@@ -29,6 +29,7 @@ import { AdminEngagementTab } from "@/components/admin/AdminEngagementTab";
 import { SwissWaitlistTab } from "@/components/admin/SwissWaitlistTab";
 import { AdminErrorLogsTab } from "@/components/admin/AdminErrorLogsTab";
 import { AdminUserNetworkTab } from "@/components/admin/AdminUserNetworkTab";
+import { AdminResidentConciergeTab } from "@/components/admin/AdminResidentConciergeTab";
 
 const Admin = () => {
     const navigate = useNavigate();
@@ -114,6 +115,7 @@ const Admin = () => {
                     <Tabs defaultValue="dashboard" className="space-y-6">
                         <TabsList className="flex-wrap h-auto">
                             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                            <TabsTrigger value="resident-concierge">Resident Concierge</TabsTrigger>
                             <TabsTrigger value="matches">Current Matches</TabsTrigger>
                             <TabsTrigger value="event-matches">Event Matches</TabsTrigger>
                             <TabsTrigger value="questions">Questions</TabsTrigger>
@@ -138,6 +140,10 @@ const Admin = () => {
 
                         <TabsContent value="dashboard">
                             <AdminDashboardTab />
+                        </TabsContent>
+
+                        <TabsContent value="resident-concierge">
+                            <AdminResidentConciergeTab />
                         </TabsContent>
 
                         <TabsContent value="matches">

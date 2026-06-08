@@ -26,6 +26,8 @@ import Terms from "./pages/Terms";
 import PartnerVenues from "./pages/PartnerVenues";
 import EventCuration from "./pages/EventCuration";
 import SwitzerlandWaitlist from "./pages/SwitzerlandWaitlist";
+import BuildingManagerOptIn from "./pages/BuildingManagerOptIn";
+import ResidentBuildingJoin from "./pages/ResidentBuildingJoin";
 import MainLayout from "./components/MainLayout";
 import Bg3 from "@/assets/bg3.webp";
 import CloudsBg from "@/assets/index-clouds.webp";
@@ -55,6 +57,8 @@ const router = createBrowserRouter(
         <Route path="/about" element={<AboutUs />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen" />}><Admin /></Suspense>} />
+        <Route path="/for-buildings" element={<BuildingManagerOptIn />} />
+        <Route path="/join-community" element={<ResidentBuildingJoin />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Route>

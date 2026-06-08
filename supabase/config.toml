@@ -1,4 +1,4 @@
-project_id = "vlaqcfzmsjzgmzxodhkd"
+project_id = "ddkdcvtueawvjshavxfx"
 
 [functions.refresh-venue-options]
 verify_jwt = false
@@ -92,3 +92,12 @@ verify_jwt = false
 [functions.send-event-speed-dating-mutuals]
 verify_jwt = false
 static_files = [ "./functions/send-user-emails/_templates/blank-announcement.html" ]
+
+[functions.submit-building-manager-lead]
+verify_jwt = false
+
+[functions.submit-resident-join-request]
+verify_jwt = false
+
+[functions.manage-resident-join-requests]
+verify_jwt = true

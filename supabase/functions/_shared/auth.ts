@@ -5,6 +5,7 @@ export type EdgeAuthContext = {
   user: User | null;
   isAdmin: boolean;
   isInternal: boolean;
+  managerBuildingIds: string[];
 };
 
 type EdgeAuthOptions = {
@@ -54,6 +55,28 @@ async function isAdminUser(supabase: SupabaseClient, userId: string) {
   return !!data;
 }
 
+async function getManagerBuildingIds(supabase: SupabaseClient, userId: string) {
+  const { data, error } = await supabase
+    .from("building_memberships")
+    .select("building_id")
+    .eq("user_id", userId)
+    .eq("role", "manager")
+    .eq("status", "active");
+
+  if (error) {
+    console.error("Failed to load manager building memberships:", error);
+    return [];
+  }
+
+  return (data ?? [])
+    .map((row: { building_id?: string | null }) => row.building_id)
+    .filter((buildingId): buildingId is string => typeof buildingId === "string" && buildingId.length > 0);
+}
+
+export function canManageBuilding(context: EdgeAuthContext, buildingId: string) {
+  return context.isAdmin || context.managerBuildingIds.includes(buildingId);
+}
+
 export async function authenticateEdgeRequest(
   req: Request,
   options: EdgeAuthOptions = {},
@@ -75,6 +98,7 @@ export async function authenticateEdgeRequest(
         user: null,
         isAdmin: true,
         isInternal: true,
+        managerBuildingIds: [],
       },
     };
   }
@@ -91,6 +115,7 @@ export async function authenticateEdgeRequest(
         user: null,
         isAdmin: true,
         isInternal: true,
+        managerBuildingIds: [],
       },
     };
   }
@@ -106,6 +131,7 @@ export async function authenticateEdgeRequest(
   }
 
   const isAdmin = await isAdminUser(supabase, user.id);
+  const managerBuildingIds = isAdmin ? [] : await getManagerBuildingIds(supabase, user.id);
 
   if (requireAdmin && !isAdmin) {
     return { error: { status: 403, message: "Forbidden" } };
@@ -117,6 +143,7 @@ export async function authenticateEdgeRequest(
       user,
       isAdmin,
       isInternal: false,
+      managerBuildingIds,
     },
   };
 }

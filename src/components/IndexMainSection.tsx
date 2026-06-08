@@ -34,6 +34,13 @@ const IndexMainSection = () => {
                     >
                         {t("cta.getMatched")}
                     </Button>
+                    <Button
+                        size="lg"
+                        variant="transparent"
+                        onClick={() => navigate("/for-buildings")}
+                    >
+                        For Building Managers
+                    </Button>
                 </div>
                 <div className="flex flex-col items-center gap-3 pb-36">
                     <Button
@@ -43,6 +50,14 @@ const IndexMainSection = () => {
                         onClick={() => navigate("/switzerland-waitlist")}
                     >
                         {t("cta.waitlist")}
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="transparent"
+                        className="px-5 text-sm"
+                        onClick={() => navigate("/join-community")}
+                    >
+                        Join Your Building
                     </Button>
                     <p className="max-w-md text-sm text-white/75">
                         {t("waitlistHelp")}
