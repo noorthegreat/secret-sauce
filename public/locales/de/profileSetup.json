@@ -1,0 +1,194 @@
+{
+    "private": "(Privat)",
+    "description": "Erzähle uns von dir, um deinen perfekten Match zu finden",
+    "title": {
+        "create": "Profil erstellen",
+        "edit": "Profil bearbeiten"
+    },
+    "photos": {
+        "uploadGeneric": "Generische Fotos hochladen",
+        "uploadGenericButton": "Generisches Foto hinzufügen",
+        "uploading": "Wird hochgeladen...",
+        "uploadCount": "Fotos hochladen ({{count}}/{{limit}})",
+        "add": "Foto hinzufügen",
+        "tip": "Tipp: aktuell (letzte 6 Monate), mindestens 1 Kopf-und-Schultern-Porträt, gute Beleuchtung, keine Gruppenfotos.",
+        "alt": "Foto {index}"
+    },
+    "fields": {
+        "firstName": "Vorname",
+        "firstNamePlaceholder": "Hans",
+        "lastName": "Nachname",
+        "lastNamePlaceholder": "Mustermann",
+        "phone": "Telefonnummer",
+        "phonePlaceholder": "+1234567890",
+        "birthday": "Geburtstag",
+        "birthdayPlaceholder": "TT/MM/JJJJ",
+        "location": "Standort",
+        "bio": "Bio",
+        "bioPlaceholder": "Erzähle uns etwas über dich..."
+    },
+    "location": {
+        "set": "Standort festgelegt ✓",
+        "update": "Aktualisieren",
+        "retry": "Standortzugriff erneut versuchen",
+        "getMy": "Meinen Standort abrufen",
+        "orChooseCity": "Oder wähle eine Stadt:",
+        "selectCity": "Stadt auswählen"
+    },
+    "prompts": {
+        "heading": "Profilfragen, die deinen Matches angezeigt werden:",
+        "threeWords": "Drei Worte, mit denen deine Freunde dich beschreiben:",
+        "threeWordsPlaceholder": "z.B. herzlich, neugierig, zuverlässig",
+        "funFact": "Ein lustiger Fakt über dich:",
+        "funFactPlaceholder": "Teile einen lustigen Fakt über dich"
+    },
+    "actions": {
+        "saving": "Wird gespeichert...",
+        "finishSetup": "Profileinrichtung abschliessen",
+        "saveProfile": "Profil speichern",
+        "changePassword": "Passwort ändern",
+        "profilePaused": "Profil pausiert",
+        "pauseProfile": "Profil pausieren",
+        "delete": "Löschen",
+        "cancel": "Abbrechen",
+        "close": "Schliessen"
+    },
+    "pauseDialog": {
+        "title": "Konto pausieren",
+        "description": "Dein Profil vorübergehend für neue Matches verbergen. Deine bestehenden Matches und Dates bleiben erhalten.",
+        "status": "Pausenstatus",
+        "paused": "Dein Konto ist aktuell pausiert",
+        "active": "Dein Konto ist aktiv"
+    },
+    "deleteDialog": {
+        "title": "Konto löschen",
+        "description": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden. Alle deine Daten, einschliesslich Matches und Nachrichten, werden dauerhaft entfernt.",
+        "warningTitle": "Achtung: Du hast bevorstehende Dates!",
+        "warningBody": "Wenn du dein Konto löschst, werden diese Dates abgesagt. Deine Matches werden benachrichtigt, dass das Date abgesagt wurde.",
+        "hold": "Halten, um Konto zu löschen",
+        "deleting": "Wird gelöscht..."
+    },
+    "photoPreview": {
+        "title": "Profilfoto-Vorschau",
+        "fullSizeAlt": "Vollbild"
+    },
+    "validation": {
+        "nameRequired": "Name ist erforderlich",
+        "nameTooLong": "Name muss weniger als 100 Zeichen haben",
+        "birthdayFormat": "Geburtstag muss im Format TT/MM/JJJJ sein",
+        "bioTooLong": "Bio muss weniger als 1000 Zeichen haben",
+        "ageMin": "Du musst mindestens 18 Jahre alt sein",
+        "birthdayInvalid": "Bitte gib einen gültigen Geburtstag ein"
+    },
+    "toast": {
+        "errorTitle": "Fehler",
+        "geoUnsupported": {
+            "title": "Geolokalisierung nicht unterstützt",
+            "description": "Dein Browser unterstützt keine Standortdienste"
+        },
+        "locationCaptured": {
+            "title": "Standort erfasst",
+            "description": "Vergiss nicht, deine Profiländerungen zu speichern!"
+        },
+        "locationDenied": {
+            "title": "Standortzugriff verweigert",
+            "description": "Bitte wähle eine Stadt aus dem Dropdown unten"
+        },
+        "locationSet": {
+            "title": "Standort festgelegt",
+            "description": "Dein Standort wurde auf {city} gesetzt. Vergiss nicht, deine Profiländerungen zu speichern!"
+        },
+        "photoLimit": {
+            "title": "Fotolimit erreicht",
+            "description": "Du kannst nur bis zu {limit} Fotos hochladen"
+        },
+        "uploadFailed": {
+            "title": "Upload fehlgeschlagen"
+        },
+        "invalidFile": {
+            "title": "Ungültiger Dateityp",
+            "description": "Bitte lade eine Bilddatei hoch"
+        },
+        "fileTooLarge": {
+            "title": "Datei zu gross",
+            "description": "Bitte lade ein Bild kleiner als 5MB hoch"
+        },
+        "photoValidation": {
+            "invalidFile": {
+                "title": "Ungültiger Dateityp",
+                "description": "Bitte lade eine Bilddatei hoch."
+            },
+            "fileTooLarge": {
+                "title": "Datei zu gross",
+                "description": "Bitte lade ein Bild kleiner als 5MB hoch."
+            },
+            "fileTooSmall": {
+                "title": "Datei wirkt zu klein",
+                "description": "Fotos unter {{minKb}}KB sind meist Screenshots oder Vorschaubilder, keine echten Fotos. Bitte lade ein normales Foto aus deiner Galerie hoch."
+            },
+            "noScreenshots": {
+                "title": "Screenshots sind nicht erlaubt",
+                "description": "Das scheint ein Screenshot zu sein. Bitte lade stattdessen ein echtes Foto von dir hoch."
+            },
+            "photoTooSmall": {
+                "title": "Auflösung zu niedrig",
+                "description": "Dieses Foto ist {{width}}×{{height}} Pixel. Bitte lade ein Bild mit mindestens {{min}}×{{min}} Pixel hoch, damit deine Matches dich gut sehen können."
+            },
+            "photoTooDark": {
+                "title": "Foto ist zu dunkel",
+                "description": "Auf diesem Foto ist nichts zu erkennen. Bitte lade ein gut beleuchtetes Foto hoch, auf dem du klar zu sehen bist."
+            },
+            "photoTooFlat": {
+                "title": "Foto wirkt leer",
+                "description": "Dieses Bild scheint einfarbig zu sein. Bitte lade ein echtes Foto von dir hoch."
+            },
+            "noFaceFound": {
+                "title": "Kein Gesicht erkannt",
+                "description": "Dein Profilfoto sollte dein Gesicht klar zeigen. Bitte lade ein Foto hoch, auf dem du sichtbar bist."
+            }
+        },
+        "photoAdded": {
+            "title": "Foto hinzugefügt",
+            "description": "Foto wurde hochgeladen"
+        },
+        "photoRemoved": {
+            "title": "Foto entfernt",
+            "description": "Foto wurde gelöscht"
+        },
+        "locationRequired": {
+            "title": "Standort erforderlich",
+            "description": "Bitte erlaube Standortzugriff, um fortzufahren"
+        },
+        "testPhotos": {
+            "title": "(TEST-MODUS) Fotos erforderlich, aber übersprungen!",
+            "description": "Test-Modus aktiv"
+        },
+        "photosRequired": {
+            "title": "Fotos erforderlich",
+            "description": "Bitte lade mindestens {min} Fotos von dir hoch :)"
+        },
+        "setupComplete": {
+            "title": "Profileinrichtung abgeschlossen!",
+            "description": "Willkommen an Bord!"
+        },
+        "profileSaved": {
+            "title": "Profil gespeichert!",
+            "description": "Deine Änderungen wurden aktualisiert."
+        },
+        "accountPaused": {
+            "title": "Konto pausiert",
+            "description": "Du erhältst keine neuen Matches, bis du fortsetzt."
+        },
+        "accountActive": {
+            "title": "Konto aktiv",
+            "description": "Du bist wieder im Pool für neue Matches!"
+        },
+        "accountDeleted": {
+            "title": "Konto gelöscht",
+            "description": "Dein Konto wurde dauerhaft gelöscht."
+        },
+        "deleteError": {
+            "title": "Fehler beim Löschen des Kontos"
+        }
+    }
+}

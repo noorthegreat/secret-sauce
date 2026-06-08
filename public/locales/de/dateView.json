@@ -1,0 +1,203 @@
+{
+    "notFound": "Date nicht gefunden.",
+    "header": {
+        "title": "Date mit {{name}}",
+        "friendshipBadge": "Freundschaft"
+    },
+    "banner": {
+        "completed": {
+            "title": "Date abgeschlossen",
+            "description": "Dieses Date wurde als abgeschlossen markiert. Du kannst die Details ansehen, aber nichts mehr ändern."
+        },
+        "readOnly": {
+            "title": "Nur-Lese-Ansicht",
+            "description": "Du siehst dieses Date als <strong>{{firstName}} {{lastName}}</strong>."
+        }
+    },
+    "confirmationCard": {
+        "confirmed": "Bestätigt",
+        "pending": "Ausstehend"
+    },
+    "details": {
+        "durationRange": "{{start}} – {{end}} ({{minutes}} Min.)",
+        "minutes": "{{count}} Min."
+    },
+    "menu": {
+        "reschedule": "Date verschieben",
+        "cancel": "Date absagen"
+    },
+    "cancelDialog": {
+        "title": "Date absagen?",
+        "intro": "Möchtest du dieses Date wirklich absagen? <strong>Damit wird euer Match aufgelöst</strong>. Du kannst deine Verfügbarkeit jederzeit anpassen, auch nach einer Bestätigung.",
+        "reasonLabel": "Grund an dein Match senden (optional):",
+        "reasonPlaceholder": "Fühle mich nicht gut / Auto kaputt / usw...",
+        "outro": "Diese Aktion kann nicht rückgängig gemacht werden – aber vielleicht ergibt sich später ja ein neues Match :)",
+        "back": "Zurück",
+        "cancelling": "Wird abgesagt ...",
+        "confirm": "Halten zum Absagen & Match auflösen",
+        "noReason": "Kein Grund angegeben"
+    },
+    "rescheduleDialog": {
+        "titleLimit": "Verschiebungs-Limit erreicht",
+        "titleAgain": "Date erneut verschieben?",
+        "title": "Date verschieben?",
+        "limit": {
+            "intro": "Du hast dieses Date bereits zweimal verschoben.",
+            "lastBy": "Zuletzt verschoben von <strong>{{who}}</strong>.",
+            "you": "dir",
+            "info": "Jede Person kann ein Date bis zu zweimal verschieben. Falls weitere Änderungen nötig sind, sprich dich bitte direkt mit deinem Match ab."
+        },
+        "headsUp": {
+            "label": "Hinweis:",
+            "body": "Du kannst dieses Date noch einmal verschieben."
+        },
+        "confirmIntro": "Möchtest du dieses Date wirklich verschieben?",
+        "warning": {
+            "label": "Achtung:",
+            "twice": "Das geht nur <strong>zweimal</strong> pro Person.",
+            "reEnter": "Du und dein Match müssen die <strong>Verfügbarkeit neu eingeben</strong>.",
+            "reset": "Bestehende Bestätigungen werden zurückgesetzt."
+        },
+        "weekLabel": "Neue Woche wählen:",
+        "nextWeek": "Nächste Woche ({{range}})",
+        "weeksOut": "In {{count}} Wochen ({{range}})",
+        "reasonLabel": "Grund an dein Match senden (optional):",
+        "reasonPlaceholder": "Bin nächste Woche beschäftigt / brauche mehr Zeit / usw...",
+        "notify": "Damit wird dein Match benachrichtigt.",
+        "close": "Schliessen",
+        "back": "Zurück",
+        "confirm": "Halten zum Verschieben"
+    },
+    "venueVote": {
+        "heading": "Wählt euren Date-Spot",
+        "partnerBadge": "Partner",
+        "youBadge": "Du",
+        "instructions": {
+            "vote": "Tippe auf eine Location, um abzustimmen – die Verfügbarkeitsanzeige passt sich an.",
+            "waiting": "Warten auf {{name}} ...",
+            "match": "Ihr habt euch beide für denselben Spot entschieden!",
+            "different": "Unterschiedliche Wahl – wir nehmen {{venue}}.",
+            "fallbackVenue": "die beste Option"
+        }
+    },
+    "planner": {
+        "instructionsLine1": "Klicken & ziehen, um deine Verfügbarkeit einzutragen – am Handy: gedrückt halten und ziehen.",
+        "instructionsLine2": "Wir finden eine passende Zeit und einen guten Ort für euch beide."
+    },
+    "phone": {
+        "label": "Meine Nummer 1 Stunde vor dem Date per E-Mail teilen:",
+        "description": "Komplett optional, kann aber helfen, sich kurzfristig mit deinem Match abzustimmen :)",
+        "matchShares": "Wir senden dir {{name}}'s Nummer 1 Stunde vor dem Date per E-Mail."
+    },
+    "noOverlapDialog": {
+        "partnerFreeTitle": "{{name}} ist zu diesen Zeiten frei",
+        "partnerFreeHint": "Tippe eine an, um sie zu deiner Verfügbarkeit hinzuzufügen – das erzeugt sofort ein Match.",
+        "title": "Keine Überschneidung gefunden :(",
+        "intro": "Eure Verfügbarkeiten überschneiden sich anscheinend nicht.",
+        "tryAgain": "Versucht, eine Zeit zu finden, die für euch beide passt!",
+        "tipLabel": "Tipp:",
+        "tipIntro": "Überschneidungen werden als <teal>türkises</teal> Feld angezeigt:",
+        "tipExplainer": "wenn <green>deine Verfügbarkeit</green> mit <blue>der deines Matches</blue> übereinstimmt.",
+        "tipImageAlt": "Beispiel für Überschneidung",
+        "tipImageCaption": "Dieses Bild zeigt eine Überschneidung am Montag von 9:30 – 10:30 Uhr.",
+        "saveAnywayBody": "Falls das <strong>wirklich nicht möglich</strong> ist, kannst du trotzdem speichern. Wir benachrichtigen dein Match, damit es seine Verfügbarkeit allenfalls erweitert – findet sich bis <strong>{{date}}</strong> keine Überschneidung, kann das Match abgesagt werden.",
+        "fallbackDate": "das Date geplant ist",
+        "keepEditing": "Weiter bearbeiten",
+        "saveAnywayButton": "Trotzdem speichern & Match informieren"
+    },
+    "autoConfirmDialog": {
+        "title": "Date einrichten?",
+        "intro": "Damit wird das Date eingerichtet und dein Match benachrichtigt!",
+        "timeLine": "Zeit: <strong>{{time}}</strong> am <strong>{{date}}</strong>",
+        "durationLine": "Dauer: <strong>{{minutes}} Min.</strong>",
+        "locationLine": "Ort: <strong>{{location}}</strong>",
+        "tbd": "Wird noch festgelegt",
+        "cancel": "Abbrechen",
+        "confirm": "Speichern & Date setzen"
+    },
+    "toast": {
+        "phoneMissing": {
+            "title": "Keine Telefonnummer hinterlegt",
+            "description": "Füge in deinem Profil eine Telefonnummer hinzu, bevor du sie mit deinem Match teilst."
+        },
+        "confirmationUpdated": {
+            "title": "Bestätigung aktualisiert",
+            "description": "Der Bestätigungsstatus hat sich geändert. Wird neu geladen ..."
+        },
+        "confirmationCheckError": {
+            "title": "Fehler",
+            "description": "Bestätigungsstatus konnte nicht überprüft werden. Bitte erneut versuchen."
+        },
+        "dateNotFound": {
+            "title": "Fehler",
+            "description": "Date nicht gefunden"
+        },
+        "unauthorized": {
+            "title": "Fehler",
+            "description": "Nicht berechtigt"
+        },
+        "voteError": {
+            "title": "Fehler",
+            "description": "Deine Stimme konnte nicht gespeichert werden."
+        },
+        "errorLoading": {
+            "title": "Fehler beim Laden des Dates"
+        },
+        "errorSavingAvailability": {
+            "title": "Fehler beim Speichern der Verfügbarkeit"
+        },
+        "availabilitySaved": {
+            "title": "Verfügbarkeit gespeichert",
+            "description": "Deine Verfügbarkeit wurde aktualisiert."
+        },
+        "availabilitySavedVote": {
+            "title": "Verfügbarkeit gespeichert!",
+            "description": "Wähle oben deine Location – sobald ihr beide abgestimmt habt, wird das Date bestätigt."
+        },
+        "noVenueAvailable": {
+            "title": "Keine Location verfügbar",
+            "description": "Während eurer gemeinsamen Verfügbarkeit hat keine Location offen. Dein Match wurde benachrichtigt – versuch es mit anderen Zeiten."
+        },
+        "dateConfirmedAuto": {
+            "title": "Date bestätigt!",
+            "description": "Zeit und Ort eures Dates sind gesetzt."
+        },
+        "dateConfirmedManual": {
+            "title": "Date bestätigt!",
+            "description": "Du hast Zeit und Ort des Dates bestätigt."
+        },
+        "errorSettingDate": {
+            "title": "Fehler beim Setzen des Dates",
+            "description": "Das Date konnte nicht vollständig gesetzt werden."
+        },
+        "dateCancelled": {
+            "title": "Date abgesagt",
+            "description": "Das Date wurde abgesagt."
+        },
+        "errorCancelling": {
+            "title": "Fehler beim Absagen"
+        },
+        "dateRescheduled": {
+            "title": "Date verschoben",
+            "description": "Das Date wurde nach hinten verschoben. Bitte gib deine Verfügbarkeit neu ein."
+        },
+        "errorRescheduling": {
+            "title": "Fehler beim Verschieben"
+        },
+        "errorConfirming": {
+            "title": "Fehler beim Bestätigen"
+        },
+        "errorPreference": {
+            "title": "Fehler",
+            "description": "Einstellung konnte nicht aktualisiert werden."
+        },
+        "phoneShareUpdated": {
+            "title": "Einstellung aktualisiert!",
+            "description": "Deine Einstellung zum Teilen der Nummer wurde aktualisiert."
+        },
+        "couldNotUpdateDate": {
+            "title": "Date konnte nicht aktualisiert werden",
+            "fallback": "Bitte erneut versuchen."
+        }
+    }
+}

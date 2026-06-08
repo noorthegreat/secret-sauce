@@ -1,0 +1,17 @@
+{
+    "heading": "Sicherheit zuerst",
+    "perks": {
+        "studentEmail": {
+            "title": "Verifizierte Studenten-E-Mail",
+            "description": "Anmelden können sich nur Nutzer mit einer verifizierten Universitäts-E-Mail-Adresse."
+        },
+        "campus": {
+            "title": "Dates auf dem Campus",
+            "description": "Locations werden auf oder in der Nähe des Campus gewählt."
+        },
+        "dataSecurity": {
+            "title": "Datenschutz",
+            "description": "Deine Daten werden nie verkauft oder an Dritte weitergegeben."
+        }
+    }
+}

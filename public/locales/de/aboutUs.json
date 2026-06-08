@@ -1,0 +1,20 @@
+{
+    "title": "Über uns",
+    "intro": {
+        "p1": "Orbiit ist ein moderner Matchmaking-Dienst, der die Lücke zwischen unpersönlichen Dating-Apps und teuren klassischen Heiratsvermittlern schliesst.",
+        "p2": "Wir gehen über oberflächliches Wischen hinaus: Unser Kompatibilitätsfragebogen geht in die Tiefe – Persönlichkeit, Kommunikationsstil, Liebessprachen, Bindungstyp, Lebensstil und langfristige Ziele.",
+        "p3": "Auf Basis deiner Antworten kuratiert unser Algorithmus durchdachte, hochwertige Matches. Sobald beide Interesse zeigen, organisiert Orbiit das erste Date und kümmert sich um die Details, damit du dich auf das Wesentliche konzentrieren kannst: Verbindung und Chemie. Bewusste, bedeutungsvolle erste Begegnungen zu schaffen, steht im Zentrum von allem, was wir tun."
+    },
+    "howItWorks": "So funktioniert Orbiit",
+    "team": {
+        "heading": "Lerne das Team kennen",
+        "roles": {
+            "coFounder": "Co-Founder"
+        }
+    },
+    "collaborators": {
+        "heading": "Unsere Partner",
+        "sphAlt": "SPH"
+    },
+    "linkedInAlt": "LinkedIn-Profil von name"
+}

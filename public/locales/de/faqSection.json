@@ -1,0 +1,63 @@
+{
+    "heading": "FAQ",
+    "items": {
+        "pairing": {
+            "trigger": "Wie matcht Orbiit Menschen?",
+            "p1": "Wir matchen Menschen anhand unseres Kompatibilitäts-Fragebogens – nicht durch Swipen.",
+            "p2": "Deine Antworten helfen uns, deinen Kommunikationsstil, deine soziale Energie, deine emotionalen Erwartungen und deine Vorlieben beim Zeitverbringen zu verstehen. Das Ziel sind nicht nur gemeinsame Interessen, sondern natürliche Interaktion.",
+            "p3": "Du wirst mit jemandem gematcht, mit dem du dich im echten Leben wohlfühlen wirst."
+        },
+        "howItWorks": {
+            "trigger": "Wie funktioniert Orbiit?",
+            "step1": "Melde dich an und fülle den Kompatibilitäts-Fragebogen aus",
+            "step2": "Du erhältst jeden Montag um Mitternacht (Zürcher Zeit) bis zu 5 wöchentliche Matches",
+            "step3": "Entscheide bis Dienstag 12:00 (Zürcher Zeit), ob du liken oder passen möchtest",
+            "step4": "Du erhältst eine Date-Einladung mit Foto und Details deines Matches",
+            "step5": "Ihr trefft euch persönlich"
+        },
+        "preview": {
+            "trigger": "Was werde ich vor dem Date über mein Match wissen?",
+            "intro": "Du wirst sehen:",
+            "bullet1": "das Foto",
+            "bullet2": "Basis-Infos wie Alter und Universität",
+            "bullet3": "eine kurze Kompatibilitäts-Zusammenfassung",
+            "outro": "Du erhältst genug Informationen, um dich vorbereitet zu fühlen, ohne vor dem Treffen zu überanalysieren."
+        },
+        "notMatch": {
+            "trigger": "Was, wenn ich mein Match oder das Date nicht mag?",
+            "p1": "Das ist völlig okay.",
+            "p2": "Nicht jedes Treffen wird romantisch. Manche werden zu Freundschaften, andere bleiben einfach ein Gespräch. Nach dem Date gibst du Feedback und zukünftige Matches verbessern sich dadurch.",
+            "p3": "Kein peinliches Unmatchen nötig."
+        },
+        "participants": {
+            "trigger": "Wer nimmt teil?",
+            "p1": "Aktuell konzentriert sich der aktive Pool auf die UZH, ETH und ZHAW in Zürich.",
+            "p2": "Falls deine Stadt oder dein Campus noch nicht aktiv ist, kannst du dich auf die Schweizer Warteliste setzen und uns sagen, wo wir als Nächstes starten sollen.",
+            "p3": "Menschen, die teilnehmen, möchten meist andere persönlich treffen, statt wochenlang online zu chatten."
+        },
+        "lastMinute": {
+            "trigger": "Was, wenn ich kurzfristig nicht kann?",
+            "p1": "Klicke einfach auf den Verschieben-Button in deiner Date-Bestätigung und wähle eine neue Zeit.",
+            "p2": "Du musst uns nicht schreiben."
+        },
+        "duration": {
+            "trigger": "Wie lange dauert es normalerweise, bis ich ein Date habe?",
+            "p1": "Meistens ein bis zwei Matching-Zyklen.",
+            "p2": "Wir warten lieber auf ein starkes Pairing, statt schnell zufällige Matches zu schicken."
+        },
+        "venues": {
+            "trigger": "Wo finden die Dates statt?",
+            "p1": "An Locations rund um den Campus und in trendigen Lokalen in der Stadt Zürich. Cafés, ungezwungene Bars und entspannte Orte, an denen Gespräche natürlich entstehen."
+        },
+        "noChat": {
+            "trigger": "Warum wir nicht ans Schreiben glauben",
+            "p1": "Die meisten Verbindungen verlieren sich in der Schreibphase.",
+            "p2": "Schreiben erzeugt Erwartungen und Grübelei. Schnell zu treffen hält die Sache einfach und ehrlich. In einem Gespräch verstehst du jemanden viel besser als in tagelangem Schreiben."
+        },
+        "privacy": {
+            "trigger": "Datenschutz und Account-Löschung",
+            "p1": "Wir erfassen nur Informationen, die für Matching und Sicherheit notwendig sind.",
+            "p2": "Deine Daten werden nicht verkauft oder für Werbe-Profiling genutzt. Du kannst deinen Account jederzeit löschen – deine Informationen werden dann dauerhaft entfernt."
+        }
+    }
+}

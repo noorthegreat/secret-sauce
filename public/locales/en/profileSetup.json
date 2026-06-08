@@ -1,0 +1,194 @@
+{
+    "private": "(Private)",
+    "description": "Tell us about yourself to find your perfect match",
+    "title": {
+        "create": "Create Your Profile",
+        "edit": "Edit Your Profile"
+    },
+    "photos": {
+        "uploadGeneric": "Upload Generic Photos",
+        "uploadGenericButton": "Add generic Photo",
+        "uploading": "Uploading...",
+        "uploadCount": "Upload Photos ({{count}}/{{limit}})",
+        "add": "Add Photo",
+        "tip": "Tip: recent (last 6 months), at least 1 head-and-shoulders portrait, good lighting, no group shots.",
+        "alt": "Photo {index}"
+    },
+    "fields": {
+        "firstName": "First Name",
+        "firstNamePlaceholder": "John",
+        "lastName": "Last Name",
+        "lastNamePlaceholder": "Doe",
+        "phone": "Phone Number",
+        "phonePlaceholder": "+1234567890",
+        "birthday": "Birthday",
+        "birthdayPlaceholder": "DD/MM/YYYY",
+        "location": "Location",
+        "bio": "Bio",
+        "bioPlaceholder": "Tell us about yourself..."
+    },
+    "location": {
+        "set": "Location set ✓",
+        "update": "Update",
+        "retry": "Retry Location Access",
+        "getMy": "Get My Location",
+        "orChooseCity": "Or choose a city:",
+        "selectCity": "Select a city"
+    },
+    "prompts": {
+        "heading": "Profile prompts shown to your matches:",
+        "threeWords": "Three words your friends use to describe you:",
+        "threeWordsPlaceholder": "e.g. Warm, curious, reliable",
+        "funFact": "A fun fact about yourself:",
+        "funFactPlaceholder": "Share a fun fact about yourself"
+    },
+    "actions": {
+        "saving": "Saving...",
+        "finishSetup": "Finish Profile Setup",
+        "saveProfile": "Save Profile",
+        "changePassword": "Change Password",
+        "profilePaused": "Profile Paused",
+        "pauseProfile": "Pause Profile",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "close": "Close"
+    },
+    "pauseDialog": {
+        "title": "Pause Account",
+        "description": "Temporarily hide your profile from new matches. You'll keep your existing matches and dates.",
+        "status": "Pause Status",
+        "paused": "Your account is currently paused",
+        "active": "Your account is active"
+    },
+    "deleteDialog": {
+        "title": "Delete Account",
+        "description": "Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data, including matches and messages, will be permanently removed.",
+        "warningTitle": "Warning: You have upcoming dates!",
+        "warningBody": "Deleting your account will cancel these dates. Your matches will be notified that the date is cancelled.",
+        "hold": "Hold to Delete Account",
+        "deleting": "Deleting..."
+    },
+    "photoPreview": {
+        "title": "Profile photo preview",
+        "fullSizeAlt": "Full size"
+    },
+    "validation": {
+        "nameRequired": "Name is required",
+        "nameTooLong": "Name must be less than 100 characters",
+        "birthdayFormat": "Birthday must be in DD/MM/YYYY format",
+        "bioTooLong": "Bio must be less than 1000 characters",
+        "ageMin": "Must be at least 18 years old",
+        "birthdayInvalid": "Please enter a valid birthday"
+    },
+    "toast": {
+        "errorTitle": "Error",
+        "geoUnsupported": {
+            "title": "Geolocation not supported",
+            "description": "Your browser doesn't support location services"
+        },
+        "locationCaptured": {
+            "title": "Location captured",
+            "description": "Don't forget to save your profile changes!"
+        },
+        "locationDenied": {
+            "title": "Location access denied",
+            "description": "Please choose a city from the dropdown below"
+        },
+        "locationSet": {
+            "title": "Location set",
+            "description": "Your location has been set to {city}. Don't forget to save your profile changes!"
+        },
+        "photoLimit": {
+            "title": "Photo limit reached",
+            "description": "You can only upload up to {limit} photos"
+        },
+        "uploadFailed": {
+            "title": "Upload failed"
+        },
+        "invalidFile": {
+            "title": "Invalid file type",
+            "description": "Please upload an image file"
+        },
+        "fileTooLarge": {
+            "title": "File too large",
+            "description": "Please upload an image smaller than 5MB"
+        },
+        "photoValidation": {
+            "invalidFile": {
+                "title": "Invalid file type",
+                "description": "Please upload an image file."
+            },
+            "fileTooLarge": {
+                "title": "File too large",
+                "description": "Please upload an image smaller than 5MB."
+            },
+            "fileTooSmall": {
+                "title": "File looks too small",
+                "description": "Photos under {{minKb}}KB are usually screenshots or thumbnails, not real photos. Please upload a regular photo from your camera roll."
+            },
+            "noScreenshots": {
+                "title": "Screenshots aren't allowed",
+                "description": "This looks like a screenshot. Please upload a real photo of yourself instead."
+            },
+            "photoTooSmall": {
+                "title": "Photo resolution is too low",
+                "description": "This photo is {{width}}×{{height}}. Please upload an image at least {{min}}×{{min}} pixels so your matches can see you clearly."
+            },
+            "photoTooDark": {
+                "title": "Photo is too dark",
+                "description": "We couldn't see anything in this photo. Please upload a well-lit photo where you're clearly visible."
+            },
+            "photoTooFlat": {
+                "title": "Photo looks blank",
+                "description": "This image appears to be a solid colour. Please upload a real photo of yourself."
+            },
+            "noFaceFound": {
+                "title": "We couldn't find a face",
+                "description": "Your profile photo should clearly show your face. Please upload a photo where you're visible."
+            }
+        },
+        "photoAdded": {
+            "title": "Photo added",
+            "description": "Photo has been uploaded"
+        },
+        "photoRemoved": {
+            "title": "Photo removed",
+            "description": "Photo has been deleted"
+        },
+        "locationRequired": {
+            "title": "Location required",
+            "description": "Please allow location access to continue"
+        },
+        "testPhotos": {
+            "title": "(TEST MODE) Photos required but skipped!",
+            "description": "Test mode active"
+        },
+        "photosRequired": {
+            "title": "Photos required",
+            "description": "Please upload at least {min} photos of yourself :)"
+        },
+        "setupComplete": {
+            "title": "Profile setup complete!",
+            "description": "Welcome aboard!"
+        },
+        "profileSaved": {
+            "title": "Profile saved!",
+            "description": "Your changes have been updated."
+        },
+        "accountPaused": {
+            "title": "Account Paused",
+            "description": "You won't receive new matches until you unpause."
+        },
+        "accountActive": {
+            "title": "Account Active",
+            "description": "You are back in the pool for new matches!"
+        },
+        "accountDeleted": {
+            "title": "Account deleted",
+            "description": "Your account has been permanently deleted."
+        },
+        "deleteError": {
+            "title": "Error deleting account"
+        }
+    }
+}

@@ -1,0 +1,33 @@
+{
+    "loading": "Profil wird geladen...",
+    "notFound": "Profil nicht gefunden",
+    "description": "Deine Profilinformationen",
+    "editButton": "Profil bearbeiten",
+    "private": "(Privat)",
+    "memberSince": "Mitglied seit {{date}}",
+    "photoAlt": "Foto {{index}}",
+    "fullSizeAlt": "Vollbild",
+    "photoPreviewTitle": "Profilfoto-Vorschau",
+    "toast": {
+        "noProfileTitle": "Kein Profil gefunden!",
+        "noProfileDescription": "Bitte schliesse die Profileinrichtung ab :)",
+        "errorTitle": "Fehler beim Laden des Profils"
+    },
+    "fields": {
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "age": "Alter",
+        "ageValue": "{{age}} Jahre alt",
+        "location": "Standort",
+        "languages": "Sprachen",
+        "email": "E-Mail",
+        "phone": "Telefonnummer",
+        "penalty": "Strafpunkte",
+        "penaltyValue": "{{count}} / 3",
+        "penaltyHelp": "Strafpunkte werden vergeben, wenn du keine Verfügbarkeit zu einem Date hinzufügst. Bei 3 Strafpunkten wird dein Konto automatisch pausiert.",
+        "bio": "Bio",
+        "threeWords": "Drei Worte, mit denen deine Freunde mich beschreiben",
+        "funFact": "Ein lustiger Fakt über mich",
+        "photos": "Fotos"
+    }
+}

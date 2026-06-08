@@ -1,0 +1,63 @@
+{
+    "badge": "Warteliste",
+    "title": "Trag dich auf die Warteliste ein",
+    "subtitle": "Wähle deine Stadt, deine Schule und nutze deine Schul-E-Mail.",
+    "fields": {
+        "city": {
+            "label": "Stadt",
+            "placeholder": "Stadt auswählen"
+        },
+        "school": {
+            "label": "Schule",
+            "placeholder": "Suche deine Schule",
+            "searchPlaceholder": "Schule suchen...",
+            "empty": "Keine Schule gefunden."
+        },
+        "firstName": {
+            "label": "Vorname",
+            "placeholder": "Noor"
+        },
+        "email": {
+            "label": "Uni-E-Mail",
+            "fallbackPlaceholder": "du@uni.ch"
+        },
+        "consent": {
+            "label": "Benachrichtige mich, wenn mein Campus startet",
+            "help": "Nur Launch-Updates."
+        }
+    },
+    "submit": {
+        "idle": "Benachrichtige mich, wenn meine Uni live geht",
+        "loading": "Wird eingetragen..."
+    },
+    "footnote": "Es werden nur passende Uni-E-Mails akzeptiert.",
+    "missingSchool": "Findest du deine Universität oder Hochschule nicht? Wir fügen laufend weitere Schulen und Städte hinzu.",
+    "validation": {
+        "firstNameRequired": "Vorname ist erforderlich",
+        "firstNameTooLong": "Vorname ist zu lang",
+        "firstNamePattern": "Nur Buchstaben, Leerzeichen, Apostrophe oder Bindestriche",
+        "emailInvalid": "Gib eine gültige E-Mail-Adresse ein",
+        "emailTooLong": "E-Mail ist zu lang",
+        "cityRequired": "Wähle eine Stadt",
+        "institutionRequired": "Wähle eine Universität oder Hochschule"
+    },
+    "toast": {
+        "review": {
+            "title": "Bitte überprüfe deine Angaben",
+            "fallback": "Einige Felder benötigen deine Aufmerksamkeit."
+        },
+        "schoolEmail": {
+            "title": "Uni-E-Mail erforderlich",
+            "withInstitution": "Verwende eine {{name}}-E-Mail-Adresse ({{domains}}).",
+            "noInstitution": "Wähle zuerst deine Institution."
+        },
+        "success": {
+            "title": "Du bist auf der Liste",
+            "description": "Wir melden uns, sobald Orbiit in deiner Stadt oder an deinem Campus startet."
+        },
+        "failure": {
+            "title": "Anmeldung zur Warteliste fehlgeschlagen",
+            "fallback": "Eintrag auf die Warteliste momentan nicht möglich."
+        }
+    }
+}

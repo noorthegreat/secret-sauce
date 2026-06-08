@@ -1,0 +1,36 @@
+{
+    "paint": {
+        "label": "Marking:",
+        "free": "Free",
+        "flex": "Could-flex"
+    },
+    "coachmark": {
+        "title": "Press & hold, then drag",
+        "body": "Hold a slot for a moment, then drag to paint your free times. A quick swipe just scrolls.",
+        "gotIt": "Got it"
+    },
+    "legend": {
+        "yours": "Yours",
+        "match": "Match's",
+        "both": "Both",
+        "flex": "Could-flex",
+        "pastDays": "Past days (not bookable)",
+        "publicHolidays": "Public holidays (venue-dependent)"
+    },
+    "venues": {
+        "coffee": "Cafe",
+        "activity": "Activity",
+        "restaurant": "Restaurant",
+        "bar": "Bar"
+    },
+    "buttons": {
+        "reset": "Reset",
+        "save": "Save"
+    },
+    "unsavedDialog": {
+        "title": "You have unsaved changes",
+        "description": "Are you sure you want to leave this page? Your availability changes will be lost.",
+        "stay": "Stay",
+        "leave": "Leave"
+    }
+}

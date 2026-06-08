@@ -1,0 +1,36 @@
+{
+    "paint": {
+        "label": "Markieren:",
+        "free": "Frei",
+        "flex": "Wenn nötig"
+    },
+    "coachmark": {
+        "title": "Gedrückt halten und ziehen",
+        "body": "Halte ein Feld kurz gedrückt und ziehe dann, um deine freien Zeiten zu markieren. Ein kurzer Wisch scrollt nur.",
+        "gotIt": "Verstanden"
+    },
+    "legend": {
+        "yours": "Deine",
+        "match": "Match",
+        "both": "Beide",
+        "flex": "Wenn nötig",
+        "pastDays": "Vergangene Tage (nicht buchbar)",
+        "publicHolidays": "Feiertage (ortsabhängig)"
+    },
+    "venues": {
+        "coffee": "Café",
+        "activity": "Aktivität",
+        "restaurant": "Restaurant",
+        "bar": "Bar"
+    },
+    "buttons": {
+        "reset": "Zurücksetzen",
+        "save": "Speichern"
+    },
+    "unsavedDialog": {
+        "title": "Du hast ungespeicherte Änderungen",
+        "description": "Möchtest du diese Seite wirklich verlassen? Deine Verfügbarkeitsänderungen gehen verloren.",
+        "stay": "Bleiben",
+        "leave": "Verlassen"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "heading": "Safety First",
+    "perks": {
+        "studentEmail": {
+            "title": "Student Email Verified",
+            "description": "Users can only sign in with a verified university email address."
+        },
+        "campus": {
+            "title": "Dates on Campus",
+            "description": "Locations are chosen on or nearby campus."
+        },
+        "dataSecurity": {
+            "title": "Data Security",
+            "description": "Your data is never sold or shared with third parties."
+        }
+    }
+}

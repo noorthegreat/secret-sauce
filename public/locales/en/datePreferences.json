@@ -1,0 +1,38 @@
+{
+    "title": "Date Preferences",
+    "duration": {
+        "label": "Duration",
+        "options": {
+            "30": "30 min",
+            "60": "1 hour",
+            "90": "1.5 hours",
+            "120": "2 hours"
+        }
+    },
+    "budget": {
+        "label": "Budget",
+        "free": "Free",
+        "max": "80+ CHF",
+        "amount": "{value} CHF"
+    },
+    "venue": {
+        "label": "Venue Type",
+        "options": {
+            "coffee": "Coffee",
+            "bar": "Bar",
+            "restaurant": "Restaurant",
+            "activity": "Activity"
+        }
+    },
+    "match": {
+        "chose": "{name} chose: {value}",
+        "budget": "{name}'s budget: {value}"
+    },
+    "save": "Save",
+    "toast": {
+        "savedTitle": "Preferences saved",
+        "savedDescription": "Your date preferences have been updated.",
+        "errorTitle": "Error",
+        "errorDescription": "Could not save preferences. Please try again."
+    }
+}

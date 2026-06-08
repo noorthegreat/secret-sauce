@@ -1,0 +1,63 @@
+{
+    "badge": "Waitlist",
+    "title": "Join the waitlist",
+    "subtitle": "Pick your city, choose your school, and use your school email.",
+    "fields": {
+        "city": {
+            "label": "City",
+            "placeholder": "Select a city"
+        },
+        "school": {
+            "label": "School",
+            "placeholder": "Search your school",
+            "searchPlaceholder": "Search school...",
+            "empty": "No school found."
+        },
+        "firstName": {
+            "label": "First name",
+            "placeholder": "Noor"
+        },
+        "email": {
+            "label": "School email",
+            "fallbackPlaceholder": "you@school.ch"
+        },
+        "consent": {
+            "label": "Email me when my campus opens",
+            "help": "Launch updates only."
+        }
+    },
+    "submit": {
+        "idle": "Notify me when my school is live",
+        "loading": "Joining..."
+    },
+    "footnote": "Only matching school emails are accepted.",
+    "missingSchool": "Don't see your university or Hochschule yet? We're adding more schools and cities.",
+    "validation": {
+        "firstNameRequired": "First name is required",
+        "firstNameTooLong": "First name is too long",
+        "firstNamePattern": "Use letters, spaces, apostrophes, or hyphens only",
+        "emailInvalid": "Enter a valid email address",
+        "emailTooLong": "Email is too long",
+        "cityRequired": "Choose a city",
+        "institutionRequired": "Choose a university or Hochschule"
+    },
+    "toast": {
+        "review": {
+            "title": "Please review your details",
+            "fallback": "Some fields need attention."
+        },
+        "schoolEmail": {
+            "title": "School email required",
+            "withInstitution": "Use a {{name}} email address ({{domains}}).",
+            "noInstitution": "Choose your institution first."
+        },
+        "success": {
+            "title": "You're on the list",
+            "description": "We'll reach out when Orbiit opens in your city or at your campus."
+        },
+        "failure": {
+            "title": "Waitlist signup failed",
+            "fallback": "Unable to join the waitlist right now."
+        }
+    }
+}

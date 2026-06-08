@@ -1,0 +1,63 @@
+{
+    "heading": "FAQ",
+    "items": {
+        "pairing": {
+            "trigger": "How does Orbiit pair people?",
+            "p1": "We match people using our compatibility survey, not swiping behavior.",
+            "p2": "Your answers help us understand communication style, social energy, emotional expectations, and how you prefer to spend time with someone. The goal is not just shared interests but natural interaction.",
+            "p3": "You are paired with someone you are likely to feel comfortable talking to in real life."
+        },
+        "howItWorks": {
+            "trigger": "How does Orbiit work?",
+            "step1": "Sign up and complete the compatibility survey",
+            "step2": "You receive up to 5 weekly matches every Monday at midnight (Zurich time)",
+            "step3": "Decide by Tuesday 12:00 (Zurich time) whether to like or pass",
+            "step4": "You receive a date invitation with your match’s photo and details",
+            "step5": "You meet in person"
+        },
+        "preview": {
+            "trigger": "What will I know about my match before the date?",
+            "intro": "You will see:",
+            "bullet1": "their photo",
+            "bullet2": "basic info such as age and university",
+            "bullet3": "a short compatibility summary",
+            "outro": "You get enough information to feel prepared without overanalyzing before meeting."
+        },
+        "notMatch": {
+            "trigger": "What if I don’t like my match or the date?",
+            "p1": "That is completely okay.",
+            "p2": "Not every meeting becomes romantic. Some become friendships and some are simply one conversation. After the date you give feedback and future matches improve from it.",
+            "p3": "No awkward unmatching needed."
+        },
+        "participants": {
+            "trigger": "Who is participating?",
+            "p1": "Right now the active pool is still centered on UZH, ETH, and ZHAW in Zurich.",
+            "p2": "If your city or campus is not live yet, you can join the Switzerland waitlist and tell us where to launch next.",
+            "p3": "People who join usually want to meet others in person instead of spending weeks chatting online."
+        },
+        "lastMinute": {
+            "trigger": "What if I can’t make it last minute?",
+            "p1": "Just click the reschedule button in your date confirmation and pick a new time.",
+            "p2": "No need to message us."
+        },
+        "duration": {
+            "trigger": "How long does it usually take to get a date?",
+            "p1": "Usually one to two matching cycles.",
+            "p2": "We wait for a strong pairing instead of sending random matches quickly."
+        },
+        "venues": {
+            "trigger": "Where do the dates happen?",
+            "p1": "At locations around campus and trendy venues across Zurich city. Cafés, casual bars, and relaxed spots where conversation feels natural."
+        },
+        "noChat": {
+            "trigger": "Why we don’t believe in chatting",
+            "p1": "Most connections fade in the talking stage.",
+            "p2": "Texting creates expectations and overthinking. Meeting quickly keeps things simple and honest. You understand someone far better in one conversation than in days of messages."
+        },
+        "privacy": {
+            "trigger": "Data Privacy and Account Deletion",
+            "p1": "We only collect information necessary for matching and safety.",
+            "p2": "Your data is not sold or used for advertising profiling. You can delete your account at any time and your information will be permanently removed."
+        }
+    }
+}

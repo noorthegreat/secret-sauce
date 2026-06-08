@@ -1,0 +1,32 @@
+{
+    "loading": "Loading...",
+    "welcome": {
+        "title": "Welcome to Orbiit!",
+        "subtitle": "Select a questionnaire to get started"
+    },
+    "tooltip": {
+        "completed": "You've completed this survey",
+        "notCompleted": "Not yet completed"
+    },
+    "romance": {
+        "title": "Compatibility Survey",
+        "description": "Find your perfect romantic match through our scientific compatibility analysis.",
+        "cta": "Find a Date"
+    },
+    "friendship": {
+        "title": "Friendship Survey",
+        "description": "Connect with like-minded people and build lasting friendships.",
+        "cta": "Find new Friends"
+    },
+    "test": {
+        "skipping": "Skipping...",
+        "skipButton": "Skip Questionnaire (Test Mode - Defaults Love)"
+    },
+    "toast": {
+        "errorTitle": "Error",
+        "skipped": {
+            "title": "Questionnaire skipped!",
+            "description": "Default answers submitted. Let's add your profile details!"
+        }
+    }
+}

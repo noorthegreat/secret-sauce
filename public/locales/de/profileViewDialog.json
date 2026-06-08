@@ -1,0 +1,33 @@
+{
+    "srDescription": "Profildetails, Informationen zur Mitgliedschaft und verfügbare Admin-Aktionen.",
+    "age_one": "{{age}} Jahr alt",
+    "age_other": "{{age}} Jahre alt",
+    "compatibility": {
+        "heading": "Warum es zwischen euch funken könnte",
+        "loading": "Kompatibilität wird geladen (kann ca. 30 Sekunden dauern)",
+        "regenerate": "Kompatibilität neu generieren",
+        "regenerating": "Wird neu generiert …",
+        "errorOnlyMatched": "Die Kompatibilität ist nur für die beiden gematchten Personen sichtbar.",
+        "errorNotActive": "Die Kompatibilität wird verfügbar, sobald beide Personen ein aktives Match sind.",
+        "errorUnavailable": "Kompatibilitäts-Insights sind aktuell nicht verfügbar."
+    },
+    "memberSince": {
+        "label": "Mitglied seit",
+        "unknown": "Unbekannt"
+    },
+    "spokenLanguages": "Gesprochene Sprachen",
+    "bio": "Bio",
+    "threeWords": "Drei Wörter, mit denen dich Freund:innen beschreiben",
+    "funFact": "Spannender Fakt",
+    "photos": {
+        "heading": "Fotos",
+        "alt": "Foto index",
+        "preview": "Vorschau des Profilfotos",
+        "fullSizeAlt": "Vollbild"
+    },
+    "admin": {
+        "delete": "Person löschen",
+        "deleting": "Wird gelöscht …"
+    },
+    "report": "Profil melden"
+}

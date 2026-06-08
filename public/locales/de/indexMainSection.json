@@ -1,0 +1,13 @@
+{
+    "hero": {
+        "title": "Jeden Montag ein Date",
+        "subtitle": "@ UZH, ETH & ZHAW",
+        "tagline": "Wir planen das Date. Du erscheinst."
+    },
+    "cta": {
+        "getMatched": "Jetzt matchen",
+        "waitlist": "Warteliste"
+    },
+    "waitlistHelp": "Falls deine Universität oder Hochschule noch nicht gelistet ist, trag dich ein und wir benachrichtigen dich, sobald sie es ist.",
+    "howItWorks": "So funktioniert's"
+}

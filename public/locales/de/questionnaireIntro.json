@@ -1,0 +1,32 @@
+{
+    "loading": "Wird geladen...",
+    "welcome": {
+        "title": "Willkommen bei Orbiit!",
+        "subtitle": "Wähle einen Fragebogen, um zu starten"
+    },
+    "tooltip": {
+        "completed": "Du hast diesen Fragebogen abgeschlossen",
+        "notCompleted": "Noch nicht abgeschlossen"
+    },
+    "romance": {
+        "title": "Kompatibilitäts-Fragebogen",
+        "description": "Finde deinen perfekten romantischen Match durch unsere wissenschaftliche Kompatibilitätsanalyse.",
+        "cta": "Date finden"
+    },
+    "friendship": {
+        "title": "Freundschafts-Fragebogen",
+        "description": "Vernetze dich mit gleichgesinnten Menschen und baue dauerhafte Freundschaften auf.",
+        "cta": "Neue Freunde finden"
+    },
+    "test": {
+        "skipping": "Wird übersprungen...",
+        "skipButton": "Fragebogen überspringen (Test-Modus – Standardantworten)"
+    },
+    "toast": {
+        "errorTitle": "Fehler",
+        "skipped": {
+            "title": "Fragebogen übersprungen!",
+            "description": "Standardantworten gespeichert. Lass uns deine Profildaten hinzufügen!"
+        }
+    }
+}

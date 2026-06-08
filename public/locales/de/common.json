@@ -1,0 +1,28 @@
+{
+    "logoAlt": "Orbiit",
+    "nav": {
+        "matches": "Matches",
+        "dates": "Dates",
+        "survey": "Fragebogen",
+        "profile": "Profil",
+        "admin": "Admin"
+    },
+    "actions": {
+        "signOut": "Abmelden"
+    },
+    "cta": {
+        "waitlist": {
+            "short": "Warteliste",
+            "long": "Warteliste"
+        },
+        "venues": {
+            "short": "Locations",
+            "long": "Partner-Locations"
+        },
+        "events": {
+            "short": "Events",
+            "long": "Event-Kuration"
+        },
+        "getMatched": "Jetzt matchen"
+    }
+}

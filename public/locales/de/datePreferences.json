@@ -1,0 +1,38 @@
+{
+    "title": "Date-Einstellungen",
+    "duration": {
+        "label": "Dauer",
+        "options": {
+            "30": "30 Min.",
+            "60": "1 Stunde",
+            "90": "1.5 Stunden",
+            "120": "2 Stunden"
+        }
+    },
+    "budget": {
+        "label": "Budget",
+        "free": "Gratis",
+        "max": "80+ CHF",
+        "amount": "{value} CHF"
+    },
+    "venue": {
+        "label": "Ortstyp",
+        "options": {
+            "coffee": "Café",
+            "bar": "Bar",
+            "restaurant": "Restaurant",
+            "activity": "Aktivität"
+        }
+    },
+    "match": {
+        "chose": "{name} hat gewählt: {value}",
+        "budget": "Budget von {name}: {value}"
+    },
+    "save": "Speichern",
+    "toast": {
+        "savedTitle": "Einstellungen gespeichert",
+        "savedDescription": "Deine Date-Einstellungen wurden aktualisiert.",
+        "errorTitle": "Fehler",
+        "errorDescription": "Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut."
+    }
+}

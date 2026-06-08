@@ -1,0 +1,111 @@
+{
+    "loading": "Wir suchen dein perfektes Match...",
+    "title": "Deine Matches",
+    "subtitle": {
+        "weeklyDrop": "Wöchentliche Matches erscheinen jeden Montag um Mitternacht (Zürcher Zeit).",
+        "decision": "Du musst bis Dienstag 12:00 entscheiden (Like/Pass). Wenn ihr euch beide mögt, hast du eine Woche Zeit, um ein Date zu vereinbaren."
+    },
+    "countdown": {
+        "next": "Nächste Matches in: {{time}}",
+        "dropDayLabel": "Montags Mitternacht (Zürcher Zeit)",
+        "openNow": "Entscheidungsfenster ist jetzt offen (Montag Mitternacht-Dienstag 12:00).",
+        "closed": "Entscheidungsfenster ist geschlossen. Likes und Passes öffnen wieder nächsten Montag um Mitternacht."
+    },
+    "buttons": {
+        "debugMatch": "Debug Match",
+        "reactivate": "Mein Konto reaktivieren",
+        "openDates": "Dates öffnen",
+        "openEventPage": "Event-Seite öffnen",
+        "updateSurvey": "Kompatibilitäts-Fragebogen aktualisieren",
+        "editProfile": "Profil bearbeiten"
+    },
+    "banners": {
+        "autoPaused": {
+            "title": "Dein Konto ist pausiert",
+            "penalty": "Dein Konto wurde automatisch pausiert, weil du zu oft keine Verfügbarkeit zu deinen Dates hinzugefügt hast (3 Strikes). Du erhältst keine neuen Matches, bis du reaktivierst.",
+            "inactivity": "Dein Konto wurde aufgrund von Inaktivität pausiert — du hast mehrere Wochen lang nicht mit deinen Matches interagiert. Du erhältst keine neuen Matches, bis du reaktivierst."
+        },
+        "selfPaused": {
+            "title": "Dein Profil ist pausiert",
+            "body": "Du hast dein Profil pausiert. Du erhältst keine neuen Matches, solange du pausiert bist."
+        },
+        "healthWarning": {
+            "title": "Konto-Status-Warnung",
+            "inactiveMulti": "⚠️ Du hast seit <strong>{{count}} aufeinanderfolgenden Wochen</strong> nicht mit deinen Matches interagiert. Nach 3 Wochen wird dein Konto automatisch pausiert.",
+            "inactiveOne": "Du hast diese Woche nicht mit deinen Matches interagiert. Stelle sicher, dass du jeden Montag deine Matches likest oder passt.",
+            "penalty": "📋 Du hast <strong>{{count}}/3 Strafpunkte</strong>, weil du keine Verfügbarkeit zu Dates hinzugefügt hast. Bei 3 Strikes wird dein Konto automatisch pausiert."
+        },
+        "feedback": {
+            "body_one": "Feedback erforderlich, um neue wöchentliche Matches freizuschalten. Du musst noch Feedback zu <strong>{{count}} abgeschlossenen Date</strong> abgeben.",
+            "body_other": "Feedback erforderlich, um neue wöchentliche Matches freizuschalten. Du musst noch Feedback zu <strong>{{count}} abgeschlossenen Dates</strong> abgeben."
+        }
+    },
+    "events": {
+        "heading": "Event-Matches",
+        "empty": "Du bist für ein Event angemeldet. Deine Matches erscheinen hier, sobald das Event-Matching abgeschlossen ist.",
+        "fallbackName": "Event-Match",
+        "scheduleEnabled": "Like oder pass deine Event-Matches. Wenn ihr euch beide mögt, wird ein Date am Event eingeplant!",
+        "scheduleDisabled": "Das sind deine zugewiesenen Matches. Kein Date-Planen nötig — triff deine Matches einfach am Event!"
+    },
+    "weekly": {
+        "heading": "Wöchentliche Matches",
+        "closed": {
+            "title": "Entscheidungsfenster ist geschlossen",
+            "body": "Wöchentliche Matches werden nach Dienstag 12:00 ausgeblendet. Deine nächsten Matches erscheinen nächsten Montag um Mitternacht."
+        },
+        "empty": {
+            "title": "Noch keine Matches gefunden",
+            "body": "Jede Woche kommen neue Nutzer dazu! Wir schreiben dir per E-Mail, sobald wir einen Match finden :)"
+        }
+    },
+    "toast": {
+        "pausedBlocked": {
+            "title": "Dein Konto ist pausiert",
+            "description": "Reaktiviere dein Konto, um Matches zu liken oder zu passen."
+        },
+        "errorTitle": "Fehler",
+        "errorLoadingTitle": "Fehler beim Laden der Matches",
+        "errorEdgeUnreachable": "Debug-Funktion nicht erreichbar. Deploye `debug-seed-date-flow` (oder starte lokale Functions) und versuche es erneut.",
+        "decisionClosed": {
+            "title": "Entscheidungsfenster ist geschlossen",
+            "description": "Du kannst wöchentliche Matches während des Entscheidungsfensters liken oder passen (Montag Mitternacht-Dienstag 12:00)."
+        },
+        "liked": {
+            "title": "Gefällt mir!",
+            "friendsMutual": "Ihr wollt euch beide als Freunde verbinden.",
+            "friendsPending": "Wenn die andere Person zurückwinkt, werdet ihr als Freunde verbunden.",
+            "eventScheduled": "Wenn die andere Person dich auch likt, wird ein Date am Event erstellt.",
+            "eventNoSchedule": "Danke! Ihr trefft euch am Event.",
+            "weekly": "Wenn die andere Person dich auch likt, wird ein Date erstellt."
+        },
+        "matchRemoved": {
+            "title": "Match entfernt",
+            "description": "Wir zeigen dir diese Person nicht mehr."
+        },
+        "reactivated": {
+            "title": "Konto reaktiviert!",
+            "description": "Dein Konto ist wieder aktiv! Du erhältst nächsten Montag wieder Matches."
+        },
+        "reactivateBlocked": {
+            "title": "Bitte zuerst Fotos aktualisieren",
+            "generic": "Deine Fotos müssen noch angepasst werden, bevor du dich reaktivieren kannst. Bitte lade in deinem Profil mindestens ein klares Foto von dir hoch.",
+            "noScreenshots": "Eines oder mehrere deiner Fotos sind Screenshots. Bitte ersetze sie durch echte Fotos von dir.",
+            "photoTooDark": "Eines oder mehrere deiner Fotos sind zu dunkel, um etwas zu erkennen. Bitte lade ein gut beleuchtetes Foto von dir hoch.",
+            "photoTooFlat": "Eines oder mehrere deiner Fotos wirken leer. Bitte ersetze sie durch ein echtes Foto von dir.",
+            "photoTooSmall": "Eines oder mehrere deiner Fotos haben eine zu niedrige Auflösung. Bitte lade ein grösseres Bild hoch.",
+            "noFaceFound": "Wir konnten auf deinen Fotos kein klares Gesicht erkennen. Bitte lade mindestens ein Foto hoch, auf dem du sichtbar bist.",
+            "faceDetectionUnavailable": "Wir konnten deine Fotos gerade nicht überprüfen. Bitte prüfe deine Verbindung und versuche es erneut, oder kontaktiere den Support.",
+            "fetchFailed": "Wir konnten deine Fotos zur Überprüfung nicht laden. Bitte versuche es gleich erneut.",
+            "fileTooSmall": "Eines oder mehrere deiner Fotos sehen wie Miniaturansichten und nicht wie echte Fotos aus. Bitte lade sie neu hoch."
+        },
+        "recalculated": {
+            "title": "Matches aktualisiert!",
+            "description": "Deine aktuellen wöchentlichen Matches werden geladen."
+        },
+        "debugCreated": {
+            "title": "Debug Match erstellt",
+            "withDate": "Debug-Date erstellt. Wird jetzt geöffnet.",
+            "pending": "1 Match erstellt — und mag dich bereits. Like zurück, um den Date-Flow zu starten!"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "steps": {
+        "type": {
+            "title": "Tell us your type",
+            "description": "Let us know what matters with our survey."
+        },
+        "when": {
+            "title": "Let us know when",
+            "description": "No matter how busy your schedule is, we can find a time that works."
+        },
+        "dating": {
+            "title": "Start dating",
+            "description": "Once a week, we'll setup a date at a safe venue with someone you're compatible with. No texting required."
+        }
+    }
+}

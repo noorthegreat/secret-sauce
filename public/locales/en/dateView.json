@@ -1,0 +1,203 @@
+{
+    "notFound": "Date not found.",
+    "header": {
+        "title": "Date with {{name}}",
+        "friendshipBadge": "Friendship"
+    },
+    "banner": {
+        "completed": {
+            "title": "Date Completed",
+            "description": "This date has been marked as completed. You can view the details but cannot make changes."
+        },
+        "readOnly": {
+            "title": "Read Only View",
+            "description": "You are viewing this date as <strong>{{firstName}} {{lastName}}</strong>."
+        }
+    },
+    "confirmationCard": {
+        "confirmed": "Confirmed",
+        "pending": "Pending"
+    },
+    "details": {
+        "durationRange": "{{start}} – {{end}} ({{minutes}} min)",
+        "minutes": "{{count}} min"
+    },
+    "menu": {
+        "reschedule": "Reschedule Date",
+        "cancel": "Cancel Date"
+    },
+    "cancelDialog": {
+        "title": "Cancel Date?",
+        "intro": "Are you sure you want to cancel this date? <strong>Doing this will remove your match</strong>. Note that you can always reschedule your availability, even after confirming.",
+        "reasonLabel": "Send a reason to your match (optional):",
+        "reasonPlaceholder": "Not feeling well / my car broke down / etc...",
+        "outro": "This action cannot be undone, though you may be able to be matched again in the future :)",
+        "back": "Back",
+        "cancelling": "Cancelling...",
+        "confirm": "Hold to Cancel & Unmatch",
+        "noReason": "No reason provided"
+    },
+    "rescheduleDialog": {
+        "titleLimit": "Date Reschedule Limit Reached",
+        "titleAgain": "Reschedule Date Again?",
+        "title": "Reschedule Date?",
+        "limit": {
+            "intro": "You have already rescheduled this date twice.",
+            "lastBy": "Last rescheduled by <strong>{{who}}</strong>.",
+            "you": "you",
+            "info": "Each person can reschedule up to two times. If you need to make further changes, please coordinate directly with your match."
+        },
+        "headsUp": {
+            "label": "Heads up:",
+            "body": "You can reschedule this date one more time."
+        },
+        "confirmIntro": "Are you sure you want to reschedule this date?",
+        "warning": {
+            "label": "Warning:",
+            "twice": "This can only be done <strong>twice</strong> per person.",
+            "reEnter": "Both you and your match will need to <strong>re-enter availability</strong>.",
+            "reset": "Any existing confirmations will be reset."
+        },
+        "weekLabel": "Select new week:",
+        "nextWeek": "Next Week ({{range}})",
+        "weeksOut": "{{count}} Weeks Out ({{range}})",
+        "reasonLabel": "Send a reason to your match (optional):",
+        "reasonPlaceholder": "I'm busy next week / need more time / etc...",
+        "notify": "Doing this will send a notification to your match.",
+        "close": "Close",
+        "back": "Back",
+        "confirm": "Hold to Reschedule"
+    },
+    "venueVote": {
+        "heading": "Pick your date spot",
+        "partnerBadge": "Partner",
+        "youBadge": "You",
+        "instructions": {
+            "vote": "Tap a venue to vote — the availability grid will update to match.",
+            "waiting": "Waiting for {{name}} to vote...",
+            "match": "You both picked the same spot!",
+            "different": "Different picks — going with {{venue}}.",
+            "fallbackVenue": "the best option"
+        }
+    },
+    "planner": {
+        "instructionsLine1": "Click & drag to set your availability — on mobile, press & hold, then drag.",
+        "instructionsLine2": "We'll find a good time & place for both of you."
+    },
+    "phone": {
+        "label": "Email my phone number 1 hour before date:",
+        "description": "Completely optional, but can be helpful to coordinate last-minute date logistics with your match :)",
+        "matchShares": "We'll email you {{name}}'s phone number 1 hour before the date."
+    },
+    "noOverlapDialog": {
+        "partnerFreeTitle": "{{name}} is free at these times",
+        "partnerFreeHint": "Tap one to add it to your availability — that instantly creates a match.",
+        "title": "No Overlap Found :(",
+        "intro": "It looks like your availability doesn't overlap with the other user's availability.",
+        "tryAgain": "Please try and find a time that works for both of you!",
+        "tipLabel": "Tip:",
+        "tipIntro": "Overlap is shown with a <teal>teal</teal> square:",
+        "tipExplainer": "when <green>your availability</green> overlaps with <blue>your match's availability</blue>.",
+        "tipImageAlt": "Overlap Example",
+        "tipImageCaption": "This image shows availability overlap on Monday from 9:30AM - 10:30AM.",
+        "saveAnywayBody": "If this <strong>really isn't possible</strong>, you can save anyway and we'll notify the other user to ask if they can expand their availability - but if no overlap is found before <strong>{{date}}</strong>, the match may be cancelled.",
+        "fallbackDate": "the date is scheduled",
+        "keepEditing": "Keep Editing",
+        "saveAnywayButton": "Save Anyway & Notify Match"
+    },
+    "autoConfirmDialog": {
+        "title": "Setup Date?",
+        "intro": "This will set up the date and notify your match!",
+        "timeLine": "Time: <strong>{{time}}</strong> on <strong>{{date}}</strong>",
+        "durationLine": "Duration: <strong>{{minutes}} min</strong>",
+        "locationLine": "Location: <strong>{{location}}</strong>",
+        "tbd": "To be decided",
+        "cancel": "Cancel",
+        "confirm": "Save & Set Date"
+    },
+    "toast": {
+        "phoneMissing": {
+            "title": "No phone number on file",
+            "description": "Add a phone number in your profile before sharing it with your match."
+        },
+        "confirmationUpdated": {
+            "title": "Confirmation Updated",
+            "description": "Confirmation status has changed. Reloading..."
+        },
+        "confirmationCheckError": {
+            "title": "Error",
+            "description": "Could not verify confirmation status. Please try again."
+        },
+        "dateNotFound": {
+            "title": "Error",
+            "description": "Date not found"
+        },
+        "unauthorized": {
+            "title": "Error",
+            "description": "Unauthorized"
+        },
+        "voteError": {
+            "title": "Error",
+            "description": "Could not save your vote."
+        },
+        "errorLoading": {
+            "title": "Error loading date"
+        },
+        "errorSavingAvailability": {
+            "title": "Error saving availability"
+        },
+        "availabilitySaved": {
+            "title": "Availability saved",
+            "description": "Your availability has been updated."
+        },
+        "availabilitySavedVote": {
+            "title": "Availability saved!",
+            "description": "Pick your venue above — once you both vote, the date will be confirmed."
+        },
+        "noVenueAvailable": {
+            "title": "No venue available",
+            "description": "We couldn't find a venue open during your shared availability. Your match has been notified — try adjusting your times."
+        },
+        "dateConfirmedAuto": {
+            "title": "Date confirmed!",
+            "description": "Your date time and location have been set."
+        },
+        "dateConfirmedManual": {
+            "title": "Date confirmed!",
+            "description": "You have confirmed the date time and location."
+        },
+        "errorSettingDate": {
+            "title": "Error setting date",
+            "description": "Could not completely set the date."
+        },
+        "dateCancelled": {
+            "title": "Date cancelled",
+            "description": "The date has been cancelled."
+        },
+        "errorCancelling": {
+            "title": "Error cancelling date"
+        },
+        "dateRescheduled": {
+            "title": "Date Rescheduled",
+            "description": "The date has been moved back. Please re-enter your availability."
+        },
+        "errorRescheduling": {
+            "title": "Error rescheduling date"
+        },
+        "errorConfirming": {
+            "title": "Error confirming date"
+        },
+        "errorPreference": {
+            "title": "Error",
+            "description": "Could not update preference."
+        },
+        "phoneShareUpdated": {
+            "title": "Phone preference updated!",
+            "description": "Your phone share preference has been updated."
+        },
+        "couldNotUpdateDate": {
+            "title": "Could not update date",
+            "fallback": "Please try again."
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "steps": {
+        "type": {
+            "title": "Verrate uns deinen Typ",
+            "description": "Sag uns mit unserem Fragebogen, was dir wichtig ist."
+        },
+        "when": {
+            "title": "Sag uns wann",
+            "description": "Egal wie voll dein Kalender ist, wir finden eine Zeit, die passt."
+        },
+        "dating": {
+            "title": "Leg los",
+            "description": "Einmal pro Woche organisieren wir dir ein Date an einem sicheren Ort mit jemandem, der zu dir passt. Kein Schreiben nötig."
+        }
+    }
+}

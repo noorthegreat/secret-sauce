@@ -1,0 +1,30 @@
+{
+    "title": "Wie Orbiit funktioniert",
+    "gotIt": "Verstanden",
+    "steps": {
+        "matches": {
+            "title": "1. Schau deine Matches an",
+            "description": "Du wirst per E-Mail benachrichtigt, sobald du und eine andere Person sich gegenseitig liken."
+        },
+        "schedule": {
+            "title": "2. Plane dein Date",
+            "description": "Gib so viele verfügbare Tage und Zeiten wie möglich an. Du kannst zudem deine Telefonnummer teilen – falls du das tust, wird sie eine Stunde vor dem Date sichtbar."
+        },
+        "details": {
+            "title": "3. Erhalte deine Date-Details",
+            "description": "Wir schicken dir die finale Location und Uhrzeit für dein Date."
+        },
+        "reschedule": {
+            "title": "4. Musst du verschieben?",
+            "description": "Falls du nicht kommen kannst, darfst du dein Date verschieben. Jede Person hat bis zu zwei Verschiebungen zur Verfügung."
+        },
+        "feedback": {
+            "title": "5. Teile dein Feedback",
+            "description": "Nach deinem Date bitten wir dich um eine kurze Rückmeldung, wie es gelaufen ist."
+        },
+        "noGhosting": {
+            "title": "6. No Ghosting-Regel",
+            "description": "Wenn du ein Date ghostest, ohne zu verschieben, wirst du von der Plattform entfernt."
+        }
+    }
+}

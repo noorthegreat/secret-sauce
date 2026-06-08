@@ -1,0 +1,30 @@
+{
+    "title": "How Orbiit Works",
+    "gotIt": "Got it",
+    "steps": {
+        "matches": {
+            "title": "1. Check out your matches",
+            "description": "You will be notified by email when you and another user like each other."
+        },
+        "schedule": {
+            "title": "2. Schedule your date",
+            "description": "Provide as many available days and times as possible. You may also choose to share your phone number. If you do, it will be revealed one hour before the date."
+        },
+        "details": {
+            "title": "3. Receive your date details",
+            "description": "We will send you the final venue and time for your date."
+        },
+        "reschedule": {
+            "title": "4. Need to reschedule?",
+            "description": "If you cannot attend, you may reschedule your date. Each user has up to two rescheduling opportunities."
+        },
+        "feedback": {
+            "title": "5. Share your feedback",
+            "description": "After your date, we ask that you send us a short review and let us know how it went."
+        },
+        "noGhosting": {
+            "title": "6. No ghosting policy",
+            "description": "If you ghost a date without rescheduling, you will be removed from the platform."
+        }
+    }
+}

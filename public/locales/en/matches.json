@@ -1,0 +1,111 @@
+{
+    "loading": "Finding your perfect matches...",
+    "title": "Your Matches",
+    "subtitle": {
+        "weeklyDrop": "Weekly matches drop every Monday midnight (Zurich time).",
+        "decision": "You must decide by Tuesday 12:00 (like/pass). If both like each other, you'll have 1 week to schedule a date."
+    },
+    "countdown": {
+        "next": "Next matches in: {{time}}",
+        "dropDayLabel": "Mondays midnight",
+        "openNow": "Decision window is open now (Monday midnight–Tuesday 12:00).",
+        "closed": "Decision window is closed. Likes and passes reopen next Monday midnight."
+    },
+    "buttons": {
+        "debugMatch": "Debug Match",
+        "reactivate": "Reactivate My Account",
+        "openDates": "Open Dates",
+        "openEventPage": "Open Event Page",
+        "updateSurvey": "Update Compatibility Survey",
+        "editProfile": "Edit Profile"
+    },
+    "banners": {
+        "autoPaused": {
+            "title": "Your account is paused",
+            "penalty": "Your account was automatically paused because you didn't add availability to your dates too many times (3 strikes). You won't receive new matches until you reactivate.",
+            "inactivity": "Your account was paused due to inactivity — you haven't interacted with your matches for multiple weeks. You won't receive new matches until you reactivate."
+        },
+        "selfPaused": {
+            "title": "Your profile is paused",
+            "body": "You paused your profile. You won't receive new matches while paused."
+        },
+        "healthWarning": {
+            "title": "Account Health Warning",
+            "inactiveMulti": "⚠️ You haven't interacted with your matches for <strong>{{count}} consecutive weeks</strong>. At 3 weeks your account will be automatically paused.",
+            "inactiveOne": "You haven't interacted with your matches this past week. Please make sure to like or pass on your matches every Monday.",
+            "penalty": "📋 You have <strong>{{count}}/3 penalty strikes</strong> from not adding availability to dates. At 3 strikes your account will be auto-paused."
+        },
+        "feedback": {
+            "body_one": "Feedback required to unlock new weekly matches. You still need to submit feedback for <strong>{{count}} completed date</strong>.",
+            "body_other": "Feedback required to unlock new weekly matches. You still need to submit feedback for <strong>{{count}} completed dates</strong>."
+        }
+    },
+    "events": {
+        "heading": "Event Matches",
+        "empty": "You are signed up for an event. Your pairings will appear here once the event matching run is complete.",
+        "fallbackName": "Event Match",
+        "scheduleEnabled": "Like or pass on your event matches. If you both like each other, a date will be scheduled at the event!",
+        "scheduleDisabled": "These are your assigned event pairings. No date scheduling needed — just meet your matches at the event!"
+    },
+    "weekly": {
+        "heading": "Weekly Matches",
+        "closed": {
+            "title": "Decision window is closed",
+            "body": "Weekly match cards are hidden after Tuesday 12:00 (Zurich time). Your next set appears next Monday midnight (Zurich time)."
+        },
+        "empty": {
+            "title": "No matches found yet",
+            "body": "New users are joining each week! We'll email you if we find a match :)"
+        }
+    },
+    "toast": {
+        "pausedBlocked": {
+            "title": "Your account is paused",
+            "description": "Reactivate your account to like or pass matches."
+        },
+        "errorTitle": "Error",
+        "errorLoadingTitle": "Error loading matches",
+        "errorEdgeUnreachable": "Debug function is not reachable. Deploy `debug-seed-date-flow` (or run local functions) and try again.",
+        "decisionClosed": {
+            "title": "Decision window is closed",
+            "description": "You can like or pass weekly matches during the decision window (Monday midnight–Tuesday 12:00 Zurich time)."
+        },
+        "liked": {
+            "title": "Liked!",
+            "friendsMutual": "You both want to connect as friends.",
+            "friendsPending": "If they wave back, you'll be connected as friends.",
+            "eventScheduled": "If they like you back, a date at the event will be created.",
+            "eventNoSchedule": "Thanks! You'll meet at the event.",
+            "weekly": "If they like you back, a date will be created."
+        },
+        "matchRemoved": {
+            "title": "Match removed",
+            "description": "You won't see this person again."
+        },
+        "reactivated": {
+            "title": "Account Reactivated!",
+            "description": "Your account is back! You'll receive matches again next Monday."
+        },
+        "reactivateBlocked": {
+            "title": "Update your photos first",
+            "generic": "Your photos still need work before you can reactivate. Please go to your profile and upload at least one clear photo of yourself.",
+            "noScreenshots": "One or more of your photos is a screenshot. Please replace it with a real photo of yourself.",
+            "photoTooDark": "One or more of your photos is too dark to see anything. Please upload a well-lit photo of yourself.",
+            "photoTooFlat": "One or more of your photos appears blank. Please replace it with a real photo of yourself.",
+            "photoTooSmall": "One or more of your photos is too low-resolution. Please upload a larger photo.",
+            "noFaceFound": "We couldn't find a clear face in your photos. Please upload at least one photo where you're visible.",
+            "faceDetectionUnavailable": "We couldn't verify your photos right now. Please check your connection and try again, or contact support.",
+            "fetchFailed": "We couldn't load your photos to check them. Please try again in a moment.",
+            "fileTooSmall": "One or more of your photos looks like a thumbnail rather than a real photo. Please re-upload it."
+        },
+        "recalculated": {
+            "title": "Matches updated!",
+            "description": "Your current weekly matches are being fetched."
+        },
+        "debugCreated": {
+            "title": "Debug Match Created",
+            "withDate": "Debug date created. Opening it now.",
+            "pending": "1 match created — they already like you. Like them back to start the date flow!"
+        }
+    }
+}

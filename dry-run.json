@@ -1,0 +1,34 @@
+{
+  "eventId": "37b29460-eb80-43a6-9340-56bf6969284a",
+  "eventName": "Wine Tasting Speed Dating",
+  "emailSubject": "Your Wine Tasting Speed Dating mutual matches",
+  "dryRun": false,
+  "disambiguate": [
+    { "firstName": "Oliver", "userId": "08c8d678-e2d3-4173-8567-76bc40642343" }
+  ], 
+  "offlineParticipants": [
+    {
+      "firstName": "Matea",
+      "email": "bajic.matea@icloud.com"
+    }
+  ],
+  "pairsByName": [
+    { "a": "Felix", "b": "Sarah" },
+    { "a": "Jakub", "b": "Karia" },
+    { "a": "Jakub", "b": "Lisa" },
+    { "a": "Jan", "b": "Kayra" },
+    { "a": "Javier", "b": "Sylvie" },
+    { "a": "Kári", "b": "Lisa" },
+    { "a": "Kári", "b": "Matea" },
+    { "a": "Niko", "b": "Eva" },
+    { "a": "Niko", "b": "Kayra" },
+    { "a": "Noah", "b": "Charlotte" },
+    { "a": "Noé", "b": "Antoinette" },
+    { "a": "Noé", "b": "Karia" },
+    { "a": "Oliver", "b": "Sylvie" },
+    { "a": "Roland", "b": "Antoinette" },
+    { "a": "Roland", "b": "Charlotte" },
+    { "a": "Szymon", "b": "Lisa" },
+    { "a": "Szymon", "b": "Matea" }
+  ]
+}

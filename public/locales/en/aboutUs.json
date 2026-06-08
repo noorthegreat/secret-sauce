@@ -1,0 +1,20 @@
+{
+    "title": "About Us",
+    "intro": {
+        "p1": "Orbiit is a modern matchmaking service designed to bridge the gap between impersonal dating apps and costly traditional matchmakers.",
+        "p2": "We go beyond surface-level swipes with a compatibility survey that dives deep into personality, communication style, love languages, attachment type, lifestyle, and long-term goals.",
+        "p3": "Using your responses, our algorithm curates thoughtful, high-quality matches. Once there's mutual interest, Orbiit steps in to organize the first date, handling the details so you can focus on what really matters: connection and chemistry. Creating intentional, meaningful first encounters is at the heart of everything we do."
+    },
+    "howItWorks": "How Orbiit Works",
+    "team": {
+        "heading": "Meet the Team",
+        "roles": {
+            "coFounder": "Co-Founder"
+        }
+    },
+    "collaborators": {
+        "heading": "Our Collaborators",
+        "sphAlt": "SPH"
+    },
+    "linkedInAlt": "name's LinkedIn profile"
+}

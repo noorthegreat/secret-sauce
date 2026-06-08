@@ -1,0 +1,33 @@
+{
+    "loading": "Loading Profile...",
+    "notFound": "Profile not found",
+    "description": "Your profile information",
+    "editButton": "Edit Profile",
+    "private": "(Private)",
+    "memberSince": "Member since {{date}}",
+    "photoAlt": "Photo {{index}}",
+    "fullSizeAlt": "Full size",
+    "photoPreviewTitle": "Profile photo preview",
+    "toast": {
+        "noProfileTitle": "No profile found!",
+        "noProfileDescription": "Please complete your profile setup :)",
+        "errorTitle": "Error loading profile"
+    },
+    "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "age": "Age",
+        "ageValue": "{{age}} years old",
+        "location": "Location",
+        "languages": "Languages",
+        "email": "Email",
+        "phone": "Phone Number",
+        "penalty": "Penalty Strikes",
+        "penaltyValue": "{{count}} / 3",
+        "penaltyHelp": "Strikes are given when you don't add availability to a date. At 3 strikes your account is auto-paused.",
+        "bio": "Bio",
+        "threeWords": "Three words your friends use to describe me",
+        "funFact": "A fun fact about me",
+        "photos": "Photos"
+    }
+}

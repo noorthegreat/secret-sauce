@@ -1,0 +1,13 @@
+{
+    "hero": {
+        "title": "Get a date every Monday",
+        "subtitle": "@ UZH, ETH & ZHAW",
+        "tagline": "We schedule the date. You show up."
+    },
+    "cta": {
+        "getMatched": "Get Matched",
+        "waitlist": "Waitlist"
+    },
+    "waitlistHelp": "If your university or Hochschule isn't listed yet, join and we'll notify you when it is.",
+    "howItWorks": "How it works"
+}

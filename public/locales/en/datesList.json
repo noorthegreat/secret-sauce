@@ -1,0 +1,103 @@
+{
+    "loading": "Loading…",
+    "yourDates": "Your Dates",
+    "managingTip": {
+        "title": "💡 Managing your dates",
+        "body": "Open a date card → tap the <bold>⋮ menu</bold> (top-right) to <bold>Reschedule</bold> or <bold>Cancel</bold>. You can reschedule even after confirming — your match will be notified automatically."
+    },
+    "pendingFeedback_one": "Feedback required to unlock new weekly matches. You still need to submit feedback for <bold>{count}</bold> completed date.",
+    "pendingFeedback_other": "Feedback required to unlock new weekly matches. You still need to submit feedback for <bold>{count}</bold> completed dates.",
+    "tabs": {
+        "upcoming": "Upcoming",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+    },
+    "empty": {
+        "upcoming": {
+            "title": "No upcoming dates.",
+            "description": "When you and a match both like each other, a date will be automatically created!"
+        },
+        "completed": {
+            "title": "No completed dates yet.",
+            "description": "After a date is completed, it will be listed here!"
+        },
+        "cancelled": {
+            "title": "No cancelled dates.",
+            "description": "Dates cancelled by you or your match will show up here."
+        }
+    },
+    "card": {
+        "title": "Date with {{name}}",
+        "you": "You",
+        "unknownUser": "Unknown User",
+        "badge": {
+            "friendship": "Friendship",
+            "cancelled": "Cancelled"
+        },
+        "cancellation": {
+            "reasonLabel": "Cancellation Reason:",
+            "noReason": "No reason provided"
+        },
+        "schedule": {
+            "pending": "Date time & location pending.",
+            "window": "Sometime between {{start}} and {{end}}"
+        },
+        "confirmation": {
+            "confirmed": "Confirmed",
+            "pending": "Pending",
+            "label": "{{who}}: {{status}}"
+        },
+        "phone": {
+            "shared": "Shared",
+            "hidden": "Hidden",
+            "label": "{{who}}: {{status}}"
+        },
+        "statusMessage": {
+            "confirmed": "Awesome, your date is confirmed! We'll email you reminders a day before and an hour before your date starts :)",
+            "confirmedFooter": "If you can't make the date for any reason, please reschedule or cancel beforehand. Ghosters will be banned from the app lol",
+            "pendingIntro": "Your date is created, now it's time to add your availability! Click this date card to do so.",
+            "pendingFooter": "Once you've both added your availability, you'll both be able to confirm the date :)"
+        },
+        "cta": {
+            "addAvailability": "View Details to Add Availability",
+            "confirm": "View Details to Confirm"
+        },
+        "actions": {
+            "markCompleted": "Mark as completed",
+            "giveFeedback": "Give Date Feedback"
+        },
+        "followUp": {
+            "friendship": {
+                "share": "Share Friendship Follow-Up",
+                "update": "Update Friendship Follow-Up"
+            },
+            "relationship": {
+                "share": "Share Relationship Follow-Up",
+                "update": "Update Relationship Follow-Up"
+            }
+        }
+    },
+    "delete": {
+        "confirm": "Are you sure you want to delete this date? This cannot be undone."
+    },
+    "toast": {
+        "errorLoading": {
+            "title": "Error loading dates"
+        },
+        "deleted": {
+            "title": "Date deleted",
+            "description": "The date has been permanently removed."
+        },
+        "errorDeleting": {
+            "title": "Error deleting date"
+        },
+        "markedCompleted": {
+            "title": "Date marked as completed",
+            "description": "Hope you had a great time!"
+        },
+        "errorMarkingCompleted": {
+            "title": "Error",
+            "description": "Could not mark date as completed."
+        }
+    }
+}

@@ -1,0 +1,103 @@
+{
+    "loading": "Wird geladen …",
+    "yourDates": "Deine Dates",
+    "managingTip": {
+        "title": "💡 Dates verwalten",
+        "body": "Öffne eine Date-Karte → tippe auf das <bold>⋮ Menü</bold> (oben rechts), um <bold>Verschieben</bold> oder <bold>Absagen</bold> zu wählen. Du kannst auch nach der Bestätigung verschieben – dein Match wird automatisch benachrichtigt."
+    },
+    "pendingFeedback_one": "Feedback ist nötig, um neue wöchentliche Matches freizuschalten. Du musst noch Feedback zu <bold>{count}</bold> abgeschlossenen Date geben.",
+    "pendingFeedback_other": "Feedback ist nötig, um neue wöchentliche Matches freizuschalten. Du musst noch Feedback zu <bold>{count}</bold> abgeschlossenen Dates geben.",
+    "tabs": {
+        "upcoming": "Bevorstehend",
+        "completed": "Abgeschlossen",
+        "cancelled": "Abgesagt"
+    },
+    "empty": {
+        "upcoming": {
+            "title": "Keine bevorstehenden Dates.",
+            "description": "Sobald ihr euch gegenseitig mögt, wird automatisch ein Date erstellt!"
+        },
+        "completed": {
+            "title": "Noch keine abgeschlossenen Dates.",
+            "description": "Nach einem abgeschlossenen Date erscheint es hier!"
+        },
+        "cancelled": {
+            "title": "Keine abgesagten Dates.",
+            "description": "Von dir oder deinem Match abgesagte Dates erscheinen hier."
+        }
+    },
+    "card": {
+        "title": "Date mit {{name}}",
+        "you": "Du",
+        "unknownUser": "Unbekannte Person",
+        "badge": {
+            "friendship": "Freundschaft",
+            "cancelled": "Abgesagt"
+        },
+        "cancellation": {
+            "reasonLabel": "Grund der Absage:",
+            "noReason": "Kein Grund angegeben"
+        },
+        "schedule": {
+            "pending": "Datum, Zeit und Ort stehen noch aus.",
+            "window": "Irgendwann zwischen {start} und {end}"
+        },
+        "confirmation": {
+            "confirmed": "Bestätigt",
+            "pending": "Ausstehend",
+            "label": "{{who}}: {{status}}"
+        },
+        "phone": {
+            "shared": "Geteilt",
+            "hidden": "Verborgen",
+            "label": "{{who}}: {{status}}"
+        },
+        "statusMessage": {
+            "confirmed": "Super, dein Date ist bestätigt! Wir senden dir eine Erinnerung am Tag davor und eine Stunde vor dem Date :)",
+            "confirmedFooter": "Falls du das Date aus irgendeinem Grund nicht wahrnehmen kannst, verschiebe oder sage es bitte rechtzeitig ab. Ghosting führt zur Sperrung in der App lol",
+            "pendingIntro": "Dein Date wurde erstellt – jetzt ist es Zeit, deine Verfügbarkeit einzutragen! Tippe dazu auf die Date-Karte.",
+            "pendingFooter": "Sobald ihr beide eure Verfügbarkeit eingetragen habt, könnt ihr beide das Date bestätigen :)"
+        },
+        "cta": {
+            "addAvailability": "Details öffnen, um Verfügbarkeit einzutragen",
+            "confirm": "Details öffnen, um zu bestätigen"
+        },
+        "actions": {
+            "markCompleted": "Als abgeschlossen markieren",
+            "giveFeedback": "Date-Feedback geben"
+        },
+        "followUp": {
+            "friendship": {
+                "share": "Freundschafts-Follow-up teilen",
+                "update": "Freundschafts-Follow-up aktualisieren"
+            },
+            "relationship": {
+                "share": "Beziehungs-Follow-up teilen",
+                "update": "Beziehungs-Follow-up aktualisieren"
+            }
+        }
+    },
+    "delete": {
+        "confirm": "Möchtest du dieses Date wirklich löschen? Das kann nicht rückgängig gemacht werden."
+    },
+    "toast": {
+        "errorLoading": {
+            "title": "Fehler beim Laden der Dates"
+        },
+        "deleted": {
+            "title": "Date gelöscht",
+            "description": "Das Date wurde dauerhaft entfernt."
+        },
+        "errorDeleting": {
+            "title": "Fehler beim Löschen des Dates"
+        },
+        "markedCompleted": {
+            "title": "Date als abgeschlossen markiert",
+            "description": "Wir hoffen, du hattest eine schöne Zeit!"
+        },
+        "errorMarkingCompleted": {
+            "title": "Fehler",
+            "description": "Date konnte nicht als abgeschlossen markiert werden."
+        }
+    }
+}

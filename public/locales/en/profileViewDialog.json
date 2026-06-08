@@ -1,0 +1,33 @@
+{
+    "srDescription": "Profile details, member since information, and available admin actions.",
+    "age_one": "{{age}} year old",
+    "age_other": "{{age}} years old",
+    "compatibility": {
+        "heading": "Why You Might Click",
+        "loading": "Loading compatibility (may take ~30 seconds)",
+        "regenerate": "Regenerate compatibility",
+        "regenerating": "Regenerating…",
+        "errorOnlyMatched": "Compatibility is only available to the two matched users.",
+        "errorNotActive": "Compatibility is available once both users are an active match.",
+        "errorUnavailable": "Compatibility insights are temporarily unavailable."
+    },
+    "memberSince": {
+        "label": "Member since",
+        "unknown": "Unknown"
+    },
+    "spokenLanguages": "Spoken languages",
+    "bio": "Bio",
+    "threeWords": "Three words friends use to describe you",
+    "funFact": "Fun fact",
+    "photos": {
+        "heading": "Photos",
+        "alt": "Photo index",
+        "preview": "Profile photo preview",
+        "fullSizeAlt": "Full size"
+    },
+    "admin": {
+        "delete": "Delete User",
+        "deleting": "Deleting…"
+    },
+    "report": "Report Profile"
+}
