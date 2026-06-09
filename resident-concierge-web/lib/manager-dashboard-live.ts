@@ -23,6 +23,19 @@ type DashboardListBlock = {
   emptyMessage?: string
 }
 
+export type ManagerIntroductionQueueItem = {
+  id: string
+  residentAFirstName: string
+  residentBFirstName: string
+  introType: "friendship" | "professional"
+  status: string
+  source: string
+  suggestedAt: string
+  mutualAt: string | null
+  deliveredAt: string | null
+  compatibilitySummary: string | null
+}
+
 export type ManagerDashboardSnapshot = {
   buildingName: string
   pulseScore: number
@@ -33,8 +46,10 @@ export type ManagerDashboardSnapshot = {
   topInterests: DashboardListBlock
   eventInsights: DashboardListBlock
   requestStatus: DashboardListBlock
+  introductionFunnel: DashboardListBlock
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
+  introductionQueue: ManagerIntroductionQueueItem[]
 }
 
 type BuildingRow = {
@@ -58,6 +73,24 @@ type JoinRequestRow = {
 
 type EnrollmentCountRow = {
   event_id: string
+}
+
+type BuildingIntroductionRow = {
+  id: string
+  resident_a_user_id: string
+  resident_b_user_id: string
+  intro_type: "friendship" | "professional"
+  status: "suggested" | "requested" | "accepted" | "mutual" | "delivered" | "declined" | "paused"
+  source: string
+  suggested_at: string
+  mutual_at: string | null
+  delivered_at: string | null
+  compatibility_summary: string | null
+}
+
+type ProfileNameRow = {
+  id: string
+  first_name: string
 }
 
 function normalizeBuildingSlug() {
@@ -192,6 +225,72 @@ function fallbackAmenityUsage(): DashboardListBlock {
   }
 }
 
+function buildIntroductionFunnel(introductions: BuildingIntroductionRow[]) {
+  const summary = new Map<string, number>([
+    ["Suggested", 0],
+    ["Requested", 0],
+    ["Accepted", 0],
+    ["Mutual", 0],
+    ["Delivered", 0],
+    ["Declined", 0],
+    ["Paused", 0],
+  ])
+
+  for (const introduction of introductions) {
+    switch (introduction.status) {
+      case "suggested":
+        summary.set("Suggested", (summary.get("Suggested") ?? 0) + 1)
+        break
+      case "requested":
+        summary.set("Requested", (summary.get("Requested") ?? 0) + 1)
+        break
+      case "accepted":
+        summary.set("Accepted", (summary.get("Accepted") ?? 0) + 1)
+        break
+      case "mutual":
+        summary.set("Mutual", (summary.get("Mutual") ?? 0) + 1)
+        break
+      case "delivered":
+        summary.set("Delivered", (summary.get("Delivered") ?? 0) + 1)
+        break
+      case "declined":
+        summary.set("Declined", (summary.get("Declined") ?? 0) + 1)
+        break
+      case "paused":
+        summary.set("Paused", (summary.get("Paused") ?? 0) + 1)
+        break
+    }
+  }
+
+  return [...summary.entries()].map(([label, value]) => ({ label, value }))
+}
+
+function buildIntroductionQueue(
+  introductions: BuildingIntroductionRow[],
+  profilesById: Map<string, string>,
+): ManagerIntroductionQueueItem[] {
+  return introductions
+    .filter((introduction) => introduction.status === "mutual" || introduction.status === "delivered")
+    .sort((left, right) => {
+      const leftDate = left.delivered_at ?? left.mutual_at ?? left.suggested_at
+      const rightDate = right.delivered_at ?? right.mutual_at ?? right.suggested_at
+      return rightDate.localeCompare(leftDate)
+    })
+    .slice(0, 8)
+    .map((introduction) => ({
+      id: introduction.id,
+      residentAFirstName: profilesById.get(introduction.resident_a_user_id) ?? "Resident",
+      residentBFirstName: profilesById.get(introduction.resident_b_user_id) ?? "Resident",
+      introType: introduction.intro_type,
+      status: introduction.status,
+      source: introduction.source,
+      suggestedAt: introduction.suggested_at,
+      mutualAt: introduction.mutual_at,
+      deliveredAt: introduction.delivered_at,
+      compatibilitySummary: introduction.compatibility_summary?.trim() || null,
+    }))
+}
+
 export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
   return {
     buildingName: "Chorus Apartments",
@@ -206,8 +305,9 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
       { label: "Survey completion", value: "67%" },
       { label: "Event RSVPs", value: "57" },
       { label: "Event attendance", value: "Coming soon", helper: "Attendance check-ins are not stored yet.", isPlaceholder: true },
-      { label: "Intro requests", value: "Coming soon", helper: "Resident intro request events are not stored yet.", isPlaceholder: true },
-      { label: "Accepted introductions", value: "Coming soon", helper: "Acceptance tracking is not available yet.", isPlaceholder: true },
+      { label: "Intro requests", value: "14" },
+      { label: "Mutual intros", value: "8", accent: true },
+      { label: "Introductions delivered", value: "5" },
     ],
     trend: [
       { month: "Jan", value: 38 },
@@ -242,11 +342,48 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
         { label: "Withdrawn", value: 2 },
       ],
     },
+    introductionFunnel: {
+      items: [
+        { label: "Suggested", value: 18 },
+        { label: "Requested", value: 14 },
+        { label: "Accepted", value: 9 },
+        { label: "Mutual", value: 8 },
+        { label: "Delivered", value: 5 },
+        { label: "Declined", value: 3 },
+        { label: "Paused", value: 2 },
+      ],
+    },
     mostRequestedEvents: {
       items: [],
       emptyMessage: "Coming soon once resident event-request voting is stored in Supabase.",
     },
     amenityUsage: fallbackAmenityUsage(),
+    introductionQueue: [
+      {
+        id: "intro-1",
+        residentAFirstName: "Ava",
+        residentBFirstName: "Marcus",
+        introType: "friendship",
+        status: "mutual",
+        source: "resident_request",
+        suggestedAt: new Date().toISOString(),
+        mutualAt: new Date().toISOString(),
+        deliveredAt: null,
+        compatibilitySummary: "They both share wellness interests and enjoy intentional one-on-one conversations.",
+      },
+      {
+        id: "intro-2",
+        residentAFirstName: "Elena",
+        residentBFirstName: "Priya",
+        introType: "friendship",
+        status: "delivered",
+        source: "system",
+        suggestedAt: new Date().toISOString(),
+        mutualAt: new Date().toISOString(),
+        deliveredAt: new Date().toISOString(),
+        compatibilitySummary: "They both value design, food, and community events in the building.",
+      },
+    ],
   }
 }
 
@@ -335,6 +472,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     surveyCompletedProfilesResult,
     requestsResult,
     eventsResult,
+    introductionsResult,
   ] = await Promise.all([
     supabase
       .from("building_memberships")
@@ -381,6 +519,13 @@ export async function getManagerDashboardSnapshotForBuilding({
       .eq("active", true)
       .order("start_date", { ascending: true })
       .returns<EventRow[]>(),
+    supabase
+      .from("building_introductions")
+      .select(
+        "id, resident_a_user_id, resident_b_user_id, intro_type, status, source, suggested_at, mutual_at, delivered_at, compatibility_summary",
+      )
+      .eq("building_id", buildingId)
+      .returns<BuildingIntroductionRow[]>(),
   ])
 
   const firstError = [
@@ -392,6 +537,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     surveyCompletedProfilesResult.error,
     requestsResult.error,
     eventsResult.error,
+    introductionsResult.error,
   ].find(Boolean)
 
   if (firstError) {
@@ -400,6 +546,7 @@ export async function getManagerDashboardSnapshotForBuilding({
 
   const requests = requestsResult.data ?? []
   const events = eventsResult.data ?? []
+  const introductions = introductionsResult.data ?? []
   const eventIds = events.map((event) => event.id)
   let enrollments: EnrollmentCountRow[] = []
 
@@ -426,12 +573,20 @@ export async function getManagerDashboardSnapshotForBuilding({
   const surveyCompletedResidents = surveyCompletedProfilesResult.count ?? 0
   const surveyCompletionRate = percentageLabel(surveyCompletedResidents, residentsActivated)
   const eventRsvps = enrollments.length
+  const introRequests = introductions.filter((introduction) => introduction.status === "requested").length
+  const introAccepted = introductions.filter((introduction) => introduction.status === "accepted").length
+  const introMutual = introductions.filter((introduction) => introduction.status === "mutual").length
+  const introDelivered = introductions.filter((introduction) => introduction.status === "delivered").length
+  const introDeclinedOrPaused = introductions.filter(
+    (introduction) => introduction.status === "declined" || introduction.status === "paused",
+  ).length
   const pulseBase =
     activeResidentMemberships * 2 +
     approvedResidents +
     surveyCompletedResidents +
     Math.min(eventRsvps, 24) +
-    Math.min(events.length * 2, 14)
+    Math.min(events.length * 2, 14) +
+    Math.min(introMutual * 2 + introDelivered, 18)
   const pulseScore = Math.max(12, Math.min(99, pulseBase))
   const trend = buildRequestTrend(requests)
   const latestMonth = trend[trend.length - 1]?.value ?? 0
@@ -440,6 +595,30 @@ export async function getManagerDashboardSnapshotForBuilding({
   const activeDemandRequests = requests.filter(
     (request) => request.status === "approved" || request.status === "pending_review",
   )
+  const introductionParticipantIds = Array.from(
+    new Set(
+      introductions.flatMap((introduction) => [
+        introduction.resident_a_user_id,
+        introduction.resident_b_user_id,
+      ]),
+    ),
+  )
+  const { data: introProfiles, error: introProfilesError } = introductionParticipantIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, first_name")
+        .in("id", introductionParticipantIds)
+        .returns<ProfileNameRow[]>()
+    : { data: [] as ProfileNameRow[], error: null }
+
+  if (introProfilesError) {
+    throw new Error("Unable to load building analytics.")
+  }
+
+  const profilesById = new Map<string, string>()
+  for (const profile of introProfiles ?? []) {
+    profilesById.set(profile.id, profile.first_name?.trim() || "Resident")
+  }
 
   return {
     buildingName,
@@ -487,15 +666,29 @@ export async function getManagerDashboardSnapshotForBuilding({
       },
       {
         label: "Intro requests",
-        value: "Coming soon",
-        helper: "Resident intro requests are not yet stored as a building-scoped metric.",
-        isPlaceholder: true,
+        value: String(introRequests),
+        helper: "Mutual-interest pipeline currently waiting on the second resident.",
       },
       {
         label: "Accepted introductions",
-        value: "Coming soon",
-        helper: "Accepted intro tracking is not yet available in the beta-safe building flow.",
-        isPlaceholder: true,
+        value: String(introAccepted),
+        helper: "One resident has accepted and the second response is still pending.",
+      },
+      {
+        label: "Mutual intros",
+        value: String(introMutual),
+        accent: true,
+        helper: "Introductions where both residents have said yes and are ready for concierge delivery.",
+      },
+      {
+        label: "Introductions delivered",
+        value: String(introDelivered),
+        helper: "Mutual intros that the concierge team has marked as delivered.",
+      },
+      {
+        label: "Declined or paused",
+        value: String(introDeclinedOrPaused),
+        helper: "Introductions that were quietly closed or paused.",
       },
     ],
     trend,
@@ -511,10 +704,58 @@ export async function getManagerDashboardSnapshotForBuilding({
       items: buildRequestStatus(requests),
       emptyMessage: "No resident requests yet.",
     },
+    introductionFunnel: {
+      items: buildIntroductionFunnel(introductions),
+      emptyMessage: "No introduction activity yet.",
+    },
     mostRequestedEvents: {
       items: [],
       emptyMessage: "Coming soon once resident event suggestions or event voting are stored in Supabase.",
     },
     amenityUsage: fallbackAmenityUsage(),
+    introductionQueue: buildIntroductionQueue(introductions, profilesById),
+  }
+}
+
+export async function markIntroductionDeliveredForBuilding({
+  buildingId,
+  introductionId,
+}: {
+  buildingId: string
+  introductionId: string
+}) {
+  const supabase = getSupabaseAdmin()
+  const { data: existing, error: loadError } = await supabase
+    .from("building_introductions")
+    .select("id, status, delivered_at")
+    .eq("building_id", buildingId)
+    .eq("id", introductionId)
+    .maybeSingle<{ id: string; status: string; delivered_at: string | null }>()
+
+  if (loadError || !existing) {
+    throw new Error("Introduction not found.")
+  }
+
+  if (existing.status !== "mutual" && existing.status !== "delivered") {
+    throw new Error("Only mutual introductions can be marked as delivered.")
+  }
+
+  const deliveredAt = existing.delivered_at ?? new Date().toISOString()
+  const { error: updateError } = await supabase
+    .from("building_introductions")
+    .update({
+      status: "delivered",
+      delivered_at: deliveredAt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", introductionId)
+
+  if (updateError) {
+    throw new Error("Unable to mark the introduction as delivered.")
+  }
+
+  return {
+    id: introductionId,
+    deliveredAt,
   }
 }

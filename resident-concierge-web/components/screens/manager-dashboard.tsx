@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ArrowLeft, ShieldAlert } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Loader2, ShieldAlert } from "lucide-react"
 import {
   Area,
   AreaChart,
@@ -29,6 +29,19 @@ type DashboardListBlock = {
   emptyMessage?: string
 }
 
+type ManagerIntroductionQueueItem = {
+  id: string
+  residentAFirstName: string
+  residentBFirstName: string
+  introType: "friendship" | "professional"
+  status: string
+  source: string
+  suggestedAt: string
+  mutualAt: string | null
+  deliveredAt: string | null
+  compatibilitySummary: string | null
+}
+
 type DashboardTrendPoint = {
   month: string
   value: number
@@ -44,8 +57,10 @@ type ManagerDashboardSnapshot = {
   topInterests: DashboardListBlock
   eventInsights: DashboardListBlock
   requestStatus: DashboardListBlock
+  introductionFunnel: DashboardListBlock
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
+  introductionQueue: ManagerIntroductionQueueItem[]
 }
 
 const emptySnapshot: ManagerDashboardSnapshot = {
@@ -58,8 +73,10 @@ const emptySnapshot: ManagerDashboardSnapshot = {
   topInterests: { items: [] },
   eventInsights: { items: [] },
   requestStatus: { items: [] },
+  introductionFunnel: { items: [] },
   mostRequestedEvents: { items: [] },
   amenityUsage: { items: [] },
+  introductionQueue: [],
 }
 
 export function ManagerDashboard({
@@ -73,59 +90,83 @@ export function ManagerDashboard({
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
+  const [deliveryActionId, setDeliveryActionId] = useState<string | null>(null)
+  const [deliveryError, setDeliveryError] = useState<string | null>(null)
+
+  const loadDashboard = async () => {
+    setIsLoading(true)
+    setLoadError(null)
+    setErrorStatus(null)
+
+    try {
+      const response = await fetch("/api/manager-dashboard", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      })
+
+      const payload = (await response.json()) as ManagerDashboardSnapshot & { error?: string }
+
+      if (!response.ok) {
+        const message =
+          payload.error ||
+          (response.status === 403
+            ? "Only authenticated building managers or admins can access Community Pulse."
+            : "Unable to load the manager dashboard.")
+        const error = new Error(message) as Error & { status?: number }
+        error.status = response.status
+        throw error
+      }
+
+      setSnapshot(payload)
+    } catch (error) {
+      const status = typeof error === "object" && error && "status" in error ? Number(error.status) : null
+      setErrorStatus(Number.isFinite(status) ? status : null)
+      setLoadError(error instanceof Error ? error.message : "Unable to load the manager dashboard.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    let isMounted = true
-
-    const loadDashboard = async () => {
-      setIsLoading(true)
-      setLoadError(null)
-      setErrorStatus(null)
-
-      try {
-        const response = await fetch("/api/manager-dashboard", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          cache: "no-store",
-        })
-
-        const payload = (await response.json()) as ManagerDashboardSnapshot & { error?: string }
-
-        if (!response.ok) {
-          const message =
-            payload.error ||
-            (response.status === 403
-              ? "Only authenticated building managers or admins can access Community Pulse."
-              : "Unable to load the manager dashboard.")
-          const error = new Error(message) as Error & { status?: number }
-          error.status = response.status
-          throw error
-        }
-
-        if (isMounted) {
-          setSnapshot(payload)
-        }
-      } catch (error) {
-        if (isMounted) {
-          const status = typeof error === "object" && error && "status" in error ? Number(error.status) : null
-          setErrorStatus(Number.isFinite(status) ? status : null)
-          setLoadError(error instanceof Error ? error.message : "Unable to load the manager dashboard.")
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      }
-    }
-
     void loadDashboard()
-
-    return () => {
-      isMounted = false
-    }
   }, [accessToken])
+
+  async function markDelivered(introductionId: string) {
+    setDeliveryActionId(introductionId)
+    setDeliveryError(null)
+
+    try {
+      const response = await fetch("/api/manager-introductions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          introductionId,
+          action: "mark_delivered",
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to mark the introduction as delivered.")
+      }
+
+      await loadDashboard()
+    } catch (error) {
+      setDeliveryError(
+        error instanceof Error ? error.message : "Unable to mark the introduction as delivered.",
+      )
+    } finally {
+      setDeliveryActionId(null)
+    }
+  }
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -244,6 +285,24 @@ export function ManagerDashboard({
               <BarList block={snapshot.requestStatus} suffix="" isLoading={isLoading} />
             </Panel>
 
+            <Panel title="Introduction funnel" caption="How concierge introductions are moving through the building">
+              <BarList block={snapshot.introductionFunnel} suffix="" isLoading={isLoading} />
+            </Panel>
+
+            <Panel title="Ready to deliver" caption="Mutual introductions that are ready for concierge follow-through">
+              {deliveryError ? (
+                <div className="mb-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  {deliveryError}
+                </div>
+              ) : null}
+              <IntroductionQueue
+                items={snapshot.introductionQueue}
+                isLoading={isLoading}
+                deliveryActionId={deliveryActionId}
+                onMarkDelivered={markDelivered}
+              />
+            </Panel>
+
             <Panel title="Most requested events" caption="Resident demand signal for future programming">
               <BarList block={snapshot.mostRequestedEvents} suffix="" isLoading={isLoading} />
             </Panel>
@@ -256,6 +315,17 @@ export function ManagerDashboard({
       </div>
     </div>
   )
+}
+
+function formatQueueDate(value: string | null) {
+  if (!value) {
+    return "Not set"
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
 }
 
 function Stat({
@@ -359,6 +429,94 @@ function BarList({
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function IntroductionQueue({
+  items,
+  isLoading,
+  deliveryActionId,
+  onMarkDelivered,
+}: {
+  items: ManagerIntroductionQueueItem[]
+  isLoading?: boolean
+  deliveryActionId: string | null
+  onMarkDelivered: (introductionId: string) => void
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3.5">
+        {[...Array.from({ length: 3 })].map((_, index) => (
+          <div key={index} className="h-28 animate-pulse rounded-2xl bg-secondary" />
+        ))}
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground">No mutual or delivered introductions yet.</p>
+  }
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      {items.map((item) => {
+        const isDelivered = item.status === "delivered"
+        const isWorking = deliveryActionId === item.id
+
+        return (
+          <div key={item.id} className="rounded-2xl border border-border bg-background px-4 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-serif text-lg leading-tight text-foreground">
+                  {item.residentAFirstName} + {item.residentBFirstName}
+                </p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold">
+                  {item.introType} · {item.source.replaceAll("_", " ")}
+                </p>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-[11px] font-medium ${
+                  isDelivered
+                    ? "bg-gold/15 text-gold-foreground"
+                    : "bg-secondary text-foreground"
+                }`}
+              >
+                {isDelivered ? "Delivered" : "Mutual"}
+              </span>
+            </div>
+
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {item.compatibilitySummary || "A private building introduction is ready for concierge follow-through."}
+            </p>
+
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span>Suggested {formatQueueDate(item.suggestedAt)}</span>
+              <span>Mutual {formatQueueDate(item.mutualAt)}</span>
+              {item.deliveredAt ? <span>Delivered {formatQueueDate(item.deliveredAt)}</span> : null}
+            </div>
+
+            <div className="mt-4">
+              {isDelivered ? (
+                <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-3 py-2 text-sm font-medium text-gold-foreground">
+                  <CheckCircle2 className="size-4" />
+                  Concierge delivery recorded
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onMarkDelivered(item.id)}
+                  disabled={isWorking}
+                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isWorking ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                  Mark delivered
+                </button>
+              )}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
