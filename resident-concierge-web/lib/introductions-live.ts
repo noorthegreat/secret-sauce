@@ -1,20 +1,14 @@
 import type { User } from "@supabase/supabase-js"
 
+import type {
+  IntroductionDecision,
+  IntroductionListResult,
+  IntroductionPreview,
+  IntroductionStatus,
+  IntroductionType,
+} from "@/lib/introduction-types"
 import { syncResidentAccountForUser } from "@/lib/resident-account-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
-
-export type IntroductionStatus =
-  | "suggested"
-  | "requested"
-  | "accepted"
-  | "mutual"
-  | "delivered"
-  | "declined"
-  | "paused"
-
-export type IntroductionType = "friendship" | "professional"
-
-type IntroductionDecision = "requested" | "accepted" | "declined" | "paused" | null
 
 type BuildingIntroductionRow = {
   id: string
@@ -71,33 +65,6 @@ type ResidentDirectoryEntry = {
   connectionStyles: string[]
 }
 
-export type IntroductionPreview = {
-  introductionId: string
-  status: IntroductionStatus
-  introType: IntroductionType
-  source: string
-  suggestedAt: string
-  mutualAt: string | null
-  deliveredAt: string | null
-  requestedByCurrentResident: boolean
-  currentResidentDecision: IntroductionDecision
-  otherResidentDecision: IntroductionDecision
-  resident: {
-    userId: string
-    firstName: string
-    photoUrl: string | null
-    bio: string | null
-    sharedInterests: string[]
-    sharedGoals: string[]
-    compatibilitySummary: string | null
-  }
-}
-
-export type IntroductionListResult = {
-  buildingId: string
-  buildingName: string
-  introductions: IntroductionPreview[]
-}
 
 function normalizeResidentPair(userIdA: string, userIdB: string) {
   if (userIdA === userIdB) {

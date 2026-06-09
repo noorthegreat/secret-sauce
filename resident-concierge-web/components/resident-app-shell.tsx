@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { DoorOpen, Loader2, Users } from "lucide-react"
+import { DoorOpen, Users } from "lucide-react"
 
 import { BottomNav, type ResidentTab } from "@/components/bottom-nav"
 import { MeetupFlow } from "@/components/meetup-flow"
@@ -14,7 +14,13 @@ import { PeopleScreen } from "@/components/screens/people-screen"
 import { ProfileScreen } from "@/components/screens/profile-screen"
 import { ScreenHeader } from "@/components/screen-header"
 import type { Resident } from "@/lib/concierge-data"
+import type { IntroductionListResult, IntroductionPreview } from "@/lib/introduction-types"
 import { useResidentAccount } from "@/lib/resident-account-browser"
+import {
+  buildResidentIntroductionCards,
+  canScheduleIntroduction,
+  countVisibleIntroductions,
+} from "@/lib/resident-introduction-ui"
 import type { ResidentPreviewSnapshot } from "@/lib/resident-preview-live"
 import { useResidentSession } from "@/lib/session-browser"
 
@@ -42,8 +48,13 @@ export function ResidentAppShell({
     useResidentAccount()
   const [meetupWith, setMeetupWith] = useState<Resident | null>(null)
   const [previewData, setPreviewData] = useState<ResidentPreviewSnapshot | null>(null)
+  const [introductionData, setIntroductionData] = useState<IntroductionListResult | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
+  const [introError, setIntroError] = useState<string | null>(null)
   const [isPreviewLoading, setIsPreviewLoading] = useState(true)
+  const [isIntroLoading, setIsIntroLoading] = useState(true)
+  const [introActionResidentId, setIntroActionResidentId] = useState<string | null>(null)
+  const [introActionError, setIntroActionError] = useState<string | null>(null)
 
   const hasActiveAccess = Boolean(
     user &&
@@ -57,13 +68,17 @@ export function ResidentAppShell({
 
     if (sessionLoading || accountLoading) {
       setIsPreviewLoading(true)
+      setIsIntroLoading(true)
       return
     }
 
     if (!user || !accessToken || !hasActiveAccess) {
       setPreviewData(null)
+      setIntroductionData(null)
       setPreviewError(null)
+      setIntroError(null)
       setIsPreviewLoading(false)
+      setIsIntroLoading(false)
       return
     }
 
@@ -71,40 +86,70 @@ export function ResidentAppShell({
 
     const loadPreview = async () => {
       setIsPreviewLoading(true)
+      setIsIntroLoading(true)
       setPreviewError(null)
+      setIntroError(null)
 
       try {
-        const response = await fetch("/api/resident-preview", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          cache: "no-store",
-        })
+        const [previewResponse, introductionsResponse] = await Promise.all([
+          fetch("/api/resident-preview", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            cache: "no-store",
+          }),
+          fetch("/api/introductions", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            cache: "no-store",
+          }),
+        ])
 
-        const payload = (await response.json()) as ResidentPreviewSnapshot & { error?: string }
+        const previewPayload = (await previewResponse.json()) as ResidentPreviewSnapshot & { error?: string }
+        const introductionsPayload = (await introductionsResponse.json()) as IntroductionListResult & {
+          error?: string
+        }
 
-        if (!response.ok) {
-          throw new Error(payload.error || "Unable to load your building community.")
+        if (!previewResponse.ok) {
+          throw new Error(previewPayload.error || "Unable to load your building community.")
         }
 
         if (!isMounted) {
           return
         }
 
-        setPreviewData(payload)
+        setPreviewData(previewPayload)
+        setIsPreviewLoading(false)
+
+        if (introductionsResponse.ok) {
+          setIntroductionData(introductionsPayload)
+          setIntroError(null)
+        } else {
+          setIntroductionData({
+            buildingId: accountSnapshot?.buildingId ?? "resident-concierge",
+            buildingName: previewPayload.buildingName,
+            introductions: [],
+          })
+          setIntroError(introductionsPayload.error || "Unable to load live introductions.")
+        }
       } catch (error) {
         if (!isMounted) {
           return
         }
 
         setPreviewData(null)
+        setIntroductionData(null)
         setPreviewError(
           error instanceof Error ? error.message : "Unable to load your building community.",
         )
+        setIntroError(null)
       } finally {
         if (isMounted) {
           setIsPreviewLoading(false)
+          setIsIntroLoading(false)
         }
       }
     }
@@ -116,9 +161,119 @@ export function ResidentAppShell({
     }
   }, [accountLoading, hasActiveAccess, session?.access_token, sessionLoading, user])
 
+  async function requestIntroduction(targetUserId: string) {
+    const accessToken = session?.access_token
+    if (!accessToken) {
+      router.push("/auth?next=%2Fapp%2Fpeople")
+      return
+    }
+
+    setIntroActionResidentId(targetUserId)
+    setIntroActionError(null)
+
+    try {
+      const response = await fetch("/api/introductions/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          targetUserId,
+          introType: "friendship",
+        }),
+      })
+
+      const payload = (await response.json()) as IntroductionPreview & { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to request the introduction.")
+      }
+
+      setIntroductionData((current) => ({
+        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "resident-concierge",
+        buildingName:
+          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Resident Concierge",
+        introductions: [
+          payload,
+          ...(current?.introductions ?? []).filter(
+            (introduction) => introduction.resident.userId !== payload.resident.userId,
+          ),
+        ],
+      }))
+    } catch (error) {
+      setIntroActionError(
+        error instanceof Error ? error.message : "Unable to request the introduction.",
+      )
+    } finally {
+      setIntroActionResidentId(null)
+    }
+  }
+
+  async function respondToIntroduction(
+    targetResidentId: string,
+    introductionId: string,
+    action: "accepted" | "declined" | "paused",
+  ) {
+    const accessToken = session?.access_token
+    if (!accessToken) {
+      router.push("/auth?next=%2Fapp%2Fpeople")
+      return
+    }
+
+    setIntroActionResidentId(targetResidentId)
+    setIntroActionError(null)
+
+    try {
+      const response = await fetch("/api/introductions/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          introductionId,
+          action,
+        }),
+      })
+
+      const payload = (await response.json()) as IntroductionPreview & { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update the introduction.")
+      }
+
+      setIntroductionData((current) => ({
+        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "resident-concierge",
+        buildingName:
+          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Resident Concierge",
+        introductions: [
+          payload,
+          ...(current?.introductions ?? []).filter(
+            (introduction) => introduction.resident.userId !== payload.resident.userId,
+          ),
+        ],
+      }))
+    } catch (error) {
+      setIntroActionError(
+        error instanceof Error ? error.message : "Unable to update the introduction.",
+      )
+    } finally {
+      setIntroActionResidentId(null)
+    }
+  }
+
   const buildingName = previewData?.buildingName || accountSnapshot?.buildingName || "Resident Concierge"
-  const residentPreviewUnavailable =
-    hasActiveAccess && (!previewData || previewData.residents.length === 0 || previewData.events.length === 0)
+  const introductionCards = buildResidentIntroductionCards(
+    previewData?.residents ?? [],
+    introductionData?.introductions ?? [],
+  )
+  const liveIntroCount = introductionCards.length
+    ? countVisibleIntroductions(introductionCards)
+    : previewData?.introCount ?? 0
+  const residentPreviewUnavailable = hasActiveAccess && !previewData
 
   if ((sessionLoading || accountLoading || isPreviewLoading) && hasActiveAccess && !previewData) {
     return (
@@ -165,15 +320,15 @@ export function ResidentAppShell({
                 {activeTab === "home" &&
                   (previewData && !residentPreviewUnavailable ? (
                     <HomeScreen
-                      onRequestIntro={() => router.push("/app/people")}
+                      onRequestIntro={requestIntroduction}
                       onGoPeople={() => router.push("/app/people")}
                       onGoCommunity={() => router.push("/app/community")}
                       onSignIn={() => router.push("/auth?next=%2Fapp")}
                       onCompleteProfile={() => router.push("/app/onboarding")}
                       onReturnToJoin={() => router.push("/join-community")}
                       welcomeName={previewData.welcomeName}
-                      introCount={previewData.introCount}
-                      residents={previewData.residents}
+                      introCount={liveIntroCount}
+                      introductionCards={introductionCards}
                       events={previewData.events}
                       isSignedIn={Boolean(user)}
                       sessionLoading={sessionLoading}
@@ -202,8 +357,16 @@ export function ResidentAppShell({
                   ))}
 
                 {activeTab === "people" &&
-                  (previewData && previewData.residents.length > 0 ? (
-                    <PeopleScreen onSchedule={setMeetupWith} residents={previewData.residents} />
+                  (previewData && introductionCards.length > 0 ? (
+                    <PeopleScreen
+                      onSchedule={setMeetupWith}
+                      onRequestIntroduction={requestIntroduction}
+                      onRespondToIntroduction={respondToIntroduction}
+                      introductions={introductionCards}
+                      isLoading={isIntroLoading}
+                      actionResidentId={introActionResidentId}
+                      actionError={introActionError ?? introError}
+                    />
                   ) : (
                     <ResidentCommunityState
                       isSignedIn={Boolean(user)}
@@ -212,6 +375,7 @@ export function ResidentAppShell({
                       accountLoading={accountLoading}
                       title={hasActiveAccess ? "Introductions will appear here." : "Introductions unlock after approval."}
                       message={
+                        introError ||
                         previewError ||
                         (hasActiveAccess
                           ? "As more active residents join the building community, your concierge will surface a thoughtful set of introductions here."

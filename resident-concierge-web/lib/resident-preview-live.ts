@@ -26,6 +26,18 @@ type ProfileRow = {
   first_name: string
   bio: string | null
   photo_url: string | null
+  is_paused: boolean | null
+}
+
+type PrivateProfileRow = {
+  user_id: string
+  email: string | null
+}
+
+type JoinRequestRow = {
+  normalized_email: string
+  interests: string[] | null
+  looking_for: string[] | null
 }
 
 function toTitleCase(value: string) {
@@ -36,7 +48,21 @@ function toTitleCase(value: string) {
     .join(" ")
 }
 
-function buildResidentFromProfile(profile: ProfileRow, index: number): Resident {
+function uniqueValues(values: string[] | null | undefined) {
+  return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)))
+}
+
+function intersection(left: string[], right: string[]) {
+  const rightSet = new Set(right)
+  return left.filter((value) => rightSet.has(value))
+}
+
+function buildResidentFromProfile(
+  profile: ProfileRow,
+  index: number,
+  sharedInterests: string[],
+  goal: string,
+): Resident {
   const palette = [
     "/residents/elena.png",
     "/residents/marcus.png",
@@ -52,9 +78,9 @@ function buildResidentFromProfile(profile: ProfileRow, index: number): Resident 
     unit: `Resident ${index + 1}`,
     photo: profile.photo_url?.trim() || palette[index % palette.length] || "/placeholder.svg",
     tagline: profile.bio?.trim() || "An active member of the building community.",
-    goal: "Friendships",
-    interests: ["Wellness", "Food", "Community", "Conversation"],
-    shared: 3,
+    goal,
+    interests: sharedInterests.length ? sharedInterests : ["Conversation", "Community"],
+    shared: sharedInterests.length || 1,
   }
 }
 
@@ -106,7 +132,7 @@ export async function getResidentPreviewSnapshot({
       getCommunityFeed(),
       supabase
         .from("profiles")
-        .select("id, first_name, bio, photo_url")
+        .select("id, first_name, bio, photo_url, is_paused")
         .eq("id", userId)
         .maybeSingle<ProfileRow>(),
     ])
@@ -117,20 +143,71 @@ export async function getResidentPreviewSnapshot({
 
   const residentIds = (activeMemberships ?? []).map((membership) => membership.user_id)
   let residents: Resident[] = []
+  const currentJoinRequestResult = await supabase
+    .from("resident_join_requests")
+    .select("normalized_email, interests, looking_for")
+    .eq("building_id", buildingId)
+    .eq("normalized_email", residentEmail)
+    .maybeSingle<JoinRequestRow>()
 
   if (residentIds.length > 0) {
-    const { data: profiles, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, first_name, bio, photo_url")
-      .in("id", residentIds)
-      .limit(8)
-      .returns<ProfileRow[]>()
+    const [{ data: profiles, error: profileError }, { data: privateProfiles, error: privateProfileError }] =
+      await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, first_name, bio, photo_url, is_paused")
+          .in("id", residentIds)
+          .limit(8)
+          .returns<ProfileRow[]>(),
+        supabase
+          .from("private_profile_data")
+          .select("user_id, email")
+          .in("user_id", residentIds)
+          .returns<PrivateProfileRow[]>(),
+      ])
 
-    if (profileError) {
+    if (profileError || privateProfileError) {
       throw new Error("Unable to load resident preview.")
     }
 
-    residents = (profiles ?? []).map((profile, index) => buildResidentFromProfile(profile, index))
+    const visibleProfiles = (profiles ?? []).filter((profile) => !profile.is_paused)
+    const emailByUserId = new Map<string, string>()
+    for (const privateProfile of privateProfiles ?? []) {
+      const normalizedEmail = privateProfile.email?.trim().toLowerCase()
+      if (normalizedEmail) {
+        emailByUserId.set(privateProfile.user_id, normalizedEmail)
+      }
+    }
+
+    const residentEmails = Array.from(new Set(emailByUserId.values()))
+    const currentResidentInterests = uniqueValues(currentJoinRequestResult.data?.interests)
+    const { data: joinRequests, error: joinRequestError } = residentEmails.length
+      ? await supabase
+          .from("resident_join_requests")
+          .select("normalized_email, interests, looking_for")
+          .eq("building_id", buildingId)
+          .in("normalized_email", residentEmails)
+          .returns<JoinRequestRow[]>()
+      : { data: [] as JoinRequestRow[], error: null }
+
+    if (joinRequestError) {
+      throw new Error("Unable to load resident preview.")
+    }
+
+    const joinRequestByEmail = new Map<string, JoinRequestRow>()
+    for (const joinRequest of joinRequests ?? []) {
+      joinRequestByEmail.set(joinRequest.normalized_email, joinRequest)
+    }
+
+    residents = visibleProfiles.map((profile, index) => {
+      const normalizedEmail = emailByUserId.get(profile.id)
+      const joinRequest = normalizedEmail ? joinRequestByEmail.get(normalizedEmail) : undefined
+      const profileInterests = uniqueValues(joinRequest?.interests)
+      const sharedInterests = intersection(currentResidentInterests, profileInterests).slice(0, 4)
+      const goal = uniqueValues(joinRequest?.looking_for)[0] || "Friendships"
+
+      return buildResidentFromProfile(profile, index, sharedInterests, goal)
+    })
   }
 
   const currentProfile = currentProfileResult.data ?? null

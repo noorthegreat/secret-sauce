@@ -4,9 +4,10 @@ import { ArrowUpRight, CalendarCheck, Lightbulb, UserPlus } from "lucide-react"
 
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { ScreenHeader, SectionLabel } from "@/components/screen-header"
-import type { Resident } from "@/lib/concierge-data"
 import type { CommunityEvent } from "@/lib/community-live"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
+import type { ResidentIntroductionCard } from "@/lib/resident-introduction-ui"
+import { canScheduleIntroduction } from "@/lib/resident-introduction-ui"
 
 export function HomeScreen({
   onRequestIntro,
@@ -17,7 +18,7 @@ export function HomeScreen({
   onReturnToJoin,
   welcomeName,
   introCount,
-  residents,
+  introductionCards,
   events,
   isSignedIn,
   sessionLoading,
@@ -32,20 +33,19 @@ export function HomeScreen({
   onReturnToJoin: () => void
   welcomeName: string
   introCount: number
-  residents: Resident[]
+  introductionCards: ResidentIntroductionCard[]
   events: CommunityEvent[]
   isSignedIn: boolean
   sessionLoading: boolean
   accountSnapshot: ResidentAccountSnapshot | null
   accountLoading: boolean
 }) {
-  const featured = residents[0]
-  const suggested = residents[Math.min(1, residents.length - 1)] ?? featured
-  const event = events[0]
-
-  if (!featured || !event || !suggested) {
-    return null
-  }
+  const featured = introductionCards[0]
+  const suggested =
+    introductionCards.find((card) => card.status === "suggested") ??
+    introductionCards.find((card) => !canScheduleIntroduction(card)) ??
+    featured
+  const event = events[0] ?? null
 
   return (
     <div className="h-full overflow-y-auto pb-28">
@@ -69,87 +69,107 @@ export function HomeScreen({
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-2.5 px-6">
-        <QuickAction icon={UserPlus} label="Request Intro" onClick={onGoPeople} />
+        <QuickAction icon={UserPlus} label="People" onClick={onGoPeople} />
         <QuickAction icon={CalendarCheck} label="RSVP" onClick={onGoCommunity} />
         <QuickAction icon={Lightbulb} label="Suggest Event" onClick={onGoCommunity} />
       </div>
 
-      <div className="mt-8 px-6">
-        <SectionLabel>Tonight&apos;s introduction</SectionLabel>
-        <div className="overflow-hidden rounded-3xl border border-border bg-card">
-          <div className="relative">
-            <img
-              src={featured.photo || "/placeholder.svg"}
-              alt={featured.name}
-              className="h-56 w-full object-cover"
-            />
-            <span className="absolute left-4 top-4 rounded-full bg-background/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground backdrop-blur">
-              {featured.shared} shared interests
-            </span>
-          </div>
-          <div className="p-5">
-            <p className="text-xs text-muted-foreground">{featured.unit}</p>
-            <h3 className="mt-0.5 font-serif text-2xl leading-tight text-foreground">{featured.name}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/75">{featured.tagline}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {featured.interests.slice(0, 3).map((interest) => (
-                <span
-                  key={interest}
-                  className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
-                >
-                  {interest}
-                </span>
-              ))}
+      {featured ? (
+        <div className="mt-8 px-6">
+          <SectionLabel>Tonight&apos;s introduction</SectionLabel>
+          <div className="overflow-hidden rounded-3xl border border-border bg-card">
+            <div className="relative">
+              <img
+                src={featured.resident.photo || "/placeholder.svg"}
+                alt={featured.resident.name}
+                className="h-56 w-full object-cover"
+              />
+              <span className="absolute left-4 top-4 rounded-full bg-background/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground backdrop-blur">
+                {featured.resident.shared} shared interests
+              </span>
             </div>
+            <div className="p-5">
+              <p className="text-xs text-muted-foreground">{featured.resident.unit}</p>
+              <h3 className="mt-0.5 font-serif text-2xl leading-tight text-foreground">{featured.resident.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-foreground/75">
+                {featured.compatibilitySummary || featured.resident.tagline}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {featured.resident.interests.slice(0, 3).map((interest) => (
+                  <span
+                    key={interest}
+                    className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  featured.status === "suggested" && !featured.introductionId
+                    ? onRequestIntro(featured.resident.id)
+                    : onGoPeople()
+                }
+                className="mt-5 w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
+              >
+                {canScheduleIntroduction(featured)
+                  ? "Schedule a meetup"
+                  : featured.status === "suggested"
+                    ? "Request Introduction"
+                    : "Open introductions"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {event ? (
+        <div className="mt-8 px-6">
+          <SectionLabel>Happening soon</SectionLabel>
+          <button
+            type="button"
+            onClick={onGoCommunity}
+            className="flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-border bg-card p-3 text-left"
+          >
+            <img
+              src={event.image || "/placeholder.svg"}
+              alt={event.title}
+              className="size-20 shrink-0 rounded-2xl object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">{event.date}</p>
+              <h3 className="mt-1 truncate font-serif text-xl leading-tight text-foreground">{event.title}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {event.time} · {event.location}
+              </p>
+            </div>
+            <ArrowUpRight className="size-5 shrink-0 text-muted-foreground" />
+          </button>
+        </div>
+      ) : null}
+
+      {suggested ? (
+        <div className="mt-8 px-6">
+          <SectionLabel>A suggested meetup</SectionLabel>
+          <div className="rounded-3xl border border-gold/40 bg-gold/10 p-5">
+            <p className="text-sm leading-relaxed text-foreground/85">
+              You and <span className="font-medium text-foreground">{suggested.resident.name}</span> share space, timing, and interests inside the building. Once there is mutual interest, your concierge can help open the meetup.
+            </p>
             <button
               type="button"
-              onClick={() => onRequestIntro(featured.id)}
-              className="mt-5 w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
+              onClick={() =>
+                suggested.status === "suggested" && !suggested.introductionId
+                  ? onRequestIntro(suggested.resident.id)
+                  : onGoPeople()
+              }
+              className="mt-4 w-full rounded-full border border-foreground/15 bg-card py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
             >
-              Request Introduction
+              {suggested.status === "suggested" ? "Arrange an introduction" : "View introduction status"}
             </button>
           </div>
         </div>
-      </div>
-
-      <div className="mt-8 px-6">
-        <SectionLabel>Happening soon</SectionLabel>
-        <button
-          type="button"
-          onClick={onGoCommunity}
-          className="flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-border bg-card p-3 text-left"
-        >
-          <img
-            src={event.image || "/placeholder.svg"}
-            alt={event.title}
-            className="size-20 shrink-0 rounded-2xl object-cover"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">{event.date}</p>
-            <h3 className="mt-1 truncate font-serif text-xl leading-tight text-foreground">{event.title}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {event.time} · {event.location}
-            </p>
-          </div>
-          <ArrowUpRight className="size-5 shrink-0 text-muted-foreground" />
-        </button>
-      </div>
-
-      <div className="mt-8 px-6">
-        <SectionLabel>A suggested meetup</SectionLabel>
-        <div className="rounded-3xl border border-gold/40 bg-gold/10 p-5">
-          <p className="text-sm leading-relaxed text-foreground/85">
-            You and <span className="font-medium text-foreground">{suggested.name}</span> both value intentional conversation and shared interests. A quiet coffee chat in the Resident Lounge could be lovely.
-          </p>
-          <button
-            type="button"
-            onClick={() => onRequestIntro(suggested.id)}
-            className="mt-4 w-full rounded-full border border-foreground/15 bg-card py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
-          >
-            Arrange a coffee chat
-          </button>
-        </div>
-      </div>
+      ) : null}
     </div>
   )
 }
