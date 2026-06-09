@@ -9,6 +9,71 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
+const interestOptions = [
+  "Fitness",
+  "Running",
+  "Hiking",
+  "Reading",
+  "Technology",
+  "Entrepreneurship",
+  "Cooking",
+  "Travel",
+  "Music",
+  "Art",
+  "Wellness",
+  "Food",
+  "Design",
+  "Outdoors",
+  "Volunteering",
+  "Pets",
+] as const;
+
+const lookingForOptions = [
+  "Friendships",
+  "Networking",
+  "Activity partners",
+  "New-to-city connections",
+  "Professional connections",
+  "Community events",
+] as const;
+
+const connectionStyleOptions = [
+  "One-on-one",
+  "Small groups",
+  "Community events",
+  "Activity partners",
+  "Professional networking",
+] as const;
+
+const availabilityOptions = [
+  "Weekday mornings",
+  "Weekday evenings",
+  "Weekends",
+  "Flexible",
+  "Workday lunch",
+  "Late evenings",
+] as const;
+
+const amenityOptions = [
+  "Sky deck",
+  "Pool",
+  "Game room",
+  "Lounge",
+  "Gym",
+  "Coworking space",
+  "Private dining room",
+  "Lobby cafe",
+] as const;
+
+const ageRangeOptions = [
+  "18-24",
+  "25-34",
+  "35-44",
+  "45-54",
+  "55-64",
+  "65+",
+] as const;
+
 const residentJoinSchema = z.object({
   inviteCode: z.string().trim().min(5).max(16).regex(/^[A-Z0-9-]+$/, "Invalid invite code"),
   firstName: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{M}' -]+$/u, "Invalid first name"),
@@ -17,6 +82,14 @@ const residentJoinSchema = z.object({
   phone: z.string().trim().min(8).max(20),
   unitNumber: z.string().trim().min(1).max(32).regex(/^[A-Za-z0-9 -]+$/, "Invalid unit number"),
   moveInDate: z.string().trim().optional().or(z.literal("")),
+  occupation: z.string().trim().max(120).optional().or(z.literal("")),
+  ageRange: z.enum(ageRangeOptions).optional(),
+  introduction: z.string().trim().max(400).optional().or(z.literal("")),
+  interests: z.array(z.enum(interestOptions)).max(12).default([]),
+  lookingFor: z.array(z.enum(lookingForOptions)).min(1).max(6),
+  connectionStyles: z.array(z.enum(connectionStyleOptions)).min(1).max(6),
+  availability: z.array(z.enum(availabilityOptions)).min(1).max(6),
+  amenityPreferences: z.array(z.enum(amenityOptions)).max(8).default([]),
   wantsFriendships: z.boolean().default(true),
   wantsNetworking: z.boolean().default(true),
   contactViaSms: z.boolean().default(true),
@@ -59,6 +132,10 @@ function normalizePhone(phone: string) {
   return normalized;
 }
 
+function uniqueValues<T extends string>(values: T[]) {
+  return [...new Set(values)];
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -69,7 +146,7 @@ serve(async (req) => {
   }
 
   const rawBody = await req.text();
-  if (!rawBody || rawBody.length > 8_192) {
+  if (!rawBody || rawBody.length > 16_384) {
     return jsonResponse(400, { error: "Invalid request" });
   }
 
@@ -89,9 +166,30 @@ serve(async (req) => {
     return jsonResponse(400, { error: "Choose at least one connection goal." });
   }
 
+  if (!validation.data.contactViaSms && !validation.data.contactViaEmail) {
+    return jsonResponse(400, { error: "Choose at least one contact method." });
+  }
+
   const normalizedInviteCode = validation.data.inviteCode.trim().toUpperCase();
   const normalizedEmail = validation.data.email.trim().toLowerCase();
   let normalizedPhone = "";
+  const normalizedInterests = uniqueValues(validation.data.interests);
+  const normalizedLookingFor = uniqueValues(validation.data.lookingFor);
+  const normalizedConnectionStyles = uniqueValues(validation.data.connectionStyles);
+  const normalizedAvailability = uniqueValues(validation.data.availability);
+  const normalizedAmenities = uniqueValues(validation.data.amenityPreferences);
+
+  if (normalizedLookingFor.length === 0) {
+    return jsonResponse(400, { error: "Choose at least one onboarding goal." });
+  }
+
+  if (normalizedAvailability.length === 0) {
+    return jsonResponse(400, { error: "Choose at least one availability window." });
+  }
+
+  if (normalizedConnectionStyles.length === 0) {
+    return jsonResponse(400, { error: "Choose at least one way you like to connect." });
+  }
 
   try {
     normalizedPhone = normalizePhone(validation.data.phone);
@@ -172,6 +270,14 @@ serve(async (req) => {
         normalized_phone: normalizedPhone,
         unit_number: validation.data.unitNumber.trim().toUpperCase(),
         move_in_date: moveInDate ? moveInDate.toISOString().slice(0, 10) : null,
+        occupation: validation.data.occupation?.trim() || null,
+        age_range: validation.data.ageRange ?? null,
+        introduction: validation.data.introduction?.trim() || null,
+        interests: normalizedInterests,
+        looking_for: normalizedLookingFor,
+        connection_styles: normalizedConnectionStyles,
+        availability: normalizedAvailability,
+        amenity_preferences: normalizedAmenities,
         status: "pending_review",
         wants_friendships: validation.data.wantsFriendships,
         wants_networking: validation.data.wantsNetworking,
@@ -194,6 +300,7 @@ serve(async (req) => {
         ? `You're on the list for ${building.name}. We'll text or email you with next steps.`
         : `${building.name} is getting set up. We've saved your details and will reach out when the community opens.`,
       buildingName: building.name,
+      buildingSlug: building.slug,
     });
   } catch (error) {
     console.error("Unexpected resident join error", error);

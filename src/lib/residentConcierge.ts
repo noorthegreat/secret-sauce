@@ -17,6 +17,14 @@ export type ResidentJoinRequest = {
   normalized_phone: string;
   unit_number: string;
   move_in_date: string | null;
+  occupation: string | null;
+  age_range: string | null;
+  introduction: string | null;
+  interests: string[];
+  looking_for: string[];
+  connection_styles: string[];
+  availability: string[];
+  amenity_preferences: string[];
   status: ResidentJoinRequestStatus;
   wants_friendships: boolean;
   wants_networking: boolean;
