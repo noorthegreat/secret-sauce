@@ -4,21 +4,57 @@ import { useState } from "react"
 import { StatusBar } from "@/components/phone-frame"
 import { SelectCard, Chip } from "@/components/select-card"
 import { interests, intents, connectionStyles } from "@/lib/concierge-data"
-import { ArrowRight, Users, CalendarCheck, DoorOpen } from "lucide-react"
+import { ArrowRight, Loader2, Users, CalendarCheck, DoorOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Step = 0 | 1 | 2 | 3 | 4
 
-export function Onboarding({ onComplete }: { onComplete: () => void }) {
+export type OnboardingSubmission = {
+  intent: string[]
+  interests: string[]
+  connectionStyles: string[]
+}
+
+export function Onboarding({
+  onComplete,
+}: {
+  onComplete: (submission: OnboardingSubmission) => Promise<void>
+}) {
   const [step, setStep] = useState<Step>(0)
   const [intent, setIntent] = useState<string[]>([])
   const [chosenInterests, setChosenInterests] = useState<string[]>(["Wellness", "Food", "Books"])
   const [style, setStyle] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
 
   const next = () => setStep((s) => Math.min(4, (s + 1) as Step))
+  const canAdvance =
+    step === 1 ? intent.length > 0 : step === 3 ? style.length > 0 : true
+
+  async function handleComplete() {
+    if (isSubmitting) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      await onComplete({
+        intent,
+        interests: chosenInterests,
+        connectionStyles: style,
+      })
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to save your onboarding right now.",
+      )
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -98,15 +134,22 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
             </div>
           </Section>
         )}
-        {step === 4 && <Success onComplete={onComplete} />}
+        {step === 4 && (
+          <Success
+            onComplete={handleComplete}
+            isSubmitting={isSubmitting}
+            errorMessage={errorMessage}
+          />
+        )}
       </div>
 
       {step < 4 && (
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background to-transparent px-7 pb-8 pt-4">
           <button
             type="button"
-            onClick={step === 0 ? next : next}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
+            onClick={next}
+            disabled={!canAdvance}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {step === 0 ? "Begin" : step === 3 ? "Find my matches" : "Continue"}
             <ArrowRight className="size-4" />
@@ -173,7 +216,15 @@ function Section({
   )
 }
 
-function Success({ onComplete }: { onComplete: () => void }) {
+function Success({
+  onComplete,
+  isSubmitting,
+  errorMessage,
+}: {
+  onComplete: () => Promise<void>
+  isSubmitting: boolean
+  errorMessage: string | null
+}) {
   const stats = [
     { value: "12", label: "residents share your interests" },
     { value: "3", label: "upcoming events may be a fit" },
@@ -201,12 +252,25 @@ function Success({ onComplete }: { onComplete: () => void }) {
           </div>
         ))}
       </div>
+      {errorMessage ? (
+        <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
+          {errorMessage}
+        </div>
+      ) : null}
       <button
         type="button"
-        onClick={onComplete}
-        className="mt-8 w-full rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
+        onClick={() => void onComplete()}
+        disabled={isSubmitting}
+        className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
       >
-        Enter Resident Concierge
+        {isSubmitting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Saving your profile
+          </>
+        ) : (
+          "Enter Resident Concierge"
+        )}
       </button>
     </div>
   )

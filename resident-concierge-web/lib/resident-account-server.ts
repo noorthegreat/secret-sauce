@@ -42,6 +42,11 @@ type JoinRequestRow = {
   unit_number: string
   status: "pending_review" | "approved" | "rejected" | "withdrawn"
   introduction: string | null
+  interests?: string[] | null
+  looking_for?: string[] | null
+  connection_styles?: string[] | null
+  wants_friendships?: boolean | null
+  wants_networking?: boolean | null
 }
 
 type ProfileRow = {
@@ -132,7 +137,7 @@ async function getJoinRequest(buildingId: string, normalizedEmail: string) {
   const { data, error } = await supabase
     .from("resident_join_requests")
     .select(
-      "id, building_id, first_name, last_name, email, normalized_email, phone_number, unit_number, status, introduction",
+      "id, building_id, first_name, last_name, email, normalized_email, phone_number, unit_number, status, introduction, interests, looking_for, connection_styles, wants_friendships, wants_networking",
     )
     .eq("building_id", buildingId)
     .eq("normalized_email", normalizedEmail)
@@ -264,6 +269,84 @@ async function getProfileCompletionState(userId: string) {
     completedQuestionnaire,
     completedFriendshipQuestionnaire,
     needsSurveyCompletion: !completedQuestionnaire && !completedFriendshipQuestionnaire,
+  }
+}
+
+export type ResidentOnboardingSubmission = {
+  interests: string[]
+  lookingFor: string[]
+  connectionStyles: string[]
+  biography?: string
+}
+
+export async function persistResidentOnboardingForUser(
+  user: User,
+  submission: ResidentOnboardingSubmission,
+): Promise<ResidentAccountSnapshot> {
+  const snapshot = await syncResidentAccountForUser(user)
+
+  if (snapshot.status !== "active" || !snapshot.hasActiveMembership) {
+    throw new Error(snapshot.message)
+  }
+
+  const normalizedEmail = user.email?.trim().toLowerCase()
+  if (!normalizedEmail) {
+    throw new Error("Your account is missing an email address.")
+  }
+
+  const joinRequest = await getJoinRequest(snapshot.buildingId, normalizedEmail)
+  if (!joinRequest || joinRequest.status !== "approved") {
+    throw new Error("An approved resident record is required before completing onboarding.")
+  }
+
+  const supabase = getSupabaseAdmin()
+  const nowIso = new Date().toISOString()
+  const trimmedBiography = submission.biography?.trim() || joinRequest.introduction?.trim() || null
+  const wantsFriendships = submission.lookingFor.some((value) =>
+    ["New Friends", "Activity Partners", "Community Events"].includes(value),
+  )
+  const wantsNetworking = submission.lookingFor.some((value) =>
+    ["Professional Connections", "Community Events"].includes(value),
+  )
+
+  const [{ error: profileError }, { error: requestError }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .update({
+        bio: trimmedBiography,
+        completed_friendship_questionnaire: true,
+        updated_at: nowIso,
+      })
+      .eq("id", user.id),
+    supabase
+      .from("resident_join_requests")
+      .update({
+        interests: submission.interests,
+        looking_for: submission.lookingFor,
+        connection_styles: submission.connectionStyles,
+        wants_friendships: wantsFriendships,
+        wants_networking: wantsNetworking,
+        updated_at: nowIso,
+      })
+      .eq("id", joinRequest.id),
+  ])
+
+  if (profileError) {
+    throw new Error("Unable to save your resident profile.")
+  }
+
+  if (requestError) {
+    throw new Error("Unable to save your onboarding preferences.")
+  }
+
+  const completion = await getProfileCompletionState(user.id)
+
+  return {
+    ...snapshot,
+    message: `Your Resident Concierge account is active for ${snapshot.buildingName}.`,
+    completedQuestionnaire: completion.completedQuestionnaire,
+    completedFriendshipQuestionnaire: completion.completedFriendshipQuestionnaire,
+    needsSurveyCompletion: completion.needsSurveyCompletion,
   }
 }
 
