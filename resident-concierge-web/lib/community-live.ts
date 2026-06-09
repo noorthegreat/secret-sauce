@@ -13,6 +13,11 @@ export type CommunityEvent = {
   image: string
   attendees: number
   description: string
+  enrollmentStatus: "open" | "upcoming" | "closed"
+  enrollmentLabel: string
+  startDateIso: string | null
+  enrollmentOpensAtIso: string | null
+  enrollmentClosesAtIso: string | null
 }
 
 export type CommunityPoll = {
@@ -41,6 +46,8 @@ type EventRow = {
   slug: string | null
   start_date: string | null
   end_date: string | null
+  enrollment_opens_at: string | null
+  enrollment_closes_at: string | null
   venue_name: string | null
   city: string | null
   description: string | null
@@ -81,6 +88,31 @@ function getEventImage(index: number) {
   return fallback?.image ?? "/events/wine.png"
 }
 
+function getEnrollmentStatus(event: EventRow) {
+  const now = Date.now()
+  const opensAt = event.enrollment_opens_at ? new Date(event.enrollment_opens_at).getTime() : null
+  const closesAt = event.enrollment_closes_at ? new Date(event.enrollment_closes_at).getTime() : null
+
+  if (opensAt && opensAt > now) {
+    return {
+      status: "upcoming" as const,
+      label: "RSVP opens soon",
+    }
+  }
+
+  if (closesAt && closesAt < now) {
+    return {
+      status: "closed" as const,
+      label: "RSVP closed",
+    }
+  }
+
+  return {
+    status: "open" as const,
+    label: "RSVP open",
+  }
+}
+
 function buildPolls(events: CommunityEvent[]) {
   if (events.length === 0) {
     return []
@@ -103,6 +135,11 @@ export function getMockCommunityFeed(): CommunityFeedSnapshot {
     events: mockEvents.map((event) => ({
       ...event,
       slug: event.id,
+      enrollmentStatus: "open",
+      enrollmentLabel: "RSVP open",
+      startDateIso: null,
+      enrollmentOpensAtIso: null,
+      enrollmentClosesAtIso: null,
     })),
     polls: mockPolls,
   }
@@ -133,7 +170,7 @@ export async function getCommunityFeed(): Promise<CommunityFeedSnapshot> {
 
   const { data: eventRows, error: eventError } = await supabase
     .from("events")
-    .select("id, name, slug, start_date, end_date, venue_name, city, description, active")
+    .select("id, name, slug, start_date, end_date, enrollment_opens_at, enrollment_closes_at, venue_name, city, description, active")
     .eq("building_id", building.id)
     .eq("active", true)
     .order("start_date", { ascending: true })
@@ -166,6 +203,7 @@ export async function getCommunityFeed(): Promise<CommunityFeedSnapshot> {
   }
 
   const liveEvents: CommunityEvent[] = (eventRows ?? []).slice(0, 6).map((event, index) => ({
+    ...getEnrollmentStatus(event),
     id: event.id,
     slug: event.slug?.trim() || event.id,
     title: event.name,
@@ -176,6 +214,9 @@ export async function getCommunityFeed(): Promise<CommunityFeedSnapshot> {
     image: getEventImage(index),
     attendees: attendeeCounts.get(event.id) ?? 0,
     description: event.description ?? "A curated gathering within your building community.",
+    startDateIso: event.start_date,
+    enrollmentOpensAtIso: event.enrollment_opens_at,
+    enrollmentClosesAtIso: event.enrollment_closes_at,
   }))
 
   if (liveEvents.length === 0 && isPreviewFallbackAllowed()) {

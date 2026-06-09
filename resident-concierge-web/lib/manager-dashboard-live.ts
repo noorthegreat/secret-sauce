@@ -36,6 +36,18 @@ export type ManagerIntroductionQueueItem = {
   compatibilitySummary: string | null
 }
 
+export type ManagerEventItem = {
+  id: string
+  name: string
+  description: string | null
+  venueName: string | null
+  startDate: string | null
+  endDate: string | null
+  state: "draft" | "published" | "closed"
+  active: boolean
+  attendeeCount: number
+}
+
 export type ManagerDashboardSnapshot = {
   buildingName: string
   pulseScore: number
@@ -50,18 +62,26 @@ export type ManagerDashboardSnapshot = {
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
   introductionQueue: ManagerIntroductionQueueItem[]
+  managerEvents: ManagerEventItem[]
 }
 
 type BuildingRow = {
   id: string
   name: string
   slug: string
+  timezone?: string
 }
 
 type EventRow = {
   id: string
   name: string
+  slug: string | null
+  description: string | null
+  venue_name: string | null
   start_date: string | null
+  end_date: string | null
+  active: boolean
+  metadata: Record<string, unknown> | null
 }
 
 type JoinRequestRow = {
@@ -180,6 +200,44 @@ function buildEventInsights(events: EventRow[], enrollments: EnrollmentCountRow[
     })
     .slice(0, 5)
     .map(({ label, value }) => ({ label, value }))
+}
+
+function getManagerEventState(event: EventRow): "draft" | "published" | "closed" {
+  const managerState = typeof event.metadata?.manager_state === "string" ? event.metadata.manager_state : null
+
+  if (managerState === "draft" || managerState === "published" || managerState === "closed") {
+    return managerState
+  }
+
+  return event.active ? "published" : "draft"
+}
+
+function buildManagerEvents(events: EventRow[], enrollments: EnrollmentCountRow[]): ManagerEventItem[] {
+  const attendeeCounts = new Map<string, number>()
+
+  for (const enrollment of enrollments) {
+    attendeeCounts.set(enrollment.event_id, (attendeeCounts.get(enrollment.event_id) ?? 0) + 1)
+  }
+
+  return events
+    .slice()
+    .sort((left, right) => {
+      const leftDate = left.start_date ?? ""
+      const rightDate = right.start_date ?? ""
+      return rightDate.localeCompare(leftDate)
+    })
+    .slice(0, 8)
+    .map((event) => ({
+      id: event.id,
+      name: event.name,
+      description: event.description ?? null,
+      venueName: event.venue_name ?? null,
+      startDate: event.start_date,
+      endDate: event.end_date,
+      state: getManagerEventState(event),
+      active: event.active,
+      attendeeCount: attendeeCounts.get(event.id) ?? 0,
+    }))
 }
 
 function buildRequestStatus(requests: JoinRequestRow[]) {
@@ -384,6 +442,30 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
         compatibilitySummary: "They both value design, food, and community events in the building.",
       },
     ],
+    managerEvents: [
+      {
+        id: "event-1",
+        name: "Rooftop Social",
+        description: "A hosted social hour for residents.",
+        venueName: "Sky Deck",
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        state: "published",
+        active: true,
+        attendeeCount: 18,
+      },
+      {
+        id: "event-2",
+        name: "Wellness Morning",
+        description: "Draft event for the next resident wellness session.",
+        venueName: "Fitness Studio",
+        startDate: null,
+        endDate: null,
+        state: "draft",
+        active: false,
+        attendeeCount: 0,
+      },
+    ],
   }
 }
 
@@ -393,7 +475,7 @@ async function getConfiguredBuilding() {
 
   const { data: building, error } = await supabase
     .from("buildings")
-    .select("id, name, slug")
+    .select("id, name, slug, timezone")
     .eq("slug", buildingSlug)
     .maybeSingle<BuildingRow>()
 
@@ -514,9 +596,8 @@ export async function getManagerDashboardSnapshotForBuilding({
       .returns<JoinRequestRow[]>(),
     supabase
       .from("events")
-      .select("id, name, start_date")
+      .select("id, name, slug, description, venue_name, start_date, end_date, active, metadata")
       .eq("building_id", buildingId)
-      .eq("active", true)
       .order("start_date", { ascending: true })
       .returns<EventRow[]>(),
     supabase
@@ -714,6 +795,131 @@ export async function getManagerDashboardSnapshotForBuilding({
     },
     amenityUsage: fallbackAmenityUsage(),
     introductionQueue: buildIntroductionQueue(introductions, profilesById),
+    managerEvents: buildManagerEvents(events, enrollments),
+  }
+}
+
+export async function saveManagerEventForBuilding({
+  buildingId,
+  eventId,
+  input,
+}: {
+  buildingId: string
+  eventId?: string | null
+  input: {
+    name: string
+    description?: string | null
+    venueName?: string | null
+    startDate?: string | null
+    endDate?: string | null
+  }
+}) {
+  const supabase = getSupabaseAdmin()
+  const nowIso = new Date().toISOString()
+  const payload = {
+    building_id: buildingId,
+    name: input.name.trim(),
+    description: input.description?.trim() || null,
+    venue_name: input.venueName?.trim() || null,
+    start_date: input.startDate || null,
+    end_date: input.endDate || null,
+    active: false,
+    is_public: false,
+    metadata: {
+      manager_state: "draft",
+      updated_by_manager_at: nowIso,
+    },
+  }
+
+  if (eventId) {
+    const { error } = await supabase
+      .from("events")
+      .update(payload)
+      .eq("id", eventId)
+      .eq("building_id", buildingId)
+
+    if (error) {
+      throw new Error("Unable to update the event.")
+    }
+
+    return { id: eventId }
+  }
+
+  const slugBase = input.name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "resident-event"
+
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      ...payload,
+      slug: `${slugBase}-${nowIso.slice(0, 10).replace(/-/g, "")}`,
+      cta_label: "RSVP",
+      matching_mode: "friendship",
+      matchmaking_enabled: false,
+      timezone: "America/Los_Angeles",
+      short_description: input.description?.trim() || null,
+      created_at: nowIso,
+    })
+    .select("id")
+    .maybeSingle<{ id: string }>()
+
+  if (error || !data) {
+    throw new Error("Unable to create the event.")
+  }
+
+  return data
+}
+
+export async function setManagerEventStateForBuilding({
+  buildingId,
+  eventId,
+  state,
+}: {
+  buildingId: string
+  eventId: string
+  state: "published" | "closed"
+}) {
+  const supabase = getSupabaseAdmin()
+  const { data: existing, error: loadError } = await supabase
+    .from("events")
+    .select("id, metadata")
+    .eq("id", eventId)
+    .eq("building_id", buildingId)
+    .maybeSingle<{ id: string; metadata: Record<string, unknown> | null }>()
+
+  if (loadError || !existing) {
+    throw new Error("Event not found.")
+  }
+
+  const metadata = {
+    ...(existing.metadata ?? {}),
+    manager_state: state,
+    updated_by_manager_at: new Date().toISOString(),
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update({
+      active: state === "published",
+      is_public: false,
+      metadata,
+    })
+    .eq("id", eventId)
+    .eq("building_id", buildingId)
+
+  if (error) {
+    throw new Error(
+      state === "published" ? "Unable to publish the event." : "Unable to close the event.",
+    )
+  }
+
+  return {
+    id: eventId,
+    state,
   }
 }
 

@@ -16,6 +16,8 @@ type EventRow = {
   building_id: string
   active: boolean
   matching_mode: string | null
+  enrollment_opens_at: string | null
+  enrollment_closes_at: string | null
 }
 
 type ProfileRow = {
@@ -23,27 +25,16 @@ type ProfileRow = {
   completed_friendship_questionnaire: boolean | null
 }
 
-function getBuildingSlug() {
-  return (process.env.RESIDENT_CONCIERGE_BUILDING_SLUG ?? "chorus-apartments").trim().toLowerCase()
-}
-
 function jsonError(message: string, status: number) {
-  return NextResponse.json({ error: message }, { status })
-}
-
-async function getConfiguredBuildingId() {
-  const supabase = getSupabaseAdmin()
-  const { data, error } = await supabase
-    .from("buildings")
-    .select("id")
-    .eq("slug", getBuildingSlug())
-    .maybeSingle<BuildingRow>()
-
-  if (error || !data) {
-    throw new Error("Unable to load configured building.")
-  }
-
-  return data.id
+  return NextResponse.json(
+    { error: message },
+    {
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  )
 }
 
 async function assertMembership(userId: string, buildingId: string) {
@@ -61,14 +52,6 @@ async function assertMembership(userId: string, buildingId: string) {
   }
 }
 
-function getRequiredSurveyMode(matchingMode: string | null) {
-  if (matchingMode === "friendship") {
-    return "friendship"
-  }
-
-  return "relationship"
-}
-
 async function assertSurveyEligibility(userId: string, event: EventRow) {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
@@ -81,18 +64,25 @@ async function assertSurveyEligibility(userId: string, event: EventRow) {
     throw new Error("Complete your resident profile before signing up for events.")
   }
 
-  const requiredMode = getRequiredSurveyMode(event.matching_mode)
   const eligible =
-    requiredMode === "friendship"
-      ? Boolean(data.completed_friendship_questionnaire)
-      : Boolean(data.completed_questionnaire)
+    Boolean(data.completed_friendship_questionnaire) || Boolean(data.completed_questionnaire)
 
   if (!eligible) {
-    throw new Error(
-      requiredMode === "friendship"
-        ? "Complete the friendship survey before RSVPing to this event."
-        : "Complete the compatibility survey before RSVPing to this event.",
-    )
+    throw new Error("Complete your onboarding before RSVPing to events.")
+  }
+}
+
+function assertEnrollmentWindow(event: EventRow) {
+  const now = Date.now()
+  const opensAt = event.enrollment_opens_at ? new Date(event.enrollment_opens_at).getTime() : null
+  const closesAt = event.enrollment_closes_at ? new Date(event.enrollment_closes_at).getTime() : null
+
+  if (opensAt && opensAt > now) {
+    throw new Error("RSVP opens soon for this event.")
+  }
+
+  if (closesAt && closesAt < now) {
+    throw new Error("RSVP is closed for this event.")
   }
 }
 
@@ -100,7 +90,7 @@ async function getScopedEvent(eventId: string, buildingId: string) {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, slug, building_id, active, matching_mode")
+    .select("id, name, slug, building_id, active, matching_mode, enrollment_opens_at, enrollment_closes_at")
     .eq("id", eventId)
     .eq("building_id", buildingId)
     .eq("active", true)
@@ -122,7 +112,7 @@ export async function GET(request: NextRequest) {
     }
 
     const account = await syncResidentAccountForUser(user)
-    if (account.status !== "active") {
+    if (account.status !== "active" || !account.hasActiveMembership) {
       return jsonError(account.message, 403)
     }
 
@@ -208,14 +198,20 @@ export async function POST(request: NextRequest) {
     }
 
     const account = await syncResidentAccountForUser(user)
-    if (account.status !== "active") {
+    if (account.status !== "active" || !account.hasActiveMembership) {
       return jsonError(account.message, 403)
     }
 
     const event = await getScopedEvent(eventId, account.buildingId)
+    await assertMembership(user.id, account.buildingId)
     const supabase = getSupabaseAdmin()
 
     if (attending) {
+      if (account.needsSurveyCompletion) {
+        return jsonError("Complete your onboarding before RSVPing to events.", 403)
+      }
+
+      assertEnrollmentWindow(event)
       await assertSurveyEligibility(user.id, event)
 
       const { error } = await supabase.from("event_enrollments").upsert(

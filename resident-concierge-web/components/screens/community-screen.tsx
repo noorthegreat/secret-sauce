@@ -11,6 +11,14 @@ import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import { useResidentSession } from "@/lib/session-browser"
 import { cn } from "@/lib/utils"
 
+type RsvpEligibilityState =
+  | "not_eligible"
+  | "needs_onboarding"
+  | "can_rsvp"
+  | "rsvp_confirmed"
+  | "rsvp_canceled"
+  | "closed"
+
 export function CommunityScreen({
   events,
   eventPolls,
@@ -35,11 +43,6 @@ export function CommunityScreen({
   onViewCommunity: () => void
 }) {
   const [tab, setTab] = useState<"events" | "vote">("events")
-  const shouldGateFeed =
-    !isSignedIn ||
-    accountLoading ||
-    (accountSnapshot?.status !== "active") ||
-    Boolean(accountSnapshot?.needsSurveyCompletion)
 
   return (
     <div className="h-full overflow-y-auto pb-28">
@@ -62,47 +65,132 @@ export function CommunityScreen({
         ) : null}
       </div>
 
-      {shouldGateFeed ? (
-        <div className="mt-6 px-6">
-          <div className="rounded-3xl border border-border bg-card p-5">
-            <p className="font-serif text-2xl text-foreground">Community unlocks once your access is ready.</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              As soon as your membership is active and your profile is complete, you&apos;ll be able to RSVP,
-              discover gatherings, and shape what happens in the building next.
-            </p>
-          </div>
+      <div className="mt-5 px-6">
+        <div className="flex rounded-full border border-border bg-secondary p-1">
+          {(["events", "vote"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTab(value)}
+              className={cn(
+                "flex-1 rounded-full py-2.5 text-sm font-medium tracking-wide transition-colors",
+                tab === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+              )}
+            >
+              {value === "events" ? "Events" : "Vote on next month"}
+            </button>
+          ))}
         </div>
-      ) : (
-        <>
-          <div className="mt-5 px-6">
-            <div className="flex rounded-full border border-border bg-secondary p-1">
-              {(["events", "vote"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setTab(value)}
-                  className={cn(
-                    "flex-1 rounded-full py-2.5 text-sm font-medium tracking-wide transition-colors",
-                    tab === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
-                  )}
-                >
-                  {value === "events" ? "Events" : "Vote on next month"}
-                </button>
-              ))}
-            </div>
-          </div>
+      </div>
 
-          {tab === "events" ? <EventsList events={events} /> : <VotingList eventPolls={eventPolls} />}
-        </>
+      {tab === "events" ? (
+        <EventsList
+          events={events}
+          isSignedIn={isSignedIn}
+          accountSnapshot={accountSnapshot}
+          accountLoading={accountLoading}
+          onSignIn={onSignIn}
+          onCompleteProfile={onCompleteProfile}
+        />
+      ) : (
+        <VotingList eventPolls={eventPolls} />
       )}
     </div>
   )
 }
 
-function EventsList({ events }: { events: CommunityEvent[] }) {
+function getEligibilityState({
+  event,
+  isSignedIn,
+  accountLoading,
+  accountSnapshot,
+  isAttending,
+  justCanceled,
+}: {
+  event: CommunityEvent
+  isSignedIn: boolean
+  accountLoading: boolean
+  accountSnapshot: ResidentAccountSnapshot | null
+  isAttending: boolean
+  justCanceled: boolean
+}): RsvpEligibilityState {
+  if (isAttending) {
+    return "rsvp_confirmed"
+  }
+
+  if (justCanceled) {
+    return "rsvp_canceled"
+  }
+
+  if (event.enrollmentStatus === "upcoming" || event.enrollmentStatus === "closed") {
+    return "closed"
+  }
+
+  if (!isSignedIn || accountLoading || accountSnapshot?.status !== "active" || !accountSnapshot?.hasActiveMembership) {
+    return "not_eligible"
+  }
+
+  if (accountSnapshot.needsSurveyCompletion) {
+    return "needs_onboarding"
+  }
+
+  return "can_rsvp"
+}
+
+function getEligibilityCopy(state: RsvpEligibilityState) {
+  switch (state) {
+    case "rsvp_confirmed":
+      return {
+        button: "RSVP confirmed",
+        helper: "You are on the list for this building event.",
+      }
+    case "rsvp_canceled":
+      return {
+        button: "RSVP canceled",
+        helper: "Your RSVP was removed. You can opt back in while RSVP is open.",
+      }
+    case "closed":
+      return {
+        button: "RSVP unavailable",
+        helper: "This event is not currently accepting RSVPs.",
+      }
+    case "needs_onboarding":
+      return {
+        button: "Complete profile to RSVP",
+        helper: "Finish onboarding first so we can keep event participation building-safe.",
+      }
+    case "not_eligible":
+      return {
+        button: "Not eligible yet",
+        helper: "RSVP opens only for approved, active residents in this building.",
+      }
+    case "can_rsvp":
+      return {
+        button: "RSVP",
+        helper: "Your access is active and you can RSVP now.",
+      }
+  }
+}
+
+function EventsList({
+  events,
+  isSignedIn,
+  accountSnapshot,
+  accountLoading,
+  onSignIn,
+  onCompleteProfile,
+}: {
+  events: CommunityEvent[]
+  isSignedIn: boolean
+  accountSnapshot: ResidentAccountSnapshot | null
+  accountLoading: boolean
+  onSignIn: () => void
+  onCompleteProfile: () => void
+}) {
   const router = useRouter()
   const { session, isLoading: sessionLoading } = useResidentSession()
   const [rsvps, setRsvps] = useState<Record<string, boolean>>({})
+  const [recentlyCanceled, setRecentlyCanceled] = useState<Record<string, boolean>>({})
   const [submittingId, setSubmittingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const building = events.filter((event) => event.host === "Building")
@@ -110,7 +198,7 @@ function EventsList({ events }: { events: CommunityEvent[] }) {
 
   useEffect(() => {
     const accessToken = session?.access_token
-    if (!accessToken || events.length === 0) {
+    if (!accessToken || events.length === 0 || accountSnapshot?.status !== "active") {
       setRsvps({})
       return
     }
@@ -153,20 +241,26 @@ function EventsList({ events }: { events: CommunityEvent[] }) {
     return () => {
       isMounted = false
     }
-  }, [events, session?.access_token])
+  }, [events, session?.access_token, accountSnapshot?.status])
 
-  async function toggleRsvp(eventId: string) {
+  async function toggleRsvp(event: CommunityEvent) {
     const accessToken = session?.access_token
 
     if (!accessToken) {
-      router.push("/auth?next=%2Fapp%2Fcommunity")
+      onSignIn()
       return
     }
 
-    setSubmittingId(eventId)
+    if (accountSnapshot?.needsSurveyCompletion) {
+      onCompleteProfile()
+      return
+    }
+
+    setSubmittingId(event.id)
     setErrorMessage(null)
 
     try {
+      const nextAttending = !rsvps[event.id]
       const response = await fetch("/api/event-rsvp", {
         method: "POST",
         headers: {
@@ -174,8 +268,8 @@ function EventsList({ events }: { events: CommunityEvent[] }) {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          eventId,
-          attending: !rsvps[eventId],
+          eventId: event.id,
+          attending: nextAttending,
         }),
       })
 
@@ -186,7 +280,12 @@ function EventsList({ events }: { events: CommunityEvent[] }) {
 
       setRsvps((previous) => ({
         ...previous,
-        [eventId]: Boolean(payload.attending),
+        [event.id]: Boolean(payload.attending),
+      }))
+
+      setRecentlyCanceled((previous) => ({
+        ...previous,
+        [event.id]: !payload.attending,
       }))
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to update your RSVP.")
@@ -213,15 +312,27 @@ function EventsList({ events }: { events: CommunityEvent[] }) {
         title="Hosted by the building"
         items={building}
         rsvps={rsvps}
+        recentlyCanceled={recentlyCanceled}
         submittingId={submittingId}
+        accountSnapshot={accountSnapshot}
+        accountLoading={accountLoading}
+        isSignedIn={isSignedIn}
         onToggleRsvp={toggleRsvp}
+        onSignIn={onSignIn}
+        onCompleteProfile={onCompleteProfile}
       />
       <EventGroup
         title="Suggested by residents"
         items={resident}
         rsvps={rsvps}
+        recentlyCanceled={recentlyCanceled}
         submittingId={submittingId}
+        accountSnapshot={accountSnapshot}
+        accountLoading={accountLoading}
+        isSignedIn={isSignedIn}
         onToggleRsvp={toggleRsvp}
+        onSignIn={onSignIn}
+        onCompleteProfile={onCompleteProfile}
       />
     </div>
   )
@@ -231,14 +342,26 @@ function EventGroup({
   title,
   items,
   rsvps,
+  recentlyCanceled,
   submittingId,
+  accountSnapshot,
+  accountLoading,
+  isSignedIn,
   onToggleRsvp,
+  onSignIn,
+  onCompleteProfile,
 }: {
   title: string
   items: CommunityEvent[]
   rsvps: Record<string, boolean>
+  recentlyCanceled: Record<string, boolean>
   submittingId: string | null
-  onToggleRsvp: (eventId: string) => Promise<void>
+  accountSnapshot: ResidentAccountSnapshot | null
+  accountLoading: boolean
+  isSignedIn: boolean
+  onToggleRsvp: (event: CommunityEvent) => Promise<void>
+  onSignIn: () => void
+  onCompleteProfile: () => void
 }) {
   if (items.length === 0) return null
 
@@ -249,6 +372,16 @@ function EventGroup({
         {items.map((event) => {
           const going = rsvps[event.id]
           const isSubmitting = submittingId === event.id
+          const eligibilityState = getEligibilityState({
+            event,
+            isSignedIn,
+            accountLoading,
+            accountSnapshot,
+            isAttending: Boolean(going),
+            justCanceled: Boolean(recentlyCanceled[event.id]),
+          })
+          const eligibilityCopy = getEligibilityCopy(eligibilityState)
+          const canToggle = eligibilityState === "can_rsvp" || eligibilityState === "rsvp_confirmed"
 
           return (
             <article key={event.id} className="overflow-hidden rounded-3xl border border-border bg-card">
@@ -258,23 +391,47 @@ function EventGroup({
                 className="h-40 w-full object-cover"
               />
               <div className="p-5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
-                  {event.date} - {event.time}
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+                    {event.date} · {event.time}
+                  </p>
+                  <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {event.enrollmentLabel}
+                  </span>
+                </div>
                 <h3 className="mt-1.5 font-serif text-2xl leading-tight text-foreground">{event.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-foreground/75">{event.description}</p>
                 <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Users className="size-3.5" />
-                  {event.attendees} attending - {event.location}
+                  {event.attendees} attending · {event.location}
                 </div>
+                <p className="mt-3 text-sm text-muted-foreground">{eligibilityCopy.helper}</p>
                 <div className="mt-4 flex gap-2.5">
                   <button
                     type="button"
-                    onClick={() => void onToggleRsvp(event.id)}
-                    disabled={isSubmitting}
+                    onClick={() => {
+                      if (eligibilityState === "not_eligible") {
+                        onSignIn()
+                        return
+                      }
+
+                      if (eligibilityState === "needs_onboarding") {
+                        onCompleteProfile()
+                        return
+                      }
+
+                      if (canToggle) {
+                        void onToggleRsvp(event)
+                      }
+                    }}
+                    disabled={isSubmitting || (eligibilityState !== "not_eligible" && eligibilityState !== "needs_onboarding" && !canToggle)}
                     className={cn(
                       "flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-medium tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-70",
-                      going ? "bg-gold/15 text-gold-foreground" : "bg-foreground text-background",
+                      eligibilityState === "rsvp_confirmed"
+                        ? "bg-gold/15 text-gold-foreground"
+                        : canToggle || eligibilityState === "not_eligible" || eligibilityState === "needs_onboarding"
+                          ? "bg-foreground text-background"
+                          : "bg-secondary text-muted-foreground",
                     )}
                   >
                     {isSubmitting ? (
@@ -282,22 +439,33 @@ function EventGroup({
                         <Loader2 className="size-4 animate-spin" />
                         Saving
                       </>
-                    ) : going ? (
+                    ) : eligibilityState === "rsvp_confirmed" ? (
                       <>
                         <Check className="size-4 text-gold" />
-                        Attending
+                        {eligibilityCopy.button}
                       </>
                     ) : (
-                      "RSVP"
+                      eligibilityCopy.button
                     )}
                   </button>
                 </div>
-                <button
-                  type="button"
-                  className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 transition-colors hover:border-gold/40"
-                >
-                  Introduce me to people attending
-                </button>
+                {eligibilityState === "rsvp_confirmed" ? (
+                  <button
+                    type="button"
+                    onClick={() => void onToggleRsvp(event)}
+                    disabled={isSubmitting}
+                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 transition-colors hover:border-gold/40 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    Cancel RSVP
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 transition-colors hover:border-gold/40"
+                  >
+                    Introduce me to people attending
+                  </button>
+                )}
               </div>
             </article>
           )

@@ -42,6 +42,18 @@ type ManagerIntroductionQueueItem = {
   compatibilitySummary: string | null
 }
 
+type ManagerEventItem = {
+  id: string
+  name: string
+  description: string | null
+  venueName: string | null
+  startDate: string | null
+  endDate: string | null
+  state: "draft" | "published" | "closed"
+  active: boolean
+  attendeeCount: number
+}
+
 type DashboardTrendPoint = {
   month: string
   value: number
@@ -61,6 +73,7 @@ type ManagerDashboardSnapshot = {
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
   introductionQueue: ManagerIntroductionQueueItem[]
+  managerEvents: ManagerEventItem[]
 }
 
 const emptySnapshot: ManagerDashboardSnapshot = {
@@ -77,6 +90,7 @@ const emptySnapshot: ManagerDashboardSnapshot = {
   mostRequestedEvents: { items: [] },
   amenityUsage: { items: [] },
   introductionQueue: [],
+  managerEvents: [],
 }
 
 export function ManagerDashboard({
@@ -92,6 +106,16 @@ export function ManagerDashboard({
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [deliveryActionId, setDeliveryActionId] = useState<string | null>(null)
   const [deliveryError, setDeliveryError] = useState<string | null>(null)
+  const [eventActionId, setEventActionId] = useState<string | null>(null)
+  const [eventError, setEventError] = useState<string | null>(null)
+  const [editingEventId, setEditingEventId] = useState<string | null>(null)
+  const [eventForm, setEventForm] = useState({
+    name: "",
+    description: "",
+    venueName: "",
+    startDate: "",
+    endDate: "",
+  })
 
   const loadDashboard = async () => {
     setIsLoading(true)
@@ -165,6 +189,95 @@ export function ManagerDashboard({
       )
     } finally {
       setDeliveryActionId(null)
+    }
+  }
+
+  function startEventDraft(event?: ManagerEventItem) {
+    setEditingEventId(event?.id ?? null)
+    setEventError(null)
+    setEventForm({
+      name: event?.name ?? "",
+      description: event?.description ?? "",
+      venueName: event?.venueName ?? "",
+      startDate: event?.startDate ? new Date(event.startDate).toISOString().slice(0, 16) : "",
+      endDate: event?.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
+    })
+  }
+
+  async function saveEvent() {
+    setEventActionId(editingEventId ?? "new")
+    setEventError(null)
+
+    try {
+      const response = await fetch("/api/manager-events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          action: "save",
+          eventId: editingEventId,
+          name: eventForm.name,
+          description: eventForm.description,
+          venueName: eventForm.venueName,
+          startDate: eventForm.startDate ? new Date(eventForm.startDate).toISOString() : null,
+          endDate: eventForm.endDate ? new Date(eventForm.endDate).toISOString() : null,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to save the event.")
+      }
+
+      setEditingEventId(null)
+      setEventForm({
+        name: "",
+        description: "",
+        venueName: "",
+        startDate: "",
+        endDate: "",
+      })
+      await loadDashboard()
+    } catch (error) {
+      setEventError(error instanceof Error ? error.message : "Unable to save the event.")
+    } finally {
+      setEventActionId(null)
+    }
+  }
+
+  async function updateEventState(eventId: string, action: "publish" | "close") {
+    setEventActionId(eventId)
+    setEventError(null)
+
+    try {
+      const response = await fetch("/api/manager-events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          action,
+          eventId,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update the event.")
+      }
+
+      await loadDashboard()
+    } catch (error) {
+      setEventError(error instanceof Error ? error.message : "Unable to update the event.")
+    } finally {
+      setEventActionId(null)
     }
   }
 
@@ -285,6 +398,42 @@ export function ManagerDashboard({
               <BarList block={snapshot.requestStatus} suffix="" isLoading={isLoading} />
             </Panel>
 
+            <Panel title="Event operations" caption="Create, edit, publish, and close building events for the pilot">
+              {eventError ? (
+                <div className="mb-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  {eventError}
+                </div>
+              ) : null}
+              <EventEditor
+                form={eventForm}
+                onChange={setEventForm}
+                onSave={saveEvent}
+                onCancel={() => {
+                  setEditingEventId(null)
+                  setEventForm({
+                    name: "",
+                    description: "",
+                    venueName: "",
+                    startDate: "",
+                    endDate: "",
+                  })
+                }}
+                isSaving={eventActionId === (editingEventId ?? "new")}
+                isEditing={Boolean(editingEventId)}
+              />
+              <div className="mt-5">
+                <EventQueue
+                  items={snapshot.managerEvents}
+                  isLoading={isLoading}
+                  eventActionId={eventActionId}
+                  onCreate={() => startEventDraft()}
+                  onEdit={startEventDraft}
+                  onPublish={(eventId) => void updateEventState(eventId, "publish")}
+                  onClose={(eventId) => void updateEventState(eventId, "close")}
+                />
+              </div>
+            </Panel>
+
             <Panel title="Introduction funnel" caption="How concierge introductions are moving through the building">
               <BarList block={snapshot.introductionFunnel} suffix="" isLoading={isLoading} />
             </Panel>
@@ -326,6 +475,10 @@ function formatQueueDate(value: string | null) {
     month: "short",
     day: "numeric",
   })
+}
+
+function formatLocalInput(value: string) {
+  return value
 }
 
 function Stat({
@@ -429,6 +582,201 @@ function BarList({
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function EventEditor({
+  form,
+  onChange,
+  onSave,
+  onCancel,
+  isSaving,
+  isEditing,
+}: {
+  form: {
+    name: string
+    description: string
+    venueName: string
+    startDate: string
+    endDate: string
+  }
+  onChange: React.Dispatch<
+    React.SetStateAction<{
+      name: string
+      description: string
+      venueName: string
+      startDate: string
+      endDate: string
+    }>
+  >
+  onSave: () => void
+  onCancel: () => void
+  isSaving: boolean
+  isEditing: boolean
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-background p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-serif text-lg text-foreground">
+          {isEditing ? "Edit event" : "Create new event"}
+        </p>
+        {isEditing ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-xs font-medium text-muted-foreground"
+          >
+            Cancel
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid gap-3">
+        <input
+          value={form.name}
+          onChange={(event) => onChange((current) => ({ ...current, name: event.target.value }))}
+          placeholder="Event name"
+          className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
+        />
+        <textarea
+          value={form.description}
+          onChange={(event) => onChange((current) => ({ ...current, description: event.target.value }))}
+          placeholder="Short description"
+          className="min-h-24 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
+        />
+        <input
+          value={form.venueName}
+          onChange={(event) => onChange((current) => ({ ...current, venueName: event.target.value }))}
+          placeholder="Venue or amenity"
+          className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="datetime-local"
+            value={formatLocalInput(form.startDate)}
+            onChange={(event) => onChange((current) => ({ ...current, startDate: event.target.value }))}
+            className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
+          />
+          <input
+            type="datetime-local"
+            value={formatLocalInput(form.endDate)}
+            onChange={(event) => onChange((current) => ({ ...current, endDate: event.target.value }))}
+            className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
+          />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={isSaving || !form.name.trim()}
+        className="mt-4 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+        {isEditing ? "Save event" : "Create draft"}
+      </button>
+    </div>
+  )
+}
+
+function EventQueue({
+  items,
+  isLoading,
+  eventActionId,
+  onCreate,
+  onEdit,
+  onPublish,
+  onClose,
+}: {
+  items: ManagerEventItem[]
+  isLoading?: boolean
+  eventActionId: string | null
+  onCreate: () => void
+  onEdit: (event: ManagerEventItem) => void
+  onPublish: (eventId: string) => void
+  onClose: (eventId: string) => void
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3.5">
+        {[...Array.from({ length: 3 })].map((_, index) => (
+          <div key={index} className="h-28 animate-pulse rounded-2xl bg-secondary" />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Current building events</p>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
+        >
+          New draft
+        </button>
+      </div>
+      <div className="flex flex-col gap-3.5">
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No events yet for this building.</p>
+        ) : (
+          items.map((item) => {
+            const isWorking = eventActionId === item.id
+            return (
+              <div key={item.id} className="rounded-2xl border border-border bg-background px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-serif text-lg leading-tight text-foreground">{item.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {item.venueName || "Venue TBD"} · {item.startDate ? new Date(item.startDate).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Schedule pending"}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-medium text-foreground">
+                    {item.state}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {item.description || "No description yet."}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">{item.attendeeCount} RSVPs</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(item)}
+                    className="rounded-full border border-border px-3 py-2 text-xs font-medium text-foreground"
+                  >
+                    Edit
+                  </button>
+                  {item.state !== "published" ? (
+                    <button
+                      type="button"
+                      onClick={() => onPublish(item.id)}
+                      disabled={isWorking}
+                      className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-medium text-background disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isWorking ? <Loader2 className="size-3 animate-spin" /> : null}
+                      Publish
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onClose(item.id)}
+                      disabled={isWorking}
+                      className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-2 text-xs font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isWorking ? <Loader2 className="size-3 animate-spin" /> : null}
+                      Close
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
     </div>
   )
 }
