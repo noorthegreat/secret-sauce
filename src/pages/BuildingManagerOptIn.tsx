@@ -6,6 +6,8 @@ import {
   CalendarRange,
   KeyRound,
   LineChart,
+  MoveRight,
+  Presentation,
   ShieldCheck,
   Sparkles,
   UsersRound,
@@ -41,17 +43,36 @@ const managerBenefits = [
   {
     icon: UsersRound,
     title: "Curated Introductions",
-    description: "Connect compatible residents with the right tone and timing.",
+    description: "Connect compatible residents with the right tone, timing, and building context.",
   },
   {
     icon: CalendarRange,
     title: "Community Programming",
-    description: "See what residents will actually attend before you plan the month.",
+    description: "See what residents will actually attend before your team plans the month.",
   },
   {
     icon: LineChart,
-    title: "Community Intelligence",
-    description: "Understand interests, engagement, and which amenities create the best moments.",
+    title: "Community Pulse",
+    description: "Track the strongest engagement, event demand, and amenity signals in one clear dashboard view.",
+  },
+];
+
+const residentJourney = [
+  {
+    title: "Concierge Profile",
+    description: "Residents opt in through your building and complete a lightweight, private profile.",
+  },
+  {
+    title: "Curated Introduction",
+    description: "The platform surfaces a small number of thoughtful resident matches.",
+  },
+  {
+    title: "Meetup",
+    description: "Introductions turn into easy conversations in lounges, rooftops, coworking spaces, or other amenities.",
+  },
+  {
+    title: "Community",
+    description: "Your team sees stronger engagement and clearer demand for events, groups, and spaces.",
   },
 ];
 
@@ -148,12 +169,37 @@ const BuildingManagerOptIn = () => {
           <BrandWordmark tone="dark" />
           <div className="space-y-4 text-[#2a2621]">
             <h1 className="font-display text-5xl leading-[0.95] sm:text-6xl">
-              Transform Residents Into Community
+              A concierge-style community product for luxury residential buildings.
             </h1>
             <p className="max-w-2xl text-base leading-7 text-[#5f564a] sm:text-lg">
-              Resident Concierge helps luxury residential communities create meaningful connections,
-              increase engagement, activate amenities, and understand what residents actually want.
+              Buildings are the customer. Resident Concierge helps property managers increase resident engagement,
+              activate amenities, and understand what their community actually wants.
             </p>
+          </div>
+
+          <div className="grid gap-4 rounded-[2rem] border border-[#ddd0ba] bg-[#fbf6ee] p-5 shadow-[0_20px_60px_rgba(44,36,24,0.08)] sm:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9c8460]">Who this is for</p>
+              <h2 className="font-display text-3xl text-[#2a2621]">Property teams that want community to feel premium.</h2>
+              <p className="text-sm leading-7 text-[#61584b]">
+                Ideal for general managers, resident experience leads, and luxury operators who want stronger resident
+                connection without launching another noisy social network.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <Button asChild className="h-12 rounded-full bg-[#24201a] text-[#f7f1e7] hover:bg-[#171410]">
+                <Link to="#pilot-form">
+                  Book Demo
+                  <Presentation className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-12 rounded-full border-[#d4c3a7] bg-white text-[#302a24] hover:bg-[#faf3e8]">
+                <Link to="#pilot-form">Request Pilot</Link>
+              </Button>
+              <Button asChild variant="ghost" className="h-12 rounded-full text-[#5f564a] hover:bg-white/70">
+                <Link to="/for-buildings/dashboard-preview">View Community Pulse</Link>
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -173,28 +219,32 @@ const BuildingManagerOptIn = () => {
           <Card className="overflow-hidden rounded-[2rem] border border-[#d8c8ab] bg-[#2a2621] text-[#f7f1e7] shadow-[0_28px_90px_rgba(39,33,24,0.28)]">
             <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
               <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-[#d4c09b]">Dashboard Preview</p>
-                <h2 className="mt-2 font-display text-3xl">A premium view of building community health.</h2>
+                <p className="text-xs uppercase tracking-[0.24em] text-[#d4c09b]">Community Pulse</p>
+                <h2 className="mt-2 font-display text-3xl">The hero feature for building teams.</h2>
+                <p className="mt-3 text-sm leading-7 text-white/76">
+                  Community Pulse makes resident momentum legible. It shows what people want, where they gather,
+                  and which amenities are creating stronger engagement.
+                </p>
               </div>
               <div className="grid gap-3 text-sm text-white/82">
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Community Engagement Rate</div>
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Most Requested Events</div>
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Top Resident Interests</div>
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Introductions Made</div>
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Amenity Utilization</div>
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Pulse Score: 68 / 100</div>
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Most Requested Event: Women's Brunch</div>
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Top Interests: Wellness, Travel, Food</div>
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Introductions This Month: 124</div>
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Best Amenities: Rooftop + Lounge</div>
               </div>
               <Button asChild variant="outline" className="border-white/15 bg-white/8 text-[#f7f1e7] hover:bg-white/12 hover:text-white">
-                <Link to="/for-buildings/dashboard-preview">Open dashboard preview</Link>
+                <Link to="/for-buildings/dashboard-preview">Open Community Pulse preview</Link>
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="rounded-[2.2rem] border border-[#d7c8af] bg-[#fffaf2] shadow-[0_28px_90px_rgba(49,41,28,0.12)]">
+        <Card id="pilot-form" className="rounded-[2.2rem] border border-[#d7c8af] bg-[#fffaf2] shadow-[0_28px_90px_rgba(49,41,28,0.12)]">
           <CardHeader className="pb-4">
             <CardTitle className="font-display text-4xl text-[#28241f]">Request a Pilot</CardTitle>
             <CardDescription className="text-base text-[#665b4e]">
-              We use this to start the building setup, prepare your invite flow, and open the subscription conversation.
+              We use this to start the building setup, scope the demo, prepare your invite flow, and open the subscription conversation.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -317,6 +367,38 @@ const BuildingManagerOptIn = () => {
         </Card>
       </section>
 
+      <section className="mt-8 rounded-[2.2rem] border border-[#ddcfb9] bg-[#fbf7ef] p-6 shadow-[0_18px_54px_rgba(46,38,24,0.08)] sm:p-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9c8460]">Resident Journey</p>
+            <h2 className="mt-2 font-display text-4xl text-[#29251f] sm:text-5xl">
+              Concierge Profile to Community
+            </h2>
+          </div>
+          <p className="max-w-2xl text-sm leading-7 text-[#61584c]">
+            A simple building-first flow that makes the resident experience feel elevated while keeping the story
+            clear for management teams.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-4">
+          {residentJourney.map((step, index) => (
+            <Card key={step.title} className="rounded-[1.8rem] border border-[#e0d4bf] bg-white shadow-[0_18px_54px_rgba(45,38,27,0.07)]">
+              <CardContent className="p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b8460]">
+                    Step {index + 1}
+                  </span>
+                  {index < residentJourney.length - 1 && <MoveRight className="hidden h-4 w-4 text-[#c6a46c] lg:block" />}
+                </div>
+                <h3 className="font-display text-3xl leading-none text-[#29241f]">{step.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-[#61584c]">{step.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       <section className="mt-8 grid gap-5 lg:grid-cols-3">
         <Card className="rounded-[1.9rem] border border-[#ddcfb9] bg-[#fbf7ef] shadow-[0_18px_54px_rgba(46,38,24,0.08)]">
           <CardHeader>
@@ -346,11 +428,11 @@ const BuildingManagerOptIn = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-display text-3xl text-[#29251f]">
               <Building2 className="h-5 w-5 text-[#8d7650]" />
-              One property at a time
+              Buildings subscribe
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-6 text-[#61584c]">
-            <p>Start with one flagship building, one refined invite flow, and one premium amenity story.</p>
+            <p>Start with one flagship property, one refined invite flow, and one monthly subscription relationship.</p>
           </CardContent>
         </Card>
       </section>

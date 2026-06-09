@@ -1,10 +1,13 @@
 import {
   ArrowRight,
   CalendarDays,
+  Building2,
   ConciergeBell,
   HeartHandshake,
   LineChart,
   MapPin,
+  MessageSquareHeart,
+  MoveRight,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -17,32 +20,61 @@ const featureCards = [
   {
     icon: HeartHandshake,
     title: "Curated Introductions",
-    description: "Connect compatible residents through intentional, concierge-style matching.",
+    description: "Connect residents through a warm, concierge-style layer that feels intentional rather than transactional.",
   },
   {
     icon: CalendarDays,
     title: "Community Programming",
-    description: "Host events residents actually want, from rooftop dinners to wellness mornings.",
+    description: "Plan events residents actually want, from rooftop dinners to wellness mornings and amenity moments.",
   },
   {
     icon: LineChart,
-    title: "Community Intelligence",
-    description: "Understand resident interests, engagement, and where your amenities can work harder.",
+    title: "Community Pulse",
+    description: "See the clearest signals on resident engagement, demand, and amenity activation in one premium view.",
   },
 ];
 
 const dashboardMetrics = [
-  { label: "Community Engagement Rate", value: "68%" },
-  { label: "Most Requested Events", value: "Women's Brunch" },
+  { label: "Community Pulse", value: "68 / 100" },
+  { label: "Most Requested Experience", value: "Women's Brunch" },
   { label: "Top Resident Interests", value: "Wellness, Travel, Food" },
-  { label: "Introductions Made", value: "124" },
-  { label: "Amenity Utilization", value: "Rooftop + Lounge" },
+  { label: "Introductions This Month", value: "124" },
+  { label: "Best-Performing Amenities", value: "Rooftop + Lounge" },
 ];
 
 const conciergeMoments = [
   "Residents never browse an endless feed.",
   "Every suggestion feels curated for the building.",
   "Managers see a hospitality-style community layer, not admin software.",
+];
+
+const customerSignals = [
+  "Built for property managers, resident experience leads, and luxury operators.",
+  "Private to each building, with no open cross-property social graph.",
+  "Designed to increase engagement without turning your brand into another app feed.",
+];
+
+const residentJourney = [
+  {
+    icon: Users,
+    title: "Concierge Profile",
+    description: "Residents opt in through a branded building flow and share interests, goals, and availability.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Curated Introduction",
+    description: "The platform suggests a small number of thoughtful introductions with clear compatibility context.",
+  },
+  {
+    icon: MessageSquareHeart,
+    title: "Meetup",
+    description: "Matches turn into easy coffee chats, rooftop conversations, or amenity-based meetups.",
+  },
+  {
+    icon: Building2,
+    title: "Community",
+    description: "Managers gain stronger resident connection, better event planning, and richer community insight.",
+  },
 ];
 
 const ResidentConciergeLanding = () => {
@@ -70,23 +102,35 @@ const ResidentConciergeLanding = () => {
                   </div>
                   <div className="space-y-4">
                     <h1 className="font-display text-5xl leading-[0.96] text-[#231f1a] sm:text-6xl lg:text-7xl">
-                      Transform Residents Into Community
+                      The resident engagement layer built for premium buildings.
                     </h1>
                     <p className="max-w-2xl text-base leading-7 text-[#5a5044] sm:text-lg">
-                      Resident Concierge helps luxury residential communities create meaningful connections,
-                      increase engagement, activate amenities, and understand what residents actually want.
+                      Resident Concierge helps property managers and luxury operators turn resident interest
+                      into introductions, amenity usage, and measurable community momentum.
                     </p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {customerSignals.map((signal) => (
+                      <div key={signal} className="rounded-[1.35rem] border border-[#d8c8ab] bg-white/55 px-4 py-3 text-sm leading-6 text-[#4f463a]">
+                        {signal}
+                      </div>
+                    ))}
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button asChild size="lg" className="h-12 rounded-full bg-[#24201a] px-6 text-sm font-semibold text-[#f7f1e7] hover:bg-[#171410]">
-                      <Link to="/for-buildings">
-                        Request a Pilot
+                      <Link to="/for-buildings#pilot-form">
+                        Book Demo
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                     <Button asChild size="lg" variant="outline" className="h-12 rounded-full border-[#c9b18a] bg-white/45 px-6 text-sm font-semibold text-[#3a3329] hover:bg-white/70">
-                      <Link to="/community/chorus-apartments?invite=CHORUS">
-                        Preview Resident Welcome
+                      <Link to="/for-buildings">
+                        Request Pilot
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="ghost" className="h-12 rounded-full px-2 text-sm font-semibold text-[#4a4034] hover:bg-white/35">
+                      <Link to="/for-buildings/dashboard-preview">
+                        View Community Pulse
                       </Link>
                     </Button>
                   </div>
@@ -118,10 +162,15 @@ const ResidentConciergeLanding = () => {
                 <ConciergeBell className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9d855d]">Manager Preview</p>
-                <h2 className="font-display text-3xl">Community Dashboard</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9d855d]">Community Pulse</p>
+                <h2 className="font-display text-3xl">The feature that makes the value obvious</h2>
               </div>
             </div>
+
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-[#5d5347]">
+              Buildings are the customer. Community Pulse turns resident engagement, event demand, and amenity usage
+              into a premium operating signal property teams can actually use.
+            </p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {dashboardMetrics.map((metric) => (
@@ -131,6 +180,12 @@ const ResidentConciergeLanding = () => {
                 </div>
               ))}
             </div>
+            <Button asChild className="mt-6 h-12 rounded-full bg-[#24201a] px-6 text-[#f7f1e7] hover:bg-[#171410]">
+              <Link to="/for-buildings/dashboard-preview">
+                Explore dashboard preview
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </article>
 
           <article className="rounded-[2.2rem] border border-[#d8c7a6] bg-[#2c2722] p-7 text-[#f7f1e7] shadow-[0_28px_90px_rgba(35,31,24,0.28)]">
@@ -152,6 +207,39 @@ const ResidentConciergeLanding = () => {
               ))}
             </div>
           </article>
+        </section>
+
+        <section className="rounded-[2.3rem] border border-[#d8c7a6] bg-[#fbf6ee]/95 p-7 shadow-[0_28px_90px_rgba(47,39,25,0.12)] sm:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9d855d]">Resident Journey</p>
+              <h2 className="mt-2 font-display text-4xl text-[#27231d] sm:text-5xl">
+                Concierge Profile to Community
+              </h2>
+            </div>
+            <p className="max-w-2xl text-sm leading-7 text-[#5d5347]">
+              A building-first experience that helps residents opt in easily while giving property teams a cleaner
+              story about how connection actually happens.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-4">
+            {residentJourney.map(({ icon: Icon, title, description }, index) => (
+              <article
+                key={title}
+                className="relative rounded-[1.9rem] border border-[#e0d3be] bg-white p-5 shadow-[0_18px_54px_rgba(45,38,27,0.07)]"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#dcc7a2] bg-[#efe4d1] text-[#8c754f]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  {index < residentJourney.length - 1 && <MoveRight className="hidden h-5 w-5 text-[#c6a46c] lg:block" />}
+                </div>
+                <h3 className="font-display text-3xl leading-none text-[#29241f]">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-[#61584c]">{description}</p>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </main>
