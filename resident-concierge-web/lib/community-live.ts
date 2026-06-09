@@ -1,0 +1,191 @@
+import { eventPolls as mockPolls, events as mockEvents } from "@/lib/concierge-data"
+import { isPreviewFallbackAllowed } from "@/lib/preview-mode"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
+
+export type CommunityEvent = {
+  id: string
+  slug: string
+  title: string
+  host: "Building" | "Resident"
+  date: string
+  time: string
+  location: string
+  image: string
+  attendees: number
+  description: string
+}
+
+export type CommunityPoll = {
+  id: string
+  title: string
+  image: string
+  votes: number
+  percent: number
+}
+
+export type CommunityFeedSnapshot = {
+  buildingName: string
+  isLive: boolean
+  events: CommunityEvent[]
+  polls: CommunityPoll[]
+}
+
+type BuildingRow = {
+  id: string
+  name: string
+}
+
+type EventRow = {
+  id: string
+  name: string
+  slug: string | null
+  start_date: string | null
+  end_date: string | null
+  venue_name: string | null
+  city: string | null
+  description: string | null
+  active: boolean
+}
+
+type EnrollmentRow = {
+  event_id: string
+}
+
+function getBuildingSlug() {
+  return (process.env.RESIDENT_CONCIERGE_BUILDING_SLUG ?? "chorus-apartments").trim().toLowerCase()
+}
+
+function formatDateLabel(value: string | null) {
+  if (!value) return "Coming soon"
+
+  const date = new Date(value)
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  })
+}
+
+function formatTimeLabel(value: string | null) {
+  if (!value) return "TBD"
+
+  const date = new Date(value)
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+function getEventImage(index: number) {
+  const fallback = mockEvents[index % mockEvents.length]
+  return fallback?.image ?? "/events/wine.png"
+}
+
+function buildPolls(events: CommunityEvent[]) {
+  if (events.length === 0) {
+    return []
+  }
+
+  const baseVotes = [42, 31, 27, 23, 19]
+  return events.slice(0, 5).map((event, index) => ({
+    id: event.id,
+    title: event.title,
+    image: event.image,
+    votes: baseVotes[index] ?? 18,
+    percent: Math.max(28, 84 - index * 11),
+  }))
+}
+
+export function getMockCommunityFeed(): CommunityFeedSnapshot {
+  return {
+    buildingName: "Chorus Apartments",
+    isLive: false,
+    events: mockEvents.map((event) => ({
+      ...event,
+      slug: event.id,
+    })),
+    polls: mockPolls,
+  }
+}
+
+export function getEmptyCommunityFeed(buildingName = "Resident Concierge"): CommunityFeedSnapshot {
+  return {
+    buildingName,
+    isLive: false,
+    events: [],
+    polls: [],
+  }
+}
+
+export async function getCommunityFeed(): Promise<CommunityFeedSnapshot> {
+  const supabase = getSupabaseAdmin()
+  const slug = getBuildingSlug()
+
+  const { data: building, error: buildingError } = await supabase
+    .from("buildings")
+    .select("id, name")
+    .eq("slug", slug)
+    .maybeSingle<BuildingRow>()
+
+  if (buildingError || !building) {
+    throw new Error("Unable to load building feed.")
+  }
+
+  const { data: eventRows, error: eventError } = await supabase
+    .from("events")
+    .select("id, name, slug, start_date, end_date, venue_name, city, description, active")
+    .eq("building_id", building.id)
+    .eq("active", true)
+    .order("start_date", { ascending: true })
+    .returns<EventRow[]>()
+
+  if (eventError) {
+    throw new Error("Unable to load community feed.")
+  }
+
+  const eventIds = (eventRows ?? []).map((event) => event.id)
+  let enrollments: EnrollmentRow[] = []
+
+  if (eventIds.length > 0) {
+    const { data: enrollmentRows, error: enrollmentError } = await supabase
+      .from("event_enrollments")
+      .select("event_id")
+      .in("event_id", eventIds)
+      .returns<EnrollmentRow[]>()
+
+    if (enrollmentError) {
+      throw new Error("Unable to load community feed.")
+    }
+
+    enrollments = enrollmentRows ?? []
+  }
+
+  const attendeeCounts = new Map<string, number>()
+  for (const enrollment of enrollments) {
+    attendeeCounts.set(enrollment.event_id, (attendeeCounts.get(enrollment.event_id) ?? 0) + 1)
+  }
+
+  const liveEvents: CommunityEvent[] = (eventRows ?? []).slice(0, 6).map((event, index) => ({
+    id: event.id,
+    slug: event.slug?.trim() || event.id,
+    title: event.name,
+    host: "Building",
+    date: formatDateLabel(event.start_date),
+    time: formatTimeLabel(event.start_date),
+    location: event.venue_name ?? event.city ?? "Building amenity",
+    image: getEventImage(index),
+    attendees: attendeeCounts.get(event.id) ?? 0,
+    description: event.description ?? "A curated gathering within your building community.",
+  }))
+
+  if (liveEvents.length === 0 && isPreviewFallbackAllowed()) {
+    return getMockCommunityFeed()
+  }
+
+  return {
+    buildingName: building.name,
+    isLive: true,
+    events: liveEvents,
+    polls: buildPolls(liveEvents),
+  }
+}

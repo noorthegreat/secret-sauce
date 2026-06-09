@@ -1,0 +1,364 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { ArrowLeft, ShieldAlert } from "lucide-react"
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from "recharts"
+
+type DashboardStat = {
+  label: string
+  value: string
+  accent?: boolean
+  helper?: string
+  isPlaceholder?: boolean
+}
+
+type DashboardBarItem = {
+  label: string
+  value: number
+}
+
+type DashboardListBlock = {
+  items: DashboardBarItem[]
+  emptyMessage?: string
+}
+
+type DashboardTrendPoint = {
+  month: string
+  value: number
+}
+
+type ManagerDashboardSnapshot = {
+  buildingName: string
+  pulseScore: number
+  pulseDelta: number
+  isLive: boolean
+  stats: DashboardStat[]
+  trend: DashboardTrendPoint[]
+  topInterests: DashboardListBlock
+  eventInsights: DashboardListBlock
+  requestStatus: DashboardListBlock
+  mostRequestedEvents: DashboardListBlock
+  amenityUsage: DashboardListBlock
+}
+
+const emptySnapshot: ManagerDashboardSnapshot = {
+  buildingName: "Resident Concierge",
+  pulseScore: 0,
+  pulseDelta: 0,
+  isLive: false,
+  stats: [],
+  trend: [],
+  topInterests: { items: [] },
+  eventInsights: { items: [] },
+  requestStatus: { items: [] },
+  mostRequestedEvents: { items: [] },
+  amenityUsage: { items: [] },
+}
+
+export function ManagerDashboard({
+  accessToken,
+  onBack,
+}: {
+  accessToken: string
+  onBack: () => void
+}) {
+  const [snapshot, setSnapshot] = useState<ManagerDashboardSnapshot>(emptySnapshot)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [errorStatus, setErrorStatus] = useState<number | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadDashboard = async () => {
+      setIsLoading(true)
+      setLoadError(null)
+      setErrorStatus(null)
+
+      try {
+        const response = await fetch("/api/manager-dashboard", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          cache: "no-store",
+        })
+
+        const payload = (await response.json()) as ManagerDashboardSnapshot & { error?: string }
+
+        if (!response.ok) {
+          const message =
+            payload.error ||
+            (response.status === 403
+              ? "Only authenticated building managers or admins can access Community Pulse."
+              : "Unable to load the manager dashboard.")
+          const error = new Error(message) as Error & { status?: number }
+          error.status = response.status
+          throw error
+        }
+
+        if (isMounted) {
+          setSnapshot(payload)
+        }
+      } catch (error) {
+        if (isMounted) {
+          const status = typeof error === "object" && error && "status" in error ? Number(error.status) : null
+          setErrorStatus(Number.isFinite(status) ? status : null)
+          setLoadError(error instanceof Error ? error.message : "Unable to load the manager dashboard.")
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadDashboard()
+
+    return () => {
+      isMounted = false
+    }
+  }, [accessToken])
+
+  return (
+    <div className="flex h-full flex-col bg-background">
+      <div className="flex items-center gap-3 border-b border-border px-6 pb-4 pt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex size-9 items-center justify-center rounded-full border border-border text-foreground"
+          aria-label="Back to resident app"
+        >
+          <ArrowLeft className="size-4" />
+        </button>
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+            Community Pulse
+          </p>
+          <h1 className="font-serif text-2xl leading-tight text-foreground">Manager Dashboard</h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {snapshot.buildingName}
+            {!isLoading && !loadError && ` · Pulse ${snapshot.pulseScore}`}
+            {!isLoading &&
+              !loadError &&
+              snapshot.pulseDelta !== 0 &&
+              ` · ${snapshot.pulseDelta > 0 ? "+" : ""}${snapshot.pulseDelta} vs last month`}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 pb-10 pt-6">
+        {loadError ? (
+          <section className="rounded-3xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="mt-0.5 size-5 shrink-0" />
+              <div>
+                <p className="font-medium">
+                  {errorStatus === 403 ? "Manager access required." : "Unable to load Community Pulse."}
+                </p>
+                <p className="mt-1 leading-relaxed">{loadError}</p>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {isLoading
+                ? [...Array.from({ length: 8 })].map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-[126px] animate-pulse rounded-3xl border border-border bg-card"
+                    />
+                  ))
+                : snapshot.stats.map((stat) => (
+                    <Stat
+                      key={stat.label}
+                      value={stat.value}
+                      label={stat.label}
+                      accent={stat.accent}
+                      helper={stat.helper}
+                      isPlaceholder={stat.isPlaceholder}
+                    />
+                  ))}
+            </div>
+
+            <Panel title="Engagement trend" caption="Resident demand, last 6 months">
+              <div className="h-44 w-full">
+                {isLoading ? (
+                  <div className="h-full animate-pulse rounded-2xl bg-secondary" />
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={snapshot.trend} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.35} />
+                          <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                      />
+                      <Tooltip
+                        cursor={{ stroke: "var(--gold)", strokeWidth: 1 }}
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: "1px solid var(--border)",
+                          background: "var(--card)",
+                          color: "var(--foreground)",
+                          fontSize: 12,
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="var(--gold)"
+                        strokeWidth={2.5}
+                        fill="url(#gold)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </Panel>
+
+            <Panel title="Top interests" caption="Based on resident join requests">
+              <BarList block={snapshot.topInterests} suffix="" isLoading={isLoading} />
+            </Panel>
+
+            <Panel title="Event traction" caption="Live from current building activity">
+              <BarList block={snapshot.eventInsights} suffix=" RSVPs" isLoading={isLoading} />
+            </Panel>
+
+            <Panel title="Join request status" caption="Current pipeline health">
+              <BarList block={snapshot.requestStatus} suffix="" isLoading={isLoading} />
+            </Panel>
+
+            <Panel title="Most requested events" caption="Resident demand signal for future programming">
+              <BarList block={snapshot.mostRequestedEvents} suffix="" isLoading={isLoading} />
+            </Panel>
+
+            <Panel title="Amenity usage" caption="Building amenity insights">
+              <BarList block={snapshot.amenityUsage} suffix="%" isLoading={isLoading} />
+            </Panel>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Stat({
+  value,
+  label,
+  accent,
+  helper,
+  isPlaceholder,
+}: {
+  value: string
+  label: string
+  accent?: boolean
+  helper?: string
+  isPlaceholder?: boolean
+}) {
+  return (
+    <div
+      className={`rounded-3xl border p-5 ${
+        accent ? "border-gold/40 bg-gold/10" : "border-border bg-card"
+      }`}
+    >
+      <p
+        className={`font-serif leading-none ${
+          isPlaceholder ? "text-2xl text-muted-foreground" : "text-4xl text-foreground"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-2 text-xs leading-snug text-muted-foreground">{label}</p>
+      {helper ? (
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/90">{helper}</p>
+      ) : null}
+    </div>
+  )
+}
+
+function Panel({
+  title,
+  caption,
+  children,
+}: {
+  title: string
+  caption: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mt-4 rounded-3xl border border-border bg-card p-5">
+      <h2 className="font-serif text-xl leading-tight text-foreground">{title}</h2>
+      <p className="mb-4 mt-0.5 text-xs text-muted-foreground">{caption}</p>
+      {children}
+    </section>
+  )
+}
+
+function BarList({
+  block,
+  suffix,
+  isLoading,
+}: {
+  block: DashboardListBlock
+  suffix: string
+  isLoading?: boolean
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3.5">
+        {[...Array.from({ length: 4 })].map((_, index) => (
+          <div key={index}>
+            <div className="mb-1.5 h-4 w-28 animate-pulse rounded bg-secondary" />
+            <div className="h-2 w-full animate-pulse rounded-full bg-secondary" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const data = block.items
+
+  if (data.length === 0) {
+    return <p className="text-sm text-muted-foreground">{block.emptyMessage ?? "No activity yet."}</p>
+  }
+
+  const max = Math.max(...data.map((item) => item.value), 1)
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      {data.map((item) => (
+        <div key={item.label}>
+          <div className="mb-1.5 flex items-baseline justify-between gap-3">
+            <span className="text-sm text-foreground">{item.label}</span>
+            <span className="font-mono text-xs text-muted-foreground">
+              {item.value}
+              {suffix}
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-gold"
+              style={{ width: `${(item.value / max) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
