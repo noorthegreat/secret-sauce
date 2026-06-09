@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 import { submitResidentJoinRequest } from "@/lib/public-intake"
@@ -73,6 +73,13 @@ export default function JoinCommunityPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const invite = new URLSearchParams(window.location.search).get("invite")?.trim().toUpperCase()
+    if (invite && invite.length >= 5) {
+      setInviteCode(invite)
+    }
+  }, [])
 
   const canSubmit =
     inviteCode.trim().length >= 5 &&

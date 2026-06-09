@@ -27,6 +27,19 @@ function jsonError(message: string, status: number) {
   )
 }
 
+function parseOptionalIsoDate(value: string | null | undefined) {
+  if (!value) {
+    return null
+  }
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return parsed
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = getBearerToken(request.headers.get("authorization"))
@@ -64,6 +77,23 @@ export async function POST(request: NextRequest) {
         return jsonError("Event name is required.", 400)
       }
 
+      const startDate = body.startDate ?? null
+      const endDate = body.endDate ?? null
+      const parsedStart = parseOptionalIsoDate(startDate)
+      const parsedEnd = parseOptionalIsoDate(endDate)
+
+      if (startDate && !parsedStart) {
+        return jsonError("Please choose a valid start date and time.", 400)
+      }
+
+      if (endDate && !parsedEnd) {
+        return jsonError("Please choose a valid end date and time.", 400)
+      }
+
+      if (parsedStart && parsedEnd && parsedEnd.getTime() < parsedStart.getTime()) {
+        return jsonError("Event end time must be after the start time.", 400)
+      }
+
       const payload = await saveManagerEventForBuilding({
         buildingId: building.id,
         eventId: eventId || null,
@@ -71,8 +101,8 @@ export async function POST(request: NextRequest) {
           name,
           description: body.description ?? null,
           venueName: body.venueName ?? null,
-          startDate: body.startDate ?? null,
-          endDate: body.endDate ?? null,
+          startDate,
+          endDate,
         },
       })
 

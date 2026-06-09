@@ -21,6 +21,7 @@ export default function ForBuildingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
+  const [buildingSlug, setBuildingSlug] = useState<string | null>(null)
 
   const canSubmit =
     buildingName.trim().length >= 2 &&
@@ -40,6 +41,7 @@ export default function ForBuildingsPage() {
     setErrorMessage(null)
     setSuccessMessage(null)
     setInviteCode(null)
+    setBuildingSlug(null)
 
     try {
       const result = await submitBuildingManagerLead({
@@ -59,6 +61,7 @@ export default function ForBuildingsPage() {
 
       setSuccessMessage(result.message)
       setInviteCode(result.inviteCode ?? null)
+      setBuildingSlug(result.buildingSlug ?? null)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to submit your request.")
     } finally {
@@ -121,7 +124,27 @@ export default function ForBuildingsPage() {
 
           {errorMessage && <p className="mt-5 text-sm text-destructive">{errorMessage}</p>}
           {successMessage && <p className="mt-5 text-sm text-gold-foreground">{successMessage}</p>}
-          {inviteCode && <p className="mt-2 text-sm text-muted-foreground">Pilot invite code: {inviteCode}</p>}
+          {inviteCode ? (
+            <div className="mt-3 rounded-3xl border border-gold/30 bg-gold/10 p-4">
+              <p className="text-sm text-gold-foreground">Pilot invite code: {inviteCode}</p>
+              {buildingSlug ? (
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <a
+                    href={`/join-community?invite=${encodeURIComponent(inviteCode)}`}
+                    className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                  >
+                    Open resident join flow
+                  </a>
+                  <a
+                    href="/manager/dashboard"
+                    className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                  >
+                    Open Community Pulse
+                  </a>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <button
             type="submit"

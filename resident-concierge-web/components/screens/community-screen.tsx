@@ -461,9 +461,10 @@ function EventGroup({
                 ) : (
                   <button
                     type="button"
-                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 transition-colors hover:border-gold/40"
+                    disabled
+                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 opacity-70 transition-colors disabled:cursor-not-allowed"
                   >
-                    Introduce me to people attending
+                    Attendee introductions unlock after RSVP
                   </button>
                 )}
               </div>

@@ -60,7 +60,7 @@ export default function ManagerDashboardPage() {
               ) : (
                 <ManagerDashboard
                   accessToken={session.access_token}
-                  onBack={() => router.push("/app/profile")}
+                  onBack={() => router.push("/")}
                 />
               )}
             </div>
