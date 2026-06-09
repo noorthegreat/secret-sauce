@@ -1,9 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 @utility font-script {
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+@utility font-display {
+  font-family: 'Cormorant Garamond', serif;
 }
 
 @plugin 'tailwindcss-animate';
@@ -151,8 +155,8 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 252 40% 98%;
-    --foreground: 252 25% 10%;
+    --background: 40 36% 95%;
+    --foreground: 24 10% 18%;
 
     --backgroundb: 236 78% 18%;
     --backgrounda: 236 78% 18%;
@@ -160,35 +164,35 @@ All colors MUST be HSL.
     --orbiit: 258 62% 56%;
     --orbiitbright: 262 88% 46%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 252 25% 10%;
+    --card: 40 33% 97%;
+    --card-foreground: 24 10% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 252 25% 10%;
+    --popover: 40 33% 97%;
+    --popover-foreground: 24 10% 18%;
 
-    --primary: 262 82% 62%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 40 38% 56%;
+    --primary-foreground: 24 16% 14%;
 
-    --secondary: 246 76% 66%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 30 12% 81%;
+    --secondary-foreground: 24 10% 18%;
 
-    --muted: 252 50% 95%;
-    --muted-foreground: 252 15% 55%;
+    --muted: 32 20% 90%;
+    --muted-foreground: 24 8% 42%;
 
-    --accent: 268 76% 72%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 40 42% 74%;
+    --accent-foreground: 24 16% 14%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 252 25% 90%;
-    --input: 252 25% 90%;
-    --ring: 262 82% 62%;
+    --border: 30 16% 82%;
+    --input: 30 16% 82%;
+    --ring: 40 38% 56%;
 
     --radius: 1rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(262 82% 62%), hsl(236 78% 56%));
-    --gradient-soft: linear-gradient(180deg, hsl(252 40% 98%), hsl(246 30% 95%));
+    --gradient-soft: linear-gradient(180deg, hsl(40 36% 95%), hsl(34 28% 92%));
 
     --sidebar-background: 0 0% 98%;
 
@@ -254,7 +258,7 @@ All colors MUST be HSL.
   body,
   #root {
     min-height: 100%;
-    background-color: #0f0620;
+    background-color: #f2ece3;
     overscroll-behavior-y: none;
   }
 
@@ -264,11 +268,11 @@ All colors MUST be HSL.
 
   body {
     @apply text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
     overflow-x: hidden;
     min-height: 100dvh;
     -webkit-overflow-scrolling: touch;
-    background-color: #0f0620;
+    background-color: #f2ece3;
   }
 }
 

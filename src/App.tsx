@@ -28,6 +28,11 @@ import EventCuration from "./pages/EventCuration";
 import SwitzerlandWaitlist from "./pages/SwitzerlandWaitlist";
 import BuildingManagerOptIn from "./pages/BuildingManagerOptIn";
 import ResidentBuildingJoin from "./pages/ResidentBuildingJoin";
+import BuildingWelcome from "./pages/BuildingWelcome";
+import ResidentCommunityHome from "./pages/ResidentCommunityHome";
+import ResidentCommunityPeople from "./pages/ResidentCommunityPeople";
+import ResidentCommunityEvents from "./pages/ResidentCommunityEvents";
+import ManagerDashboardPreview from "./pages/ManagerDashboardPreview";
 import MainLayout from "./components/MainLayout";
 import Bg3 from "@/assets/bg3.webp";
 import CloudsBg from "@/assets/index-clouds.webp";
@@ -58,6 +63,11 @@ const router = createBrowserRouter(
         <Route path="/terms" element={<Terms />} />
         <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen" />}><Admin /></Suspense>} />
         <Route path="/for-buildings" element={<BuildingManagerOptIn />} />
+        <Route path="/for-buildings/dashboard-preview" element={<ManagerDashboardPreview />} />
+        <Route path="/community/:buildingSlug" element={<BuildingWelcome />} />
+        <Route path="/community/:buildingSlug/home" element={<ResidentCommunityHome />} />
+        <Route path="/community/:buildingSlug/people" element={<ResidentCommunityPeople />} />
+        <Route path="/community/:buildingSlug/events" element={<ResidentCommunityEvents />} />
         <Route path="/join-community" element={<ResidentBuildingJoin />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
