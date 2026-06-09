@@ -12,7 +12,7 @@ const tabs = [
   { key: "profile", label: "Profile", icon: UserCircle2, suffix: "/profile" },
 ];
 
-const isTabEnabled = (key: string) => key === "home" || key === "people";
+const isTabEnabled = (key: string) => key === "home" || key === "people" || key === "events";
 
 const ResidentCommunityFrame = ({
   buildingSlug,

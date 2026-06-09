@@ -183,6 +183,9 @@ const BuildingManagerOptIn = () => {
                 <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Introductions Made</div>
                 <div className="rounded-[1.35rem] border border-white/10 bg-white/6 px-4 py-3">Amenity Utilization</div>
               </div>
+              <Button asChild variant="outline" className="border-white/15 bg-white/8 text-[#f7f1e7] hover:bg-white/12 hover:text-white">
+                <Link to="/for-buildings/dashboard-preview">Open dashboard preview</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
