@@ -13,6 +13,7 @@ type ResidentAccountState = {
 
 export function useResidentAccount() {
   const { session, user, isLoading: sessionLoading } = useResidentSession()
+  const [reloadVersion, setReloadVersion] = useState(0)
   const [state, setState] = useState<ResidentAccountState>({
     snapshot: null,
     errorMessage: null,
@@ -83,7 +84,12 @@ export function useResidentAccount() {
     return () => {
       isMounted = false
     }
-  }, [session?.access_token, sessionLoading, user])
+  }, [reloadVersion, session?.access_token, sessionLoading, user])
 
-  return state
+  return {
+    ...state,
+    refresh() {
+      setReloadVersion((current) => current + 1)
+    },
+  }
 }

@@ -54,6 +54,23 @@ type ManagerEventItem = {
   attendeeCount: number
 }
 
+type ManagerSupportRequestItem = {
+  id: string
+  category:
+    | "harassment"
+    | "inappropriate_behavior"
+    | "bug"
+    | "safety_concern"
+    | "support_request"
+    | "other"
+  status: "open" | "reviewed" | "closed"
+  subject: string | null
+  messagePreview: string
+  submittedAt: string
+  residentFirstName: string
+  reportedResidentFirstName: string | null
+}
+
 type DashboardTrendPoint = {
   month: string
   value: number
@@ -74,6 +91,8 @@ type ManagerDashboardSnapshot = {
   amenityUsage: DashboardListBlock
   introductionQueue: ManagerIntroductionQueueItem[]
   managerEvents: ManagerEventItem[]
+  supportCategoryBreakdown: DashboardListBlock
+  supportQueue: ManagerSupportRequestItem[]
 }
 
 const emptySnapshot: ManagerDashboardSnapshot = {
@@ -91,6 +110,8 @@ const emptySnapshot: ManagerDashboardSnapshot = {
   amenityUsage: { items: [] },
   introductionQueue: [],
   managerEvents: [],
+  supportCategoryBreakdown: { items: [] },
+  supportQueue: [],
 }
 
 export function ManagerDashboard({
@@ -452,6 +473,16 @@ export function ManagerDashboard({
               />
             </Panel>
 
+            <Panel
+              title="Resident support & safety"
+              caption="Private building-scoped requests, bug reports, and conduct concerns that need concierge awareness"
+            >
+              <div className="mb-5">
+                <BarList block={snapshot.supportCategoryBreakdown} suffix="" isLoading={isLoading} />
+              </div>
+              <SupportQueue items={snapshot.supportQueue} isLoading={isLoading} />
+            </Panel>
+
             <Panel title="Most requested events" caption="Resident demand signal for future programming">
               <BarList block={snapshot.mostRequestedEvents} suffix="" isLoading={isLoading} />
             </Panel>
@@ -464,6 +495,10 @@ export function ManagerDashboard({
       </div>
     </div>
   )
+}
+
+function formatSupportCategory(category: ManagerSupportRequestItem["category"]) {
+  return category.replaceAll("_", " ")
 }
 
 function formatQueueDate(value: string | null) {
@@ -865,6 +900,55 @@ function IntroductionQueue({
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function SupportQueue({
+  items,
+  isLoading,
+}: {
+  items: ManagerSupportRequestItem[]
+  isLoading?: boolean
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3.5">
+        {[...Array.from({ length: 3 })].map((_, index) => (
+          <div key={index} className="h-28 animate-pulse rounded-2xl bg-secondary" />
+        ))}
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground">No resident support requests yet.</p>
+  }
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      {items.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-border bg-background px-4 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-serif text-lg leading-tight text-foreground">
+                {item.subject || `${item.residentFirstName} submitted a ${formatSupportCategory(item.category)} request`}
+              </p>
+              <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold">
+                {formatSupportCategory(item.category)} Â· {item.status}
+              </p>
+            </div>
+            <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-medium text-foreground">
+              {formatQueueDate(item.submittedAt)}
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.messagePreview}</p>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>Submitted by {item.residentFirstName}</span>
+            {item.reportedResidentFirstName ? <span>References {item.reportedResidentFirstName}</span> : null}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

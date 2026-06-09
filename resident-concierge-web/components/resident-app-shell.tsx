@@ -44,8 +44,12 @@ export function ResidentAppShell({
 }) {
   const router = useRouter()
   const { user, session, isLoading: sessionLoading } = useResidentSession()
-  const { snapshot: accountSnapshot, errorMessage: accountErrorMessage, isLoading: accountLoading } =
-    useResidentAccount()
+  const {
+    snapshot: accountSnapshot,
+    errorMessage: accountErrorMessage,
+    isLoading: accountLoading,
+    refresh: refreshResidentAccount,
+  } = useResidentAccount()
   const [meetupWith, setMeetupWith] = useState<Resident | null>(null)
   const [previewData, setPreviewData] = useState<ResidentPreviewSnapshot | null>(null)
   const [introductionData, setIntroductionData] = useState<IntroductionListResult | null>(null)
@@ -407,14 +411,17 @@ export function ResidentAppShell({
                     onOpenManager={() => router.push("/manager/dashboard")}
                     isSignedIn={Boolean(user)}
                     residentEmail={user?.email ?? null}
+                    accessToken={session?.access_token ?? null}
                     sessionLoading={sessionLoading}
                     accountSnapshot={accountSnapshot}
                     accountErrorMessage={accountErrorMessage}
                     accountLoading={accountLoading}
+                    reportableResidents={previewData?.residents ?? []}
                     onSignIn={() => router.push("/auth?next=%2Fapp%2Fprofile")}
                     onCompleteProfile={() => router.push("/app/onboarding")}
                     onReturnToJoin={() => router.push("/join-community")}
                     onViewCommunity={() => router.push("/app/community")}
+                    onAccountRefresh={refreshResidentAccount}
                   />
                 )}
               </div>

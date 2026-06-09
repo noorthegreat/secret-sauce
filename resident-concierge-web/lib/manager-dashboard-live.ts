@@ -1,4 +1,8 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
+import {
+  getManagerSupportRequestsForBuilding,
+  type ManagerSupportRequestItem,
+} from "@/lib/support-live"
 
 type DashboardSeriesPoint = {
   month: string
@@ -63,6 +67,8 @@ export type ManagerDashboardSnapshot = {
   amenityUsage: DashboardListBlock
   introductionQueue: ManagerIntroductionQueueItem[]
   managerEvents: ManagerEventItem[]
+  supportCategoryBreakdown: DashboardListBlock
+  supportQueue: ManagerSupportRequestItem[]
 }
 
 type BuildingRow = {
@@ -466,6 +472,35 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
         attendeeCount: 0,
       },
     ],
+    supportCategoryBreakdown: {
+      items: [
+        { label: "support request", value: 3 },
+        { label: "bug", value: 2 },
+        { label: "safety concern", value: 1 },
+      ],
+    },
+    supportQueue: [
+      {
+        id: "support-1",
+        category: "support_request",
+        status: "open",
+        subject: "Need help updating unit details",
+        messagePreview: "Resident asked for help updating their unit details after a recent move within the building.",
+        submittedAt: new Date().toISOString(),
+        residentFirstName: "Ava",
+        reportedResidentFirstName: null,
+      },
+      {
+        id: "support-2",
+        category: "bug",
+        status: "open",
+        subject: "RSVP issue",
+        messagePreview: "Resident could view the event but the RSVP button stayed disabled after sign-in.",
+        submittedAt: new Date().toISOString(),
+        residentFirstName: "Marcus",
+        reportedResidentFirstName: null,
+      },
+    ],
   }
 }
 
@@ -555,6 +590,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     requestsResult,
     eventsResult,
     introductionsResult,
+    supportResult,
   ] = await Promise.all([
     supabase
       .from("building_memberships")
@@ -607,6 +643,7 @@ export async function getManagerDashboardSnapshotForBuilding({
       )
       .eq("building_id", buildingId)
       .returns<BuildingIntroductionRow[]>(),
+    getManagerSupportRequestsForBuilding(buildingId),
   ])
 
   const firstError = [
@@ -628,6 +665,8 @@ export async function getManagerDashboardSnapshotForBuilding({
   const requests = requestsResult.data ?? []
   const events = eventsResult.data ?? []
   const introductions = introductionsResult.data ?? []
+  const supportCategoryBreakdown = supportResult.supportCategoryBreakdown
+  const supportQueue = supportResult.supportQueue
   const eventIds = events.map((event) => event.id)
   let enrollments: EnrollmentCountRow[] = []
 
@@ -796,6 +835,11 @@ export async function getManagerDashboardSnapshotForBuilding({
     amenityUsage: fallbackAmenityUsage(),
     introductionQueue: buildIntroductionQueue(introductions, profilesById),
     managerEvents: buildManagerEvents(events, enrollments),
+    supportCategoryBreakdown: {
+      items: supportCategoryBreakdown,
+      emptyMessage: "No support or safety requests yet.",
+    },
+    supportQueue,
   }
 }
 

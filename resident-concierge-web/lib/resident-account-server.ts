@@ -22,6 +22,7 @@ export type ResidentAccountSnapshot = {
   completedQuestionnaire: boolean
   completedFriendshipQuestionnaire: boolean
   needsSurveyCompletion: boolean
+  isPaused: boolean
 }
 
 type BuildingRow = {
@@ -254,7 +255,7 @@ async function getProfileCompletionState(userId: string) {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
     .from("profiles")
-    .select("completed_questionnaire, completed_friendship_questionnaire")
+    .select("completed_questionnaire, completed_friendship_questionnaire, is_paused")
     .eq("id", userId)
     .maybeSingle<ProfileRow>()
 
@@ -269,6 +270,7 @@ async function getProfileCompletionState(userId: string) {
     completedQuestionnaire,
     completedFriendshipQuestionnaire,
     needsSurveyCompletion: !completedQuestionnaire && !completedFriendshipQuestionnaire,
+    isPaused: Boolean(data.is_paused),
   }
 }
 
@@ -347,6 +349,7 @@ export async function persistResidentOnboardingForUser(
     completedQuestionnaire: completion.completedQuestionnaire,
     completedFriendshipQuestionnaire: completion.completedFriendshipQuestionnaire,
     needsSurveyCompletion: completion.needsSurveyCompletion,
+    isPaused: completion.isPaused,
   }
 }
 
@@ -370,6 +373,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -389,6 +393,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -406,6 +411,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -421,6 +427,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -436,6 +443,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -451,6 +459,7 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
       completedQuestionnaire: false,
       completedFriendshipQuestionnaire: false,
       needsSurveyCompletion: false,
+      isPaused: false,
     }
   }
 
@@ -471,5 +480,6 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
     completedQuestionnaire: completion.completedQuestionnaire,
     completedFriendshipQuestionnaire: completion.completedFriendshipQuestionnaire,
     needsSurveyCompletion: completion.needsSurveyCompletion,
+    isPaused: completion.isPaused,
   }
 }
