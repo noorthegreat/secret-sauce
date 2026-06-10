@@ -82,7 +82,7 @@ export function Onboarding({
           <Section
             eyebrow="To begin"
             title="What brings you here?"
-            subtitle="Choose all that feel right. Your concierge will tailor every introduction."
+            subtitle="Choose what feels most valuable right now. Your concierge will use this to shape better introductions."
           >
             <div className="flex flex-col gap-3">
               {intents.map((i) => (
@@ -119,7 +119,7 @@ export function Onboarding({
           <Section
             eyebrow="Connection style"
             title="How would you like to meet?"
-            subtitle="We keep things intentional, never overwhelming."
+            subtitle="Choose the format that feels most natural for you."
           >
             <div className="flex flex-col gap-3">
               {connectionStyles.map((s) => (

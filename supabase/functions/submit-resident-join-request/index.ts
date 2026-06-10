@@ -11,18 +11,23 @@ const corsHeaders = {
 
 const interestOptions = [
   "Fitness",
-  "Running",
-  "Hiking",
-  "Reading",
-  "Technology",
-  "Entrepreneurship",
-  "Cooking",
   "Travel",
-  "Music",
-  "Art",
-  "Wellness",
   "Food",
+  "Coffee",
+  "Books",
+  "Wellness",
+  "Art",
   "Design",
+  "Film",
+  "Music",
+  "Technology",
+  "Hiking",
+  "Running",
+  "Tennis",
+  "Entrepreneurship",
+  "Dogs",
+  "Reading",
+  "Cooking",
   "Outdoors",
   "Volunteering",
   "Pets",
@@ -35,14 +40,19 @@ const lookingForOptions = [
   "New-to-city connections",
   "Professional connections",
   "Community events",
+  "Community involvement",
+  "Professional networking",
 ] as const;
 
 const connectionStyleOptions = [
   "One-on-one",
   "Small groups",
+  "Small group",
   "Community events",
+  "Event-based",
   "Activity partners",
   "Professional networking",
+  "Flexible",
 ] as const;
 
 const availabilityOptions = [

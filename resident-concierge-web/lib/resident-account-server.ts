@@ -305,10 +305,22 @@ export async function persistResidentOnboardingForUser(
   const nowIso = new Date().toISOString()
   const trimmedBiography = submission.biography?.trim() || joinRequest.introduction?.trim() || null
   const wantsFriendships = submission.lookingFor.some((value) =>
-    ["New Friends", "Activity Partners", "Community Events"].includes(value),
+    [
+      "New Friends",
+      "Friendships",
+      "Activity Partners",
+      "Activity partners",
+      "Community Events",
+      "Community involvement",
+    ].includes(value),
   )
   const wantsNetworking = submission.lookingFor.some((value) =>
-    ["Professional Connections", "Community Events"].includes(value),
+    [
+      "Networking",
+      "Professional Connections",
+      "Professional connections",
+      "Professional networking",
+    ].includes(value),
   )
 
   const [{ error: profileError }, { error: requestError }] = await Promise.all([

@@ -140,29 +140,33 @@ export const interests = [
   "Fitness",
   "Travel",
   "Food",
+  "Coffee",
   "Books",
   "Wellness",
   "Art",
+  "Design",
+  "Film",
   "Music",
   "Technology",
   "Hiking",
   "Running",
+  "Tennis",
   "Entrepreneurship",
   "Dogs",
 ]
 
 export const intents = [
-  { id: "friends", label: "New Friends", note: "Meet neighbors who feel like future friends." },
-  { id: "professional", label: "Professional Connections", note: "Build your network within the building." },
-  { id: "activity", label: "Activity Partners", note: "Find a running, climbing, or studio partner." },
-  { id: "events", label: "Community Events", note: "Discover gatherings happening at home." },
+  { id: "friendships", label: "Friendships", note: "Meet neighbors you would genuinely want to know." },
+  { id: "activity", label: "Activity partners", note: "Find people for workouts, walks, racquet sports, or hobbies." },
+  { id: "community", label: "Community involvement", note: "Be included in gatherings, rituals, and building life." },
+  { id: "networking", label: "Professional networking", note: "Opt into thoughtful introductions around work and ideas." },
 ]
 
 export const connectionStyles = [
-  { id: "one", label: "One-on-One", note: "Quiet, considered introductions." },
-  { id: "small", label: "Small Groups", note: "Three to five like-minded neighbors." },
-  { id: "events", label: "Events", note: "Meet people at building gatherings." },
-  { id: "partners", label: "Activity Partners", note: "Pair up around a shared pursuit." },
+  { id: "one-on-one", label: "One-on-one", note: "Quiet, thoughtful introductions." },
+  { id: "small-group", label: "Small group", note: "A few well-matched neighbors at a time." },
+  { id: "event-based", label: "Event-based", note: "Meet naturally through gatherings in the building." },
+  { id: "flexible", label: "Flexible", note: "Open to whichever format feels like the best fit." },
 ]
 
 export const meetupTypes = [
