@@ -15,9 +15,9 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Resident Concierge',
+  title: 'Fifth Circle',
   description:
-    'A private concierge that introduces you to the right neighbors, events, and spaces inside your building.',
+    'Private resident communities, thoughtfully connected through introductions, gatherings, and Community Pulse.',
   generator: 'v0.app',
   icons: {
     icon: [

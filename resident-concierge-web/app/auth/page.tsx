@@ -107,7 +107,7 @@ function AuthPageContent() {
               className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="size-4" />
-              Back to Resident Concierge
+              Back to Fifth Circle
             </Link>
 
             <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.35em] text-gold">
@@ -118,7 +118,7 @@ function AuthPageContent() {
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
               Your matches, events, and resident experience stay private to your building. Use the
-              same email you plan to use for Resident Concierge.
+              same email you plan to use for Fifth Circle.
             </p>
           </section>
 

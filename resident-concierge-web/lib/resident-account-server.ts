@@ -358,7 +358,7 @@ export async function persistResidentOnboardingForUser(
 
   return {
     ...snapshot,
-    message: `Your Resident Concierge account is active for ${snapshot.buildingName}.`,
+    message: `Your Fifth Circle account is active for ${snapshot.buildingName}.`,
     completedQuestionnaire: completion.completedQuestionnaire,
     completedFriendshipQuestionnaire: completion.completedFriendshipQuestionnaire,
     needsSurveyCompletion: completion.needsSurveyCompletion,
@@ -487,8 +487,8 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
     buildingSlug: building.slug,
     residentEmail: normalizedEmail,
     message: completion.needsSurveyCompletion
-      ? `Your Resident Concierge access is live for ${building.name}. Complete your profile to unlock better introductions and event matching.`
-      : `Your Resident Concierge account is active for ${building.name}.`,
+      ? `Your Fifth Circle access is live for ${building.name}. Complete your profile to unlock better introductions and gathering recommendations.`
+      : `Your Fifth Circle account is active for ${building.name}.`,
     hasActiveMembership: true,
     completedQuestionnaire: completion.completedQuestionnaire,
     completedFriendshipQuestionnaire: completion.completedFriendshipQuestionnaire,

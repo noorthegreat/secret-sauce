@@ -373,7 +373,7 @@ export function ProfileScreen({
                   Send request
                 </button>
                 <a
-                  href="mailto:hello@residentconcierge.co?subject=Resident%20Concierge%20Support"
+                  href="mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Support"
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
                 >
                   Email support instead

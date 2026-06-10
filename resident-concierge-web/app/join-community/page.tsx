@@ -127,7 +127,7 @@ export default function JoinCommunityPage() {
         <header className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
           <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
-            Private resident access
+            Fifth Circle resident access
           </p>
           <h1 className="mt-6 max-w-3xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
             Join your building&apos;s private community.
@@ -373,7 +373,7 @@ export default function JoinCommunityPage() {
               <div className="mt-5 rounded-3xl border border-gold/30 bg-gold/10 p-4">
                 <p className="text-sm text-gold-foreground">{successMessage}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Once approved, activate your resident access using this same email address so we can connect your membership safely.
+                  Once approved, activate your access using this same email address so we can connect your membership safely.
                 </p>
                 <Link
                   href="/auth?next=%2Fapp%2Fprofile"

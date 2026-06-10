@@ -62,11 +62,11 @@ export function ResidentAccessCard({
     return (
       <CardFrame
         icon={Sparkles}
-        eyebrow={snapshot?.buildingName || "Resident Concierge"}
+        eyebrow={snapshot?.buildingName || "Fifth Circle"}
         title="Your private community is now open."
         description={
           snapshot?.message ||
-          "Your building membership is active. You can now view introductions, gatherings, and private resident experiences."
+          "Your building membership is active. You can now view introductions, gatherings, and your private resident experience."
         }
         tone="success"
         primaryAction={{
@@ -85,7 +85,7 @@ export function ResidentAccessCard({
         title="Complete your profile before introductions begin."
         description={
           snapshot?.message ||
-          "Your access is active, but your onboarding is still incomplete. Finish it so Resident Concierge can tailor introductions and gathering recommendations."
+          "Your access is active, but your onboarding is still incomplete. Finish it so Fifth Circle can tailor introductions and gathering recommendations."
         }
         tone="gold"
         primaryAction={{

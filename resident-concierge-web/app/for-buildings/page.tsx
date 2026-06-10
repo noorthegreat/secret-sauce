@@ -7,12 +7,12 @@ import { submitBuildingManagerLead } from "@/lib/public-intake"
 
 const valueCards = [
   {
-    title: "Private resident access",
+    title: "Private resident experience",
     description:
       "Residents opt in to a building-scoped experience that feels curated, not crowded.",
   },
   {
-    title: "Concierge-led introductions",
+    title: "Thoughtful introductions",
     description:
       "Thoughtful introductions and small moments of connection designed for trust and compatibility.",
   },
@@ -108,15 +108,14 @@ export default function ForBuildingsPage() {
               <div className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
                 <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
-                  For building teams
+                  Fifth Circle for building teams
                 </p>
                 <h1 className="mt-6 max-w-xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
-                  Launch a private resident community for your building.
+                  A private residential community experience for your building.
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                  Resident Concierge gives luxury residential teams a softer, higher-trust way to build
-                  community: curated introductions, better gathering participation, and a clear read on
-                  resident momentum.
+                  Fifth Circle helps luxury residential teams create a calmer, higher-trust resident
+                  experience through thoughtful introductions, curated gatherings, and Community Pulse.
                 </p>
 
                 <div className="mt-8 grid gap-3">

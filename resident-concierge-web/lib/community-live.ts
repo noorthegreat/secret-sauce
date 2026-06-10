@@ -145,7 +145,7 @@ export function getMockCommunityFeed(): CommunityFeedSnapshot {
   }
 }
 
-export function getEmptyCommunityFeed(buildingName = "Resident Concierge"): CommunityFeedSnapshot {
+export function getEmptyCommunityFeed(buildingName = "Fifth Circle"): CommunityFeedSnapshot {
   return {
     buildingName,
     isLive: false,

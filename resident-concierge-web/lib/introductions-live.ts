@@ -172,7 +172,7 @@ async function getActiveResidentContext(user: User) {
   }
 
   if (profile.is_paused) {
-    throw new Error("Your Resident Concierge account is currently paused.")
+    throw new Error("Your Fifth Circle account is currently paused.")
   }
 
   return {

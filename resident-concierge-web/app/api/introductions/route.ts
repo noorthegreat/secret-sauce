@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           buildingId: "preview-building",
-          buildingName: "Resident Concierge",
+          buildingName: "Fifth Circle",
           introductions: [],
         },
         {

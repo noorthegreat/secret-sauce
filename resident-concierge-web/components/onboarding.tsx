@@ -288,7 +288,7 @@ function Welcome() {
     <div className="flex h-full flex-col justify-center pb-10 pt-10">
       <div className="mb-8">
         <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold">
-          Resident Concierge
+          Fifth Circle
         </span>
       </div>
       <h1 className="text-balance font-serif text-5xl leading-[1.05] text-foreground">

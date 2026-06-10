@@ -196,9 +196,9 @@ export function ResidentAppShell({
       }
 
       setIntroductionData((current) => ({
-        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "resident-concierge",
+        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "fifth-circle",
         buildingName:
-          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Resident Concierge",
+          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Fifth Circle",
         introductions: [
           payload,
           ...(current?.introductions ?? []).filter(
@@ -250,9 +250,9 @@ export function ResidentAppShell({
       }
 
       setIntroductionData((current) => ({
-        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "resident-concierge",
+        buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "fifth-circle",
         buildingName:
-          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Resident Concierge",
+          current?.buildingName ?? previewData?.buildingName ?? accountSnapshot?.buildingName ?? "Fifth Circle",
         introductions: [
           payload,
           ...(current?.introductions ?? []).filter(
@@ -269,7 +269,7 @@ export function ResidentAppShell({
     }
   }
 
-  const buildingName = previewData?.buildingName || accountSnapshot?.buildingName || "Resident Concierge"
+  const buildingName = previewData?.buildingName || accountSnapshot?.buildingName || "Fifth Circle"
   const introductionCards = buildResidentIntroductionCards(
     previewData?.residents ?? [],
     introductionData?.introductions ?? [],
@@ -308,11 +308,11 @@ export function ResidentAppShell({
             {buildingName} Community
           </span>
           <h1 className="mt-3 text-balance font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Resident Concierge
+            Fifth Circle
           </h1>
           <p className="mx-auto mt-3 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-            Powered by Resident Concierge. A private members&apos; experience for one building community,
-            with curated introductions, intentional gatherings, and beautiful shared spaces.
+            Powered by Fifth Circle. Your resident concierge for one private building community, with
+            thoughtful introductions, intentional gatherings, and beautiful shared spaces.
           </p>
         </header>
 

@@ -45,7 +45,7 @@ export default function PrototypePage() {
             Prototype
           </span>
           <h1 className="mt-3 text-balance font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Resident Concierge
+            Fifth Circle
           </h1>
           <p className="mx-auto mt-3 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
             The original all-in-one v0 prototype is still here for rapid review while the route-based app

@@ -103,7 +103,7 @@ type ManagerDashboardSnapshot = {
 }
 
 const emptySnapshot: ManagerDashboardSnapshot = {
-  buildingName: "Resident Concierge",
+  buildingName: "Fifth Circle",
   pulseScore: 0,
   pulseDelta: 0,
   isLive: false,

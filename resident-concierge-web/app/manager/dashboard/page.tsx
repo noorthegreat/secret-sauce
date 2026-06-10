@@ -25,7 +25,7 @@ export default function ManagerDashboardPage() {
 
         <header className="relative z-10 mb-10 text-center">
           <span className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold">
-            Building team
+            Fifth Circle · building team
           </span>
           <h1 className="mt-3 text-balance font-serif text-4xl leading-tight text-foreground sm:text-5xl">
             Community Pulse dashboard

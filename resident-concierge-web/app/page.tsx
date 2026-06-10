@@ -14,15 +14,15 @@ export default function Page() {
           <header className="relative overflow-hidden rounded-[2.75rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
             <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
-              Resident Concierge
+              Fifth Circle
             </p>
             <h1 className="mt-6 max-w-4xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl lg:text-7xl">
-              A private resident community, shaped with the care of a concierge.
+              Meaningful connections, beginning where you live.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-              Resident Concierge helps luxury residential buildings quietly bring the right neighbors
-              together through curated introductions, thoughtful gatherings, and a calm operational
-              view for the building team.
+              Most of us know colleagues across the world but not the neighbors living down the
+              hall. Fifth Circle helps residential communities foster meaningful connections through
+              thoughtful introductions, curated gatherings, and concierge-led community building.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -47,8 +47,8 @@ export default function Page() {
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {[
                 "Private access for one building at a time",
-                "Concierge-led introductions, never noisy discovery",
-                "Community Pulse for demand, events, and resident traction",
+                "Thoughtful introductions, never noisy discovery",
+                "Community Pulse for participation, gatherings, and resident momentum",
               ].map((item) => (
                 <div key={item} className="rounded-[1.4rem] border border-border/70 bg-background/75 px-4 py-3 text-sm text-foreground/80 backdrop-blur-sm">
                   {item}
@@ -85,17 +85,17 @@ export default function Page() {
               </p>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[1.5rem] border border-border bg-background p-5">
-                  <h2 className="font-serif text-2xl text-foreground">One shared backend foundation</h2>
+                  <h2 className="font-serif text-2xl text-foreground">One private community foundation</h2>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    The web experience is wired to the existing `secret-sauce` Supabase foundation instead
-                    of creating a second resident system behind the scenes.
+                    The live experience is wired to one shared data foundation instead of creating a
+                    separate resident system behind the scenes.
                   </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-border bg-background p-5">
-                  <h2 className="font-serif text-2xl text-foreground">Live-ready secure routes</h2>
+                  <h2 className="font-serif text-2xl text-foreground">Live-ready private access</h2>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    Building-scoped manager and resident APIs are already in place, ready to read live
-                    data when the production environment is configured.
+                    Building-scoped manager and resident routes are already in place, ready to read
+                    live data once the production environment is configured.
                   </p>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export default function Page() {
                 <li>1. The building team requests a pilot and receives a private launch path.</li>
                 <li>2. Residents request access, complete onboarding, and quietly enter the community.</li>
                 <li>3. Introductions and gatherings begin with privacy, context, and building scope built in.</li>
-                <li>4. Community Pulse gives the property team a clear read on traction without becoming a noisy portal.</li>
+                <li>4. Community Pulse gives the building team a clear read on participation without becoming a noisy portal.</li>
               </ol>
             </div>
           </section>
