@@ -10,58 +10,50 @@ const corsHeaders = {
 };
 
 const interestOptions = [
-  "Fitness",
-  "Travel",
-  "Food",
-  "Coffee",
-  "Books",
-  "Wellness",
-  "Art",
-  "Design",
-  "Film",
-  "Music",
-  "Technology",
-  "Hiking",
-  "Running",
-  "Tennis",
-  "Entrepreneurship",
-  "Dogs",
-  "Reading",
-  "Cooking",
-  "Outdoors",
-  "Volunteering",
-  "Pets",
+  "coffee",
+  "food",
+  "travel",
+  "books",
+  "wellness",
+  "art",
+  "design",
+  "film",
+  "music",
+  "technology",
+  "entrepreneurship",
+  "fitness",
+  "running",
+  "hiking",
+  "tennis",
+  "walking",
+  "yoga",
+  "coworking",
+  "volunteering",
+  "dogs",
 ] as const;
 
 const lookingForOptions = [
-  "Friendships",
-  "Networking",
-  "Activity partners",
-  "New-to-city connections",
-  "Professional connections",
-  "Community events",
-  "Community involvement",
-  "Professional networking",
+  "friendships",
+  "activity_partners",
+  "community_involvement",
+  "professional_networking",
 ] as const;
 
 const connectionStyleOptions = [
-  "One-on-one",
-  "Small groups",
-  "Small group",
-  "Community events",
-  "Event-based",
-  "Activity partners",
-  "Professional networking",
-  "Flexible",
+  "one_on_one",
+  "small_group",
+  "event_based",
+  "flexible",
 ] as const;
 
 const availabilityOptions = [
-  "Weekday mornings",
-  "Weekday evenings",
-  "Weekends",
-  "Flexible",
-  "Workday lunch",
-  "Late evenings",
+  "weekday_mornings",
+  "weekday_lunch",
+  "weekday_evenings",
+  "weekend_mornings",
+  "weekend_afternoons",
+  "weekend_evenings",
+  "flexible",
 ] as const;
 
 const amenityOptions = [
@@ -84,6 +76,67 @@ const ageRangeOptions = [
   "65+",
 ] as const;
 
+const legacyInterestMap: Record<string, typeof interestOptions[number]> = {
+  Fitness: "fitness",
+  Travel: "travel",
+  Food: "food",
+  Coffee: "coffee",
+  Books: "books",
+  Reading: "books",
+  Wellness: "wellness",
+  Art: "art",
+  Design: "design",
+  Film: "film",
+  Music: "music",
+  Technology: "technology",
+  Entrepreneurship: "entrepreneurship",
+  Hiking: "hiking",
+  Outdoors: "hiking",
+  Running: "running",
+  Tennis: "tennis",
+  Walking: "walking",
+  Yoga: "yoga",
+  Coworking: "coworking",
+  Volunteering: "volunteering",
+  Dogs: "dogs",
+  Pets: "dogs",
+  Cooking: "food",
+};
+
+const legacyGoalMap: Record<string, typeof lookingForOptions[number]> = {
+  Friendships: "friendships",
+  "Activity partners": "activity_partners",
+  "Community involvement": "community_involvement",
+  "Community events": "community_involvement",
+  Networking: "professional_networking",
+  "Professional connections": "professional_networking",
+  "Professional networking": "professional_networking",
+  "New-to-city connections": "friendships",
+};
+
+const legacyConnectionStyleMap: Record<string, typeof connectionStyleOptions[number]> = {
+  "One-on-one": "one_on_one",
+  "Small group": "small_group",
+  "Small groups": "small_group",
+  "Event-based": "event_based",
+  "Community events": "event_based",
+  Flexible: "flexible",
+  "Activity partners": "flexible",
+  "Professional networking": "flexible",
+};
+
+const legacyAvailabilityMap: Record<string, typeof availabilityOptions[number]> = {
+  "Weekday mornings": "weekday_mornings",
+  "Workday lunch": "weekday_lunch",
+  "Weekday evenings": "weekday_evenings",
+  "Weekend mornings": "weekend_mornings",
+  "Weekend afternoons": "weekend_afternoons",
+  "Weekend evenings": "weekend_evenings",
+  Weekends: "weekend_afternoons",
+  "Late evenings": "weekend_evenings",
+  Flexible: "flexible",
+};
+
 const residentJoinSchema = z.object({
   inviteCode: z.string().trim().min(5).max(16).regex(/^[A-Z0-9-]+$/, "Invalid invite code"),
   firstName: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{M}' -]+$/u, "Invalid first name"),
@@ -95,10 +148,10 @@ const residentJoinSchema = z.object({
   occupation: z.string().trim().max(120).optional().or(z.literal("")),
   ageRange: z.enum(ageRangeOptions).optional(),
   introduction: z.string().trim().max(400).optional().or(z.literal("")),
-  interests: z.array(z.enum(interestOptions)).max(12).default([]),
-  lookingFor: z.array(z.enum(lookingForOptions)).min(1).max(6),
-  connectionStyles: z.array(z.enum(connectionStyleOptions)).min(1).max(6),
-  availability: z.array(z.enum(availabilityOptions)).min(1).max(6),
+  interests: z.array(z.string().trim()).max(12).default([]),
+  lookingFor: z.array(z.string().trim()).min(1).max(6),
+  connectionStyles: z.array(z.string().trim()).min(1).max(6),
+  availability: z.array(z.string().trim()).min(1).max(6),
   amenityPreferences: z.array(z.enum(amenityOptions)).max(8).default([]),
   wantsFriendships: z.boolean().default(true),
   wantsNetworking: z.boolean().default(true),
@@ -146,6 +199,27 @@ function uniqueValues<T extends string>(values: T[]) {
   return [...new Set(values)];
 }
 
+function normalizeOptionValues<T extends string>(
+  values: string[],
+  allowedOptions: readonly T[],
+  legacyMap: Record<string, T>,
+) {
+  const allowed = new Set(allowedOptions);
+
+  return uniqueValues(
+    values
+      .map((value) => value.trim())
+      .map((value) => {
+        if (allowed.has(value as T)) {
+          return value as T;
+        }
+
+        return legacyMap[value] ?? null;
+      })
+      .filter((value): value is T => value !== null),
+  );
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -183,11 +257,31 @@ serve(async (req) => {
   const normalizedInviteCode = validation.data.inviteCode.trim().toUpperCase();
   const normalizedEmail = validation.data.email.trim().toLowerCase();
   let normalizedPhone = "";
-  const normalizedInterests = uniqueValues(validation.data.interests);
-  const normalizedLookingFor = uniqueValues(validation.data.lookingFor);
-  const normalizedConnectionStyles = uniqueValues(validation.data.connectionStyles);
-  const normalizedAvailability = uniqueValues(validation.data.availability);
+  const normalizedInterests = normalizeOptionValues(
+    validation.data.interests,
+    interestOptions,
+    legacyInterestMap,
+  );
+  const normalizedLookingFor = normalizeOptionValues(
+    validation.data.lookingFor,
+    lookingForOptions,
+    legacyGoalMap,
+  );
+  const normalizedConnectionStyles = normalizeOptionValues(
+    validation.data.connectionStyles,
+    connectionStyleOptions,
+    legacyConnectionStyleMap,
+  );
+  const normalizedAvailability = normalizeOptionValues(
+    validation.data.availability,
+    availabilityOptions,
+    legacyAvailabilityMap,
+  );
   const normalizedAmenities = uniqueValues(validation.data.amenityPreferences);
+
+  if (normalizedInterests.length === 0) {
+    return jsonResponse(400, { error: "Choose at least one interest." });
+  }
 
   if (normalizedLookingFor.length === 0) {
     return jsonResponse(400, { error: "Choose at least one onboarding goal." });

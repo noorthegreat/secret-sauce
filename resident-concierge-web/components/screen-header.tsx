@@ -11,8 +11,8 @@ export function ScreenHeader({
 }) {
   return (
     <header className={cn("px-6 pt-3", className)}>
-      <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">{eyebrow}</span>
-      <h1 className="mt-1.5 text-balance font-serif text-3xl leading-tight text-foreground">{title}</h1>
+      <span className="font-mono text-[10px] uppercase tracking-[0.34em] text-gold">{eyebrow}</span>
+      <h1 className="mt-2 text-balance font-serif text-3xl leading-[1.02] text-foreground">{title}</h1>
     </header>
   )
 }

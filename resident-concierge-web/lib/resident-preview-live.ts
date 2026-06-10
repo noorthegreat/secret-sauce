@@ -1,10 +1,13 @@
-import type { Resident } from "@/lib/concierge-data"
 import {
   eventPolls as mockPolls,
   events as mockEvents,
-  residents as mockResidents,
+  formatIntentLabel,
+  formatInterestLabel,
+  type AvailabilityGrid,
+  type Resident,
 } from "@/lib/concierge-data"
 import { getCommunityFeed, type CommunityEvent, type CommunityPoll } from "@/lib/community-live"
+import { compareMatchInsightsByStrength, compareResidents } from "@/lib/matching-engine"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type ResidentPreviewSnapshot = {
@@ -36,8 +39,21 @@ type PrivateProfileRow = {
 
 type JoinRequestRow = {
   normalized_email: string
+  introduction: string | null
   interests: string[] | null
   looking_for: string[] | null
+  connection_styles: string[] | null
+  availability: string[] | null
+  availability_grid: AvailabilityGrid | null
+}
+
+type ResidentProfileCandidate = {
+  profile: ProfileRow
+  joinRequest: JoinRequestRow | null
+  matchScore: number
+  compatibilitySummary: string
+  sharedInterests: string[]
+  goal: string
 }
 
 function toTitleCase(value: string) {
@@ -52,17 +68,7 @@ function uniqueValues(values: string[] | null | undefined) {
   return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)))
 }
 
-function intersection(left: string[], right: string[]) {
-  const rightSet = new Set(right)
-  return left.filter((value) => rightSet.has(value))
-}
-
-function buildResidentFromProfile(
-  profile: ProfileRow,
-  index: number,
-  sharedInterests: string[],
-  goal: string,
-): Resident {
+function buildResidentFromCandidate(candidate: ResidentProfileCandidate, index: number): Resident {
   const palette = [
     "/residents/elena.png",
     "/residents/marcus.png",
@@ -72,15 +78,25 @@ function buildResidentFromProfile(
     "/residents/daniel.png",
   ]
 
+  const fallbackInterests = uniqueValues(candidate.joinRequest?.interests)
+    .slice(0, 4)
+    .map(formatInterestLabel)
+
   return {
-    id: profile.id,
-    name: toTitleCase(profile.first_name),
+    id: candidate.profile.id,
+    name: toTitleCase(candidate.profile.first_name),
     unit: `Resident ${index + 1}`,
-    photo: profile.photo_url?.trim() || palette[index % palette.length] || "/placeholder.svg",
-    tagline: profile.bio?.trim() || "An active member of the building community.",
-    goal,
-    interests: sharedInterests.length ? sharedInterests : ["Conversation", "Community"],
-    shared: sharedInterests.length || 1,
+    photo:
+      candidate.profile.photo_url?.trim() || palette[index % palette.length] || "/placeholder.svg",
+    tagline: candidate.compatibilitySummary,
+    goal: candidate.goal,
+    interests: candidate.sharedInterests.length
+      ? candidate.sharedInterests.map(formatInterestLabel)
+      : fallbackInterests.length
+        ? fallbackInterests
+        : ["Conversation", "Community"],
+    shared: candidate.sharedInterests.length,
+    matchScore: candidate.matchScore,
   }
 }
 
@@ -104,6 +120,42 @@ export function getMockResidentPreviewSnapshot(): ResidentPreviewSnapshot {
     polls: mockPolls,
   }
 }
+
+const mockResidents = [
+  {
+    id: "elena",
+    name: "Elena Marchetti",
+    unit: "Residence 18B",
+    photo: "/residents/elena.png",
+    tagline: "You both value quiet friendships and share interests in art, books, and wellness.",
+    goal: "Friendships",
+    interests: ["Art", "Wellness", "Travel", "Books"],
+    shared: 4,
+    matchScore: 78,
+  },
+  {
+    id: "marcus",
+    name: "Marcus Bell",
+    unit: "Residence 12A",
+    photo: "/residents/marcus.png",
+    tagline: "You both like active routines and easy coffee-led introductions after work.",
+    goal: "Activity partners",
+    interests: ["Running", "Technology", "Coffee", "Food"],
+    shared: 3,
+    matchScore: 72,
+  },
+  {
+    id: "sophie",
+    name: "Sophie Laurent",
+    unit: "Residence 21C",
+    photo: "/residents/sophie.png",
+    tagline: "A one-on-one introduction feels natural here, especially around books and slower weekends.",
+    goal: "Friendships",
+    interests: ["Books", "Art", "Wellness", "Walking"],
+    shared: 3,
+    matchScore: 69,
+  },
+] satisfies Resident[]
 
 export async function getResidentPreviewSnapshot({
   userId,
@@ -145,12 +197,14 @@ export async function getResidentPreviewSnapshot({
   let residents: Resident[] = []
   const currentJoinRequestResult = await supabase
     .from("resident_join_requests")
-    .select("normalized_email, interests, looking_for")
+    .select(
+      "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid",
+    )
     .eq("building_id", buildingId)
     .eq("normalized_email", residentEmail)
     .maybeSingle<JoinRequestRow>()
 
-  if (residentIds.length > 0) {
+  if (residentIds.length > 0 && currentJoinRequestResult.data) {
     const [{ data: profiles, error: profileError }, { data: privateProfiles, error: privateProfileError }] =
       await Promise.all([
         supabase
@@ -180,11 +234,12 @@ export async function getResidentPreviewSnapshot({
     }
 
     const residentEmails = Array.from(new Set(emailByUserId.values()))
-    const currentResidentInterests = uniqueValues(currentJoinRequestResult.data?.interests)
     const { data: joinRequests, error: joinRequestError } = residentEmails.length
       ? await supabase
           .from("resident_join_requests")
-          .select("normalized_email, interests, looking_for")
+          .select(
+            "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid",
+          )
           .eq("building_id", buildingId)
           .in("normalized_email", residentEmails)
           .returns<JoinRequestRow[]>()
@@ -199,15 +254,45 @@ export async function getResidentPreviewSnapshot({
       joinRequestByEmail.set(joinRequest.normalized_email, joinRequest)
     }
 
-    residents = visibleProfiles.map((profile, index) => {
-      const normalizedEmail = emailByUserId.get(profile.id)
-      const joinRequest = normalizedEmail ? joinRequestByEmail.get(normalizedEmail) : undefined
-      const profileInterests = uniqueValues(joinRequest?.interests)
-      const sharedInterests = intersection(currentResidentInterests, profileInterests).slice(0, 4)
-      const goal = uniqueValues(joinRequest?.looking_for)[0] || "Friendships"
+    const currentResident = {
+      interests: uniqueValues(currentJoinRequestResult.data.interests),
+      lookingFor: uniqueValues(currentJoinRequestResult.data.looking_for),
+      connectionStyles: uniqueValues(currentJoinRequestResult.data.connection_styles),
+      availability: uniqueValues(currentJoinRequestResult.data.availability),
+      availabilityGrid: currentJoinRequestResult.data.availability_grid,
+      conciergeNote: currentJoinRequestResult.data.introduction?.trim() || null,
+    }
 
-      return buildResidentFromProfile(profile, index, sharedInterests, goal)
-    })
+    const rankedCandidates: ResidentProfileCandidate[] = visibleProfiles
+      .map((profile) => {
+        const normalizedEmail = emailByUserId.get(profile.id)
+        const joinRequest = normalizedEmail ? joinRequestByEmail.get(normalizedEmail) ?? null : null
+
+        const match = compareResidents(currentResident, {
+          interests: uniqueValues(joinRequest?.interests),
+          lookingFor: uniqueValues(joinRequest?.looking_for),
+          connectionStyles: uniqueValues(joinRequest?.connection_styles),
+          availability: uniqueValues(joinRequest?.availability),
+          availabilityGrid: joinRequest?.availability_grid ?? null,
+          conciergeNote: joinRequest?.introduction?.trim() || profile.bio?.trim() || null,
+        })
+
+        return {
+          profile,
+          joinRequest,
+          matchScore: match.score,
+          compatibilitySummary: match.compatibilitySummary,
+          sharedInterests: match.sharedInterests,
+          goal: formatIntentLabel(match.sharedGoals[0] || uniqueValues(joinRequest?.looking_for)[0] || "friendships"),
+          match,
+        }
+      })
+      .sort((left, right) => compareMatchInsightsByStrength(left.match, right.match))
+      .map(({ match, ...candidate }) => candidate)
+
+    residents = rankedCandidates.map((candidate, index) =>
+      buildResidentFromCandidate(candidate, index),
+    )
   }
 
   const currentProfile = currentProfileResult.data ?? null

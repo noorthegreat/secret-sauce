@@ -1,4 +1,4 @@
-import type { Resident } from "@/lib/concierge-data"
+import { formatIntentLabel, formatInterestLabel, type Resident } from "@/lib/concierge-data"
 import type {
   IntroductionDecision,
   IntroductionPreview,
@@ -16,6 +16,15 @@ export type ResidentIntroductionCard = {
   mutualAt: string | null
   deliveredAt: string | null
   compatibilitySummary: string | null
+  managerCompatibilitySummary: string | null
+  sharedConnectionStyles: string[]
+  sharedAvailability: string[]
+  meetupRecommendation: {
+    title: string
+    amenityLabel: string
+    timingLabel: string | null
+    reason: string
+  } | null
 }
 
 function isPositiveDecision(decision: IntroductionDecision) {
@@ -63,10 +72,11 @@ export function buildResidentIntroductionCards(
         otherResidentDecision: null,
         mutualAt: null,
         deliveredAt: null,
-        compatibilitySummary:
-          resident.shared > 0
-            ? `You share ${resident.shared} interest${resident.shared === 1 ? "" : "s"} in common.`
-            : resident.tagline,
+        compatibilitySummary: resident.tagline,
+        managerCompatibilitySummary: null,
+        sharedConnectionStyles: [],
+        sharedAvailability: [],
+        meetupRecommendation: null,
       }
     }
 
@@ -79,9 +89,11 @@ export function buildResidentIntroductionCards(
           introduction.resident.compatibilitySummary?.trim() ||
           resident.tagline,
         interests: introduction.resident.sharedInterests.length
-          ? introduction.resident.sharedInterests
+          ? introduction.resident.sharedInterests.map(formatInterestLabel)
           : resident.interests,
-        goal: introduction.resident.sharedGoals[0] || resident.goal,
+        goal: introduction.resident.sharedGoals[0]
+          ? formatIntentLabel(introduction.resident.sharedGoals[0])
+          : resident.goal,
         shared: introduction.resident.sharedInterests.length || resident.shared,
       },
       introductionId: introduction.introductionId,
@@ -93,6 +105,10 @@ export function buildResidentIntroductionCards(
       mutualAt: introduction.mutualAt,
       deliveredAt: introduction.deliveredAt,
       compatibilitySummary: introduction.resident.compatibilitySummary,
+      managerCompatibilitySummary: introduction.resident.managerCompatibilitySummary,
+      sharedConnectionStyles: introduction.resident.sharedConnectionStyles,
+      sharedAvailability: introduction.resident.sharedAvailability,
+      meetupRecommendation: introduction.resident.meetupRecommendation,
     }
   })
 
@@ -111,6 +127,11 @@ export function buildResidentIntroductionCards(
       return leftNeedsAction ? -1 : 1
     }
 
+    const scoreDifference = (right.resident.matchScore ?? 0) - (left.resident.matchScore ?? 0)
+    if (scoreDifference !== 0) {
+      return scoreDifference
+    }
+
     return right.resident.shared - left.resident.shared
   })
 }
@@ -118,4 +139,3 @@ export function buildResidentIntroductionCards(
 export function countVisibleIntroductions(cards: ResidentIntroductionCard[]) {
   return cards.filter((card) => card.status !== "declined" && card.status !== "paused").length
 }
-

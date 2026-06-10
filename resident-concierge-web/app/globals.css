@@ -100,8 +100,18 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at top, rgba(191, 151, 85, 0.12), transparent 28%),
+      radial-gradient(circle at 20% 20%, rgba(76, 98, 79, 0.08), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.9));
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--gold) 38%, white);
+    color: var(--foreground);
   }
 }

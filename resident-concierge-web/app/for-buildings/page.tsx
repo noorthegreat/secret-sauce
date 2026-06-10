@@ -99,19 +99,24 @@ export default function ForBuildingsPage() {
     <main className="min-h-screen bg-background">
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(191,151,85,0.16),_transparent_36%)]" />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.1]">
+          <img src="/building.png" alt="" aria-hidden="true" className="h-full w-full object-cover blur-[3px]" />
+        </div>
         <div className="mx-auto max-w-6xl px-6 py-10 sm:px-8 lg:px-10 lg:py-14">
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <section className="lg:sticky lg:top-10">
-              <div className="rounded-[2.5rem] border border-border bg-card px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
                 <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
                   For building teams
                 </p>
                 <h1 className="mt-6 max-w-xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
-                  Launch a private resident community pilot for your building.
+                  Launch a private resident community for your building.
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                  Resident Concierge helps luxury residential buildings turn resident interest into
-                  curated introductions, stronger event participation, and clearer community insight.
+                  Resident Concierge gives luxury residential teams a softer, higher-trust way to build
+                  community: curated introductions, better gathering participation, and a clear read on
+                  resident momentum.
                 </p>
 
                 <div className="mt-8 grid gap-3">
@@ -129,9 +134,9 @@ export default function ForBuildingsPage() {
                 </div>
               </div>
 
-              <div className="mt-6 rounded-[2rem] border border-border bg-card p-6 shadow-[0_24px_60px_-42px_rgba(70,56,35,0.3)]">
+              <div className="mt-6 rounded-[2rem] border border-border bg-card/95 p-6 shadow-[0_24px_60px_-42px_rgba(70,56,35,0.3)]">
                 <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
-                  What happens next
+                  Pilot path
                 </p>
                 <ol className="mt-5 space-y-3">
                   {nextSteps.map((step, index) => (
@@ -144,8 +149,7 @@ export default function ForBuildingsPage() {
                   ))}
                 </ol>
                 <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-                  We recommend starting with one flagship property, one building lead, and a soft
-                  resident launch.
+                  We recommend starting with one flagship property, one building lead, and a measured resident rollout.
                 </p>
               </div>
             </section>
@@ -153,18 +157,18 @@ export default function ForBuildingsPage() {
             <section>
               <form
                 onSubmit={handleSubmit}
-                className="rounded-[2rem] border border-border bg-card p-7 shadow-[0_24px_60px_-42px_rgba(70,56,35,0.3)] sm:p-8"
+                className="rounded-[2rem] border border-border bg-card/95 p-7 shadow-[0_24px_60px_-42px_rgba(70,56,35,0.3)] sm:p-8"
               >
                 <div className="border-b border-border pb-6">
                   <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
                     Request your pilot
                   </p>
                   <h2 className="mt-3 font-serif text-4xl leading-tight text-foreground">
-                    Tell us about your building.
+                    Tell us about the building.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                    Share a few details about the property and the lead contact. We will use this to
-                    prepare pilot setup, manager access, and resident invites.
+                    Share the essentials. We’ll use them to prepare your launch path, building access,
+                    and the first resident invite flow.
                   </p>
                 </div>
 
@@ -290,8 +294,7 @@ export default function ForBuildingsPage() {
                       </p>
                     ) : null}
                     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                      Your next step is to test the resident invite flow and confirm manager access for
-                      Community Pulse.
+                      Next, test the resident request flow and confirm secure access to Community Pulse.
                     </p>
                     {buildingSlug ? (
                       <div className="mt-4 flex flex-wrap gap-3">

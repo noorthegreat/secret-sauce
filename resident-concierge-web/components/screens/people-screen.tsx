@@ -3,6 +3,10 @@
 import { Check, Clock, Loader2, PauseCircle, Sparkles, UserRoundCheck, X } from "lucide-react"
 
 import { ScreenHeader } from "@/components/screen-header"
+import {
+  formatAvailabilitySummaryLabel,
+  formatConnectionStyleLabel,
+} from "@/lib/concierge-data"
 import type { Resident } from "@/lib/concierge-data"
 import type { ResidentIntroductionCard } from "@/lib/resident-introduction-ui"
 import { canScheduleIntroduction } from "@/lib/resident-introduction-ui"
@@ -100,7 +104,7 @@ export function PeopleScreen({
   return (
     <div className="h-full overflow-y-auto pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Chosen for you" title="Neighbors worth meeting" />
+        <ScreenHeader eyebrow="Introductions" title="Neighbors worth meeting" />
         <p className="mt-2 px-6 text-sm leading-relaxed text-muted-foreground">
           A short, considered list, not a directory. Private details stay hidden until there is mutual interest.
         </p>
@@ -120,7 +124,7 @@ export function PeopleScreen({
           const isActionLoading = actionResidentId === card.resident.id
 
           return (
-            <article key={card.resident.id} className="overflow-hidden rounded-3xl border border-border bg-card">
+            <article key={card.resident.id} className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_26px_60px_-48px_rgba(70,56,35,0.42)]">
               <div className="flex gap-4 p-4">
                 <img
                   src={card.resident.photo || "/placeholder.svg"}
@@ -136,6 +140,9 @@ export function PeopleScreen({
                 </div>
               </div>
 
+              <p className="px-4 pt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+                Why this fits
+              </p>
               <p className="px-4 text-sm leading-relaxed text-foreground/75">
                 {card.compatibilitySummary || card.resident.tagline}
               </p>
@@ -150,6 +157,49 @@ export function PeopleScreen({
                   </span>
                 ))}
               </div>
+
+              {card.sharedConnectionStyles.length > 0 || card.sharedAvailability.length > 0 ? (
+                <div className="flex flex-wrap gap-2 px-4 pt-3">
+                  {card.sharedConnectionStyles.slice(0, 2).map((style) => (
+                    <span
+                      key={style}
+                      className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-muted-foreground"
+                    >
+                      {formatConnectionStyleLabel(style)}
+                    </span>
+                  ))}
+                  {card.sharedAvailability.slice(0, 2).map((availability) => (
+                    <span
+                      key={availability}
+                      className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-muted-foreground"
+                    >
+                      {formatAvailabilitySummaryLabel(availability)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
+              {card.meetupRecommendation ? (
+                <div className="px-4 pt-4">
+                  <div className="rounded-2xl border border-gold/25 bg-gold/10 px-4 py-3">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+                      Suggested meetup
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-foreground">
+                      {card.meetupRecommendation.title}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-foreground/75">
+                      {card.meetupRecommendation.amenityLabel}
+                      {card.meetupRecommendation.timingLabel
+                        ? ` · ${card.meetupRecommendation.timingLabel}`
+                        : ""}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {card.meetupRecommendation.reason}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
 
               <div className="px-4 pt-4">
                 <div

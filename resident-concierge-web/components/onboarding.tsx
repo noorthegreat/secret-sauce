@@ -1,18 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { StatusBar } from "@/components/phone-frame"
 import { SelectCard, Chip } from "@/components/select-card"
-import { interests, intents, connectionStyles } from "@/lib/concierge-data"
-import { ArrowRight, Loader2, Users, CalendarCheck, DoorOpen } from "lucide-react"
+import {
+  availabilityGridDays,
+  availabilityTimeBlocks,
+  buildAvailabilitySummaryFromGrid,
+  connectionStyles,
+  createEmptyAvailabilityGrid,
+  formatAvailabilitySummaryLabel,
+  interestOptions,
+  intents,
+  type AvailabilityGrid,
+  type AvailabilitySummaryId,
+  type ConnectionStyleId,
+  type InterestId,
+  type MatchingGoalId,
+  type TimeBlockId,
+  type WeekdayId,
+} from "@/lib/concierge-data"
+import { ArrowRight, Loader2, CalendarRange, Sparkles, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type Step = 0 | 1 | 2 | 3 | 4
+type Step = 0 | 1 | 2 | 3 | 4 | 5
 
 export type OnboardingSubmission = {
-  intent: string[]
-  interests: string[]
-  connectionStyles: string[]
+  lookingFor: MatchingGoalId[]
+  interests: InterestId[]
+  connectionStyles: ConnectionStyleId[]
+  availability: AvailabilitySummaryId[]
+  availabilityGrid: AvailabilityGrid
+  conciergeNote: string
 }
 
 export function Onboarding({
@@ -21,18 +40,32 @@ export function Onboarding({
   onComplete: (submission: OnboardingSubmission) => Promise<void>
 }) {
   const [step, setStep] = useState<Step>(0)
-  const [intent, setIntent] = useState<string[]>([])
-  const [chosenInterests, setChosenInterests] = useState<string[]>(["Wellness", "Food", "Books"])
-  const [style, setStyle] = useState<string[]>([])
+  const [lookingFor, setLookingFor] = useState<MatchingGoalId[]>(["friendships"])
+  const [chosenInterests, setChosenInterests] = useState<InterestId[]>(["coffee", "walking", "wellness"])
+  const [style, setStyle] = useState<ConnectionStyleId[]>(["one_on_one"])
+  const [availabilityGrid, setAvailabilityGrid] = useState<AvailabilityGrid>(() => createEmptyAvailabilityGrid())
+  const [conciergeNote, setConciergeNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
-    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
+  const availabilitySummary = useMemo(
+    () => buildAvailabilitySummaryFromGrid(availabilityGrid),
+    [availabilityGrid],
+  )
 
-  const next = () => setStep((s) => Math.min(4, (s + 1) as Step))
+  const next = () => setStep((current) => Math.min(5, (current + 1) as Step))
+  const previous = () => setStep((current) => Math.max(0, (current - 1) as Step))
+
   const canAdvance =
-    step === 1 ? intent.length > 0 : step === 3 ? style.length > 0 : true
+    step === 1
+      ? lookingFor.length > 0
+      : step === 2
+        ? chosenInterests.length >= 3
+        : step === 3
+          ? style.length > 0
+          : step === 4
+            ? availabilitySummary.length > 0
+            : true
 
   async function handleComplete() {
     if (isSubmitting) {
@@ -44,9 +77,12 @@ export function Onboarding({
 
     try {
       await onComplete({
-        intent,
+        lookingFor,
         interests: chosenInterests,
         connectionStyles: style,
+        availability: availabilitySummary,
+        availabilityGrid,
+        conciergeNote,
       })
     } catch (error) {
       setErrorMessage(
@@ -60,15 +96,15 @@ export function Onboarding({
     <div className="flex h-full flex-col bg-background">
       <StatusBar />
 
-      {step > 0 && step < 4 && (
+      {step > 0 && (
         <div className="px-7 pt-2">
           <div className="flex gap-1.5">
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4, 5].map((progressStep) => (
               <span
-                key={s}
+                key={progressStep}
                 className={cn(
                   "h-1 flex-1 rounded-full transition-colors",
-                  s <= step ? "bg-gold" : "bg-border",
+                  progressStep <= step ? "bg-gold" : "bg-border",
                 )}
               />
             ))}
@@ -80,18 +116,24 @@ export function Onboarding({
         {step === 0 && <Welcome />}
         {step === 1 && (
           <Section
-            eyebrow="To begin"
-            title="What brings you here?"
-            subtitle="Choose what feels most valuable right now. Your concierge will use this to shape better introductions."
+            eyebrow="What you want"
+            title="What would feel most valuable here?"
+            subtitle="Choose the kinds of introductions you would genuinely want us to make inside the building."
           >
             <div className="flex flex-col gap-3">
-              {intents.map((i) => (
+              {intents.map((intent) => (
                 <SelectCard
-                  key={i.id}
-                  label={i.label}
-                  note={i.note}
-                  selected={intent.includes(i.id)}
-                  onClick={() => toggle(intent, setIntent, i.id)}
+                  key={intent.id}
+                  label={intent.label}
+                  note={intent.note ?? ""}
+                  selected={lookingFor.includes(intent.id)}
+                  onClick={() =>
+                    setLookingFor((current) =>
+                      current.includes(intent.id)
+                        ? current.filter((value) => value !== intent.id)
+                        : [...current, intent.id],
+                    )
+                  }
                 />
               ))}
             </div>
@@ -99,17 +141,25 @@ export function Onboarding({
         )}
         {step === 2 && (
           <Section
-            eyebrow="Your interests"
-            title="What do you love?"
-            subtitle="We pair neighbors around genuine common ground."
+            eyebrow="Common ground"
+            title="What should your matches have in common with you?"
+            subtitle="Choose a few specific interests. Three to six usually leads to the strongest introductions."
           >
             <div className="flex flex-wrap gap-2.5">
-              {interests.map((i) => (
+              {interestOptions.map((interest) => (
                 <Chip
-                  key={i}
-                  label={i}
-                  selected={chosenInterests.includes(i)}
-                  onClick={() => toggle(chosenInterests, setChosenInterests, i)}
+                  key={interest.id}
+                  label={interest.label}
+                  selected={chosenInterests.includes(interest.id)}
+                  onClick={() =>
+                    setChosenInterests((current) =>
+                      current.includes(interest.id)
+                        ? current.filter((value) => value !== interest.id)
+                        : current.length < 10
+                          ? [...current, interest.id]
+                          : current,
+                    )
+                  }
                 />
               ))}
             </div>
@@ -117,45 +167,118 @@ export function Onboarding({
         )}
         {step === 3 && (
           <Section
-            eyebrow="Connection style"
-            title="How would you like to meet?"
-            subtitle="Choose the format that feels most natural for you."
+            eyebrow="Format"
+            title="How do you like to connect?"
+            subtitle="This helps us choose between quieter introductions, small circles, and event-led meetups."
           >
             <div className="flex flex-col gap-3">
-              {connectionStyles.map((s) => (
+              {connectionStyles.map((option) => (
                 <SelectCard
-                  key={s.id}
-                  label={s.label}
-                  note={s.note}
-                  selected={style.includes(s.id)}
-                  onClick={() => toggle(style, setStyle, s.id)}
+                  key={option.id}
+                  label={option.label}
+                  note={option.note ?? ""}
+                  selected={style.includes(option.id)}
+                  onClick={() =>
+                    setStyle((current) =>
+                      current.includes(option.id)
+                        ? current.filter((value) => value !== option.id)
+                        : [...current, option.id],
+                    )
+                  }
                 />
               ))}
             </div>
           </Section>
         )}
         {step === 4 && (
-          <Success
-            onComplete={handleComplete}
-            isSubmitting={isSubmitting}
-            errorMessage={errorMessage}
-          />
+          <Section
+            eyebrow="When you are free"
+            title="When are introductions easiest for you?"
+            subtitle="Select the times that tend to work most weeks. We use schedule overlap to make introductions more realistic."
+          >
+            <AvailabilityGridEditor
+              grid={availabilityGrid}
+              summary={availabilitySummary}
+              onChange={setAvailabilityGrid}
+            />
+          </Section>
+        )}
+        {step === 5 && (
+          <Section
+            eyebrow="Concierge note"
+            title="What kind of person would you genuinely enjoy being introduced to?"
+            subtitle="Optional, but helpful. Focus on the kind of interaction you want, not your full biography."
+          >
+            <textarea
+              value={conciergeNote}
+              onChange={(event) => setConciergeNote(event.target.value)}
+              maxLength={280}
+              className="min-h-40 w-full rounded-3xl border border-border bg-card px-4 py-4 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-gold/50"
+              placeholder="Examples: Looking for people to grab coffee with after work. Hoping to find a tennis or walking partner on weekends. New to the city and would love a few thoughtful neighbor introductions."
+            />
+
+            <div className="mt-5 rounded-3xl border border-gold/20 bg-gold/10 p-4">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-background text-gold">
+                  <Sparkles className="size-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-foreground">What happens next</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    We&apos;ll use your goals, interests, social style, and availability to shape
+                    more thoughtful introductions and better meetup suggestions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {errorMessage ? (
+              <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
+                {errorMessage}
+              </div>
+            ) : null}
+          </Section>
         )}
       </div>
 
-      {step < 4 && (
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background to-transparent px-7 pb-8 pt-4">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background to-transparent px-7 pb-8 pt-4">
+        <div className="flex gap-3">
+          {step > 0 ? (
+            <button
+              type="button"
+              onClick={previous}
+              className="rounded-full border border-border bg-card px-5 py-4 text-sm font-medium text-foreground"
+            >
+              Back
+            </button>
+          ) : null}
           <button
             type="button"
-            onClick={next}
-            disabled={!canAdvance}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={step === 5 ? () => void handleComplete() : next}
+            disabled={!canAdvance || isSubmitting}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {step === 0 ? "Begin" : step === 3 ? "Find my matches" : "Continue"}
-            <ArrowRight className="size-4" />
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Saving your profile
+              </>
+            ) : step === 0 ? (
+              <>
+                Begin
+                <ArrowRight className="size-4" />
+              </>
+            ) : step === 5 ? (
+              "Save my profile"
+            ) : (
+              <>
+                Continue
+                <ArrowRight className="size-4" />
+              </>
+            )}
           </button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -165,20 +288,20 @@ function Welcome() {
     <div className="flex h-full flex-col justify-center pb-10 pt-10">
       <div className="mb-8">
         <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold">
-          The Albany Residences
+          Resident Concierge
         </span>
       </div>
       <h1 className="text-balance font-serif text-5xl leading-[1.05] text-foreground">
-        Resident Concierge
+        A few details, better introductions
       </h1>
       <p className="mt-6 max-w-[300px] text-pretty text-base leading-relaxed text-muted-foreground">
-        A private introduction to the neighbors, gatherings, and spaces that suit you — quietly arranged,
-        never browsed.
+        We keep this short and private. The goal is not a survey. It is a better first
+        introduction.
       </p>
       <div className="mt-10 flex flex-col gap-4">
-        <Promise icon={Users} text="Meet a few right people, not hundreds of profiles." />
-        <Promise icon={CalendarCheck} text="Discover gatherings happening within your walls." />
-        <Promise icon={DoorOpen} text="Reserve beautiful spaces to meet in person." />
+        <Promise icon={Users} text="Meet a few right people, not a directory." />
+        <Promise icon={CalendarRange} text="Use timing overlap to suggest realistic meetups." />
+        <Promise icon={Sparkles} text="Keep everything calm, curated, and building-scoped." />
       </div>
     </div>
   )
@@ -216,62 +339,97 @@ function Section({
   )
 }
 
-function Success({
-  onComplete,
-  isSubmitting,
-  errorMessage,
+function AvailabilityGridEditor({
+  grid,
+  summary,
+  onChange,
 }: {
-  onComplete: () => Promise<void>
-  isSubmitting: boolean
-  errorMessage: string | null
+  grid: AvailabilityGrid
+  summary: AvailabilitySummaryId[]
+  onChange: (next: AvailabilityGrid) => void
 }) {
-  const stats = [
-    { value: "12", label: "residents share your interests" },
-    { value: "3", label: "upcoming events may be a fit" },
-    { value: "2", label: "building spaces are ideal for meeting" },
-  ]
+  function toggleSlot(day: WeekdayId, block: TimeBlockId) {
+    const currentSlots = grid[day] ?? []
+    const nextSlots = currentSlots.includes(block)
+      ? currentSlots.filter((value) => value !== block)
+      : [...currentSlots, block]
+
+    onChange({
+      ...grid,
+      [day]: nextSlots,
+    })
+  }
+
   return (
-    <div className="flex h-full flex-col justify-center pb-10 pt-6">
-      <div className="mx-auto mb-8 flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10">
-        <span className="font-serif text-3xl text-gold">✦</span>
+    <div className="rounded-[2rem] border border-border bg-card p-4">
+      <div className="mb-4 flex flex-wrap gap-2">
+        {summary.length > 0 ? (
+          summary.map((item) => (
+            <span
+              key={item}
+              className="rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-xs text-gold-foreground"
+            >
+              {formatAvailabilitySummaryLabel(item)}
+            </span>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Pick the windows that usually work. Even two or three is enough for strong matching.
+          </p>
+        )}
       </div>
-      <h2 className="text-balance text-center font-serif text-4xl leading-tight text-foreground">
-        Your concierge is ready
-      </h2>
-      <p className="mx-auto mt-3 max-w-[280px] text-pretty text-center text-sm leading-relaxed text-muted-foreground">
-        Here is what we found within your building.
-      </p>
-      <div className="mt-8 flex flex-col gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="flex items-center gap-4 rounded-2xl border border-border bg-card px-5 py-4"
-          >
-            <span className="font-serif text-4xl text-gold">{s.value}</span>
-            <span className="text-sm leading-snug text-foreground/80">{s.label}</span>
+
+      <div className="grid grid-cols-[90px_repeat(5,minmax(0,1fr))] gap-2 text-center">
+        <div />
+        {availabilityTimeBlocks.map((block) => (
+          <div key={block.id} className="px-1 text-[11px] font-medium text-muted-foreground">
+            {block.label}
           </div>
         ))}
+
+        {availabilityGridDays.map((day) => (
+          <AvailabilityGridRow
+            key={day.id}
+            dayLabel={day.label.slice(0, 3)}
+            selectedBlocks={grid[day.id] ?? []}
+            onToggle={(block) => toggleSlot(day.id, block)}
+          />
+        ))}
       </div>
-      {errorMessage ? (
-        <div className="mt-5 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
-          {errorMessage}
-        </div>
-      ) : null}
-      <button
-        type="button"
-        onClick={() => void onComplete()}
-        disabled={isSubmitting}
-        className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Saving your profile
-          </>
-        ) : (
-          "Enter Resident Concierge"
-        )}
-      </button>
     </div>
+  )
+}
+
+function AvailabilityGridRow({
+  dayLabel,
+  selectedBlocks,
+  onToggle,
+}: {
+  dayLabel: string
+  selectedBlocks: TimeBlockId[]
+  onToggle: (block: TimeBlockId) => void
+}) {
+  return (
+    <>
+      <div className="flex items-center justify-start py-2 text-sm text-foreground/85">{dayLabel}</div>
+      {availabilityTimeBlocks.map((block) => {
+        const selected = selectedBlocks.includes(block.id)
+        return (
+          <button
+            key={block.id}
+            type="button"
+            onClick={() => onToggle(block.id)}
+            className={cn(
+              "h-10 rounded-2xl border text-xs transition-colors",
+              selected
+                ? "border-gold bg-gold/15 text-gold-foreground"
+                : "border-border bg-background text-muted-foreground",
+            )}
+          >
+            {selected ? "Yes" : ""}
+          </button>
+        )
+      })}
+    </>
   )
 }

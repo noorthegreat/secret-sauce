@@ -7,6 +7,7 @@ import type {
   IntroductionStatus,
   IntroductionType,
 } from "@/lib/introduction-types"
+import { compareResidents } from "@/lib/matching-engine"
 import { syncResidentAccountForUser } from "@/lib/resident-account-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
@@ -49,9 +50,12 @@ type PrivateProfileRow = {
 
 type JoinRequestRow = {
   normalized_email: string
+  introduction: string | null
   interests: string[] | null
   looking_for: string[] | null
   connection_styles: string[] | null
+  availability: string[] | null
+  availability_grid: Record<string, unknown> | null
 }
 
 type ResidentDirectoryEntry = {
@@ -63,6 +67,9 @@ type ResidentDirectoryEntry = {
   interests: string[]
   lookingFor: string[]
   connectionStyles: string[]
+  availability: string[]
+  availabilityGrid: Record<string, unknown> | null
+  conciergeNote: string | null
 }
 
 
@@ -121,47 +128,28 @@ function getOtherDecision(currentUserId: string, row: BuildingIntroductionRow) {
     : row.resident_a_decision
 }
 
-function buildCompatibilitySummary(
-  currentResident: ResidentDirectoryEntry,
-  otherResident: ResidentDirectoryEntry,
-  rowSummary: string | null,
-) {
-  if (rowSummary?.trim()) {
-    return rowSummary.trim()
-  }
-
-  const sharedInterests = intersection(currentResident.interests, otherResident.interests)
-  if (sharedInterests.length >= 2) {
-    return `You both share ${sharedInterests.slice(0, 2).join(" and ")}.`
-  }
-
-  if (sharedInterests.length === 1) {
-    return `You both share an interest in ${sharedInterests[0]}.`
-  }
-
-  const sharedGoals = intersection(currentResident.lookingFor, otherResident.lookingFor)
-  if (sharedGoals.length > 0) {
-    return `You are both here for ${sharedGoals[0].toLowerCase()}.`
-  }
-
-  return "A thoughtful introduction inside your building community."
-}
-
 function buildSharedContext(
   currentResident: ResidentDirectoryEntry,
   otherResident: ResidentDirectoryEntry,
 ) {
-  const sharedInterests = intersection(currentResident.interests, otherResident.interests).slice(0, 4)
-  const sharedGoals = intersection(currentResident.lookingFor, otherResident.lookingFor).slice(0, 3)
-  const sharedStyles = intersection(
-    currentResident.connectionStyles,
-    otherResident.connectionStyles,
-  ).slice(0, 3)
+  const match = compareResidents(currentResident, otherResident)
 
   return {
-    shared_interests: sharedInterests,
-    shared_goals: sharedGoals,
-    shared_connection_styles: sharedStyles,
+    score: match.score,
+    score_breakdown: match.scoreBreakdown,
+    shared_interests: match.sharedInterests,
+    shared_goals: match.sharedGoals,
+    shared_connection_styles: match.sharedConnectionStyles,
+    shared_availability: match.overlapSummaries,
+    shared_timing_label: match.timingLabel,
+    resident_compatibility_summary: match.compatibilitySummary,
+    manager_compatibility_summary: match.managerCompatibilitySummary,
+    meetup_recommendation: {
+      title: match.meetupRecommendation.title,
+      amenity_label: match.meetupRecommendation.amenityLabel,
+      timing_label: match.meetupRecommendation.timingLabel,
+      reason: match.meetupRecommendation.reason,
+    },
   }
 }
 
@@ -232,7 +220,7 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
     normalizedEmails.length > 0
       ? await supabase
           .from("resident_join_requests")
-          .select("normalized_email, interests, looking_for, connection_styles")
+          .select("normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid")
           .eq("building_id", buildingId)
           .in("normalized_email", normalizedEmails)
           .returns<JoinRequestRow[]>()
@@ -261,6 +249,9 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
       interests: uniqueValues(joinRequest?.interests),
       lookingFor: uniqueValues(joinRequest?.looking_for),
       connectionStyles: uniqueValues(joinRequest?.connection_styles),
+      availability: uniqueValues(joinRequest?.availability),
+      availabilityGrid: joinRequest?.availability_grid ?? null,
+      conciergeNote: joinRequest?.introduction?.trim() || profile.bio?.trim() || null,
     })
   }
 
@@ -366,8 +357,7 @@ function toPreview(
     throw new Error("Unable to load the introduction resident.")
   }
 
-  const sharedInterests = intersection(currentResident.interests, otherResident.interests).slice(0, 4)
-  const sharedGoals = intersection(currentResident.lookingFor, otherResident.lookingFor).slice(0, 3)
+  const match = compareResidents(currentResident, otherResident)
 
   return {
     introductionId: row.id,
@@ -385,9 +375,39 @@ function toPreview(
       firstName: otherResident.firstName,
       photoUrl: otherResident.photoUrl,
       bio: otherResident.bio,
-      sharedInterests,
-      sharedGoals,
-      compatibilitySummary: buildCompatibilitySummary(currentResident, otherResident, row.compatibility_summary),
+      sharedInterests: match.sharedInterests,
+      sharedGoals: match.sharedGoals,
+      sharedConnectionStyles: match.sharedConnectionStyles,
+      sharedAvailability: match.overlapSummaries,
+      compatibilitySummary: row.compatibility_summary?.trim() || match.compatibilitySummary,
+      managerCompatibilitySummary:
+        (typeof row.shared_context?.manager_compatibility_summary === "string"
+          ? row.shared_context.manager_compatibility_summary
+          : null) || match.managerCompatibilitySummary,
+      meetupRecommendation:
+        row.shared_context &&
+        typeof row.shared_context === "object" &&
+        row.shared_context.meetup_recommendation &&
+        typeof row.shared_context.meetup_recommendation === "object"
+          ? {
+              title:
+                typeof row.shared_context.meetup_recommendation.title === "string"
+                  ? row.shared_context.meetup_recommendation.title
+                  : match.meetupRecommendation.title,
+              amenityLabel:
+                typeof row.shared_context.meetup_recommendation.amenity_label === "string"
+                  ? row.shared_context.meetup_recommendation.amenity_label
+                  : match.meetupRecommendation.amenityLabel,
+              timingLabel:
+                typeof row.shared_context.meetup_recommendation.timing_label === "string"
+                  ? row.shared_context.meetup_recommendation.timing_label
+                  : match.meetupRecommendation.timingLabel,
+              reason:
+                typeof row.shared_context.meetup_recommendation.reason === "string"
+                  ? row.shared_context.meetup_recommendation.reason
+                  : match.meetupRecommendation.reason,
+            }
+          : match.meetupRecommendation,
     },
   }
 }
@@ -514,7 +534,10 @@ export async function requestIntroductionForResident(
     const currentDecisionColumn =
       context.userId === pair.residentAUserId ? "resident_a_decision" : "resident_b_decision"
     const sharedContext = buildSharedContext(currentResident, target)
-    const compatibilitySummary = buildCompatibilitySummary(currentResident, target, null)
+    const compatibilitySummary =
+      typeof sharedContext.resident_compatibility_summary === "string"
+        ? sharedContext.resident_compatibility_summary
+        : compareResidents(currentResident, target).compatibilitySummary
     const { data, error } = await getSupabaseAdmin()
       .from("building_introductions")
       .insert({

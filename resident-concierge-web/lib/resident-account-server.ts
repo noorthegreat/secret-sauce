@@ -1,5 +1,10 @@
 import type { User } from "@supabase/supabase-js"
 
+import {
+  buildAvailabilitySummaryFromGrid,
+  normalizeAvailabilityGrid,
+  type AvailabilityGrid,
+} from "@/lib/concierge-data"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type ResidentAccountStatus =
@@ -46,6 +51,8 @@ type JoinRequestRow = {
   interests?: string[] | null
   looking_for?: string[] | null
   connection_styles?: string[] | null
+  availability?: string[] | null
+  availability_grid?: Record<string, unknown> | null
   wants_friendships?: boolean | null
   wants_networking?: boolean | null
 }
@@ -138,7 +145,7 @@ async function getJoinRequest(buildingId: string, normalizedEmail: string) {
   const { data, error } = await supabase
     .from("resident_join_requests")
     .select(
-      "id, building_id, first_name, last_name, email, normalized_email, phone_number, unit_number, status, introduction, interests, looking_for, connection_styles, wants_friendships, wants_networking",
+      "id, building_id, first_name, last_name, email, normalized_email, phone_number, unit_number, status, introduction, interests, looking_for, connection_styles, availability, availability_grid, wants_friendships, wants_networking",
     )
     .eq("building_id", buildingId)
     .eq("normalized_email", normalizedEmail)
@@ -278,7 +285,9 @@ export type ResidentOnboardingSubmission = {
   interests: string[]
   lookingFor: string[]
   connectionStyles: string[]
-  biography?: string
+  availability: string[]
+  availabilityGrid: AvailabilityGrid
+  conciergeNote?: string
 }
 
 export async function persistResidentOnboardingForUser(
@@ -303,31 +312,20 @@ export async function persistResidentOnboardingForUser(
 
   const supabase = getSupabaseAdmin()
   const nowIso = new Date().toISOString()
-  const trimmedBiography = submission.biography?.trim() || joinRequest.introduction?.trim() || null
+  const trimmedConciergeNote = submission.conciergeNote?.trim() || joinRequest.introduction?.trim() || null
+  const normalizedAvailabilityGrid = normalizeAvailabilityGrid(submission.availabilityGrid)
+  const normalizedAvailability = buildAvailabilitySummaryFromGrid(normalizedAvailabilityGrid)
   const wantsFriendships = submission.lookingFor.some((value) =>
-    [
-      "New Friends",
-      "Friendships",
-      "Activity Partners",
-      "Activity partners",
-      "Community Events",
-      "Community involvement",
-    ].includes(value),
+    ["friendships", "activity_partners", "community_involvement"].includes(value),
   )
-  const wantsNetworking = submission.lookingFor.some((value) =>
-    [
-      "Networking",
-      "Professional Connections",
-      "Professional connections",
-      "Professional networking",
-    ].includes(value),
-  )
+  const wantsNetworking = submission.lookingFor.some((value) => value === "professional_networking")
 
   const [{ error: profileError }, { error: requestError }] = await Promise.all([
     supabase
       .from("profiles")
       .update({
-        bio: trimmedBiography,
+        bio: trimmedConciergeNote,
+        completed_questionnaire: true,
         completed_friendship_questionnaire: true,
         updated_at: nowIso,
       })
@@ -335,9 +333,12 @@ export async function persistResidentOnboardingForUser(
     supabase
       .from("resident_join_requests")
       .update({
+        introduction: trimmedConciergeNote,
         interests: submission.interests,
         looking_for: submission.lookingFor,
         connection_styles: submission.connectionStyles,
+        availability: normalizedAvailability.length > 0 ? normalizedAvailability : submission.availability,
+        availability_grid: normalizedAvailabilityGrid,
         wants_friendships: wantsFriendships,
         wants_networking: wantsNetworking,
         updated_at: nowIso,

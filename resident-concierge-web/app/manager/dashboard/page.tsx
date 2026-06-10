@@ -19,7 +19,7 @@ export default function ManagerDashboardPage() {
             src="/building.png"
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover opacity-[0.06]"
+            className="h-full w-full object-cover opacity-[0.09] blur-[2px]"
           />
         </div>
 
@@ -31,8 +31,8 @@ export default function ManagerDashboardPage() {
             Community Pulse dashboard
           </h1>
           <p className="mx-auto mt-3 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-            Secure manager-side access to resident demand, event traction, and the overall health of
-            the building community.
+            A private operating view for resident demand, introduction momentum, gathering traction,
+            and concierge follow-through.
           </p>
           <div className="mt-5">
             <Link
@@ -45,7 +45,7 @@ export default function ManagerDashboardPage() {
         </header>
 
         <div className="relative z-10 w-full max-w-[390px]">
-          <div className="relative overflow-hidden rounded-[2.75rem] border border-border bg-card shadow-[0_40px_80px_-32px_rgba(60,52,40,0.45)] ring-1 ring-black/5">
+          <div className="relative overflow-hidden rounded-[2.75rem] border border-border bg-card/95 shadow-[0_40px_80px_-32px_rgba(60,52,40,0.45)] ring-1 ring-black/5">
             <div className="pointer-events-none absolute left-1/2 top-0 z-30 h-7 w-36 -translate-x-1/2 rounded-b-2xl bg-foreground/90" />
             <div className="relative h-[760px] overflow-hidden">
               {isLoading ? (

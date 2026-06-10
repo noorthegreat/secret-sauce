@@ -4,17 +4,17 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 
 import { SelectCard, Chip } from "@/components/select-card"
-import { connectionStyles, interests, intents } from "@/lib/concierge-data"
+import {
+  availabilitySummaryOptions,
+  connectionStyles,
+  interestOptions,
+  intents,
+  type AvailabilitySummaryId,
+  type ConnectionStyleId,
+  type InterestId,
+  type MatchingGoalId,
+} from "@/lib/concierge-data"
 import { submitResidentJoinRequest } from "@/lib/public-intake"
-
-const availabilityOptions = [
-  "Weekday mornings",
-  "Weekday evenings",
-  "Weekends",
-  "Flexible",
-  "Workday lunch",
-  "Late evenings",
-] as const
 
 const amenityOptions = [
   "Sky deck",
@@ -29,7 +29,7 @@ const amenityOptions = [
 
 const ageRangeOptions = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"] as const
 
-function toggleValue(values: string[], nextValue: string) {
+function toggleValue<T extends string>(values: T[], nextValue: T) {
   return values.includes(nextValue)
     ? values.filter((value) => value !== nextValue)
     : [...values, nextValue]
@@ -46,10 +46,10 @@ export default function JoinCommunityPage() {
   const [occupation, setOccupation] = useState("")
   const [ageRange, setAgeRange] = useState<(typeof ageRangeOptions)[number] | "">("")
   const [introduction, setIntroduction] = useState("")
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(["Wellness", "Food"])
-  const [selectedLookingFor, setSelectedLookingFor] = useState<string[]>(["Friendships"])
-  const [selectedConnectionStyles, setSelectedConnectionStyles] = useState<string[]>(["One-on-one"])
-  const [selectedAvailability, setSelectedAvailability] = useState<string[]>(["Weekday evenings"])
+  const [selectedInterests, setSelectedInterests] = useState<InterestId[]>(["wellness", "coffee"])
+  const [selectedLookingFor, setSelectedLookingFor] = useState<MatchingGoalId[]>(["friendships"])
+  const [selectedConnectionStyles, setSelectedConnectionStyles] = useState<ConnectionStyleId[]>(["one_on_one"])
+  const [selectedAvailability, setSelectedAvailability] = useState<AvailabilitySummaryId[]>(["weekday_evenings"])
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(["Lounge"])
   const [contactViaSms, setContactViaSms] = useState(true)
   const [contactViaEmail, setContactViaEmail] = useState(true)
@@ -103,9 +103,9 @@ export default function JoinCommunityPage() {
         availability: selectedAvailability,
         amenityPreferences: selectedAmenities,
         wantsFriendships: selectedLookingFor.some((value) =>
-          ["Friendships", "Activity partners", "Community involvement"].includes(value),
+          ["friendships", "activity_partners", "community_involvement"].includes(value),
         ),
-        wantsNetworking: selectedLookingFor.includes("Professional networking"),
+        wantsNetworking: selectedLookingFor.includes("professional_networking"),
         contactViaSms,
         contactViaEmail,
       })
@@ -120,8 +120,12 @@ export default function JoinCommunityPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8 lg:py-14">
-        <header className="rounded-[2.5rem] border border-border bg-card px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
+      <div className="relative mx-auto max-w-5xl overflow-hidden px-6 py-10 sm:px-8 lg:py-14">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.1]">
+          <img src="/building.png" alt="" aria-hidden="true" className="h-full w-full object-cover blur-[3px]" />
+        </div>
+        <header className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
           <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
             Private resident access
           </p>
@@ -129,8 +133,9 @@ export default function JoinCommunityPage() {
             Join your building&apos;s private community.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Tell us a little about what you enjoy and how you like to connect. We use this to
-            curate thoughtful introductions, gatherings, and invitations within your building.
+            This is a quiet request for access, not a public profile. We use it to verify residency,
+            understand how you’d like to connect, and prepare more thoughtful introductions once
+            you’re approved.
           </p>
           <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
             <TrustPill text="Reviewed privately by your building team" />
@@ -140,7 +145,7 @@ export default function JoinCommunityPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <section className="rounded-[2rem] border border-border bg-card p-7">
+          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
             <SectionHeader
               title="Confirm your residency"
               subtitle="We&apos;ll use this to verify your access and contact you once approved."
@@ -200,10 +205,10 @@ export default function JoinCommunityPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-border bg-card p-7">
+          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
             <SectionHeader
               title="What are you hoping to find?"
-              subtitle="Choose the introductions or experiences that would feel most valuable."
+              subtitle="Choose the kinds of introductions or shared moments that would feel most valuable."
             />
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {intents.map((option) => (
@@ -211,34 +216,34 @@ export default function JoinCommunityPage() {
                   key={option.id}
                   label={option.label}
                   note={option.note}
-                  selected={selectedLookingFor.includes(option.label)}
+                  selected={selectedLookingFor.includes(option.id)}
                   onClick={() =>
-                    setSelectedLookingFor((current) => toggleValue(current, option.label))
+                    setSelectedLookingFor((current) => toggleValue(current, option.id))
                   }
                 />
               ))}
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-border bg-card p-7">
+          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
             <SectionHeader
               title="Your interests and social style"
-              subtitle="A few quick selections help us make better introductions."
+              subtitle="A few quick signals help your concierge make stronger, more natural introductions."
             />
             <div className="mt-5">
               <p className="text-sm text-muted-foreground">Interests</p>
               <div className="mt-3 flex flex-wrap gap-3">
-                {interests.map((option) => (
+                {interestOptions.map((option) => (
                   <Chip
-                    key={option}
-                    label={option}
-                    selected={selectedInterests.includes(option)}
+                    key={option.id}
+                    label={option.label}
+                    selected={selectedInterests.includes(option.id)}
                     onClick={() =>
                       setSelectedInterests((current) =>
-                        current.includes(option)
-                          ? current.filter((value) => value !== option)
+                        current.includes(option.id)
+                          ? current.filter((value) => value !== option.id)
                           : current.length < 12
-                            ? [...current, option]
+                            ? [...current, option.id]
                             : current,
                       )
                     }
@@ -250,34 +255,32 @@ export default function JoinCommunityPage() {
             <div className="mt-8">
               <p className="text-sm text-muted-foreground">How you like to connect</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {connectionStyles.map((option) => (
-                  <SelectCard
-                    key={option.id}
-                    label={option.label}
-                    note={option.note}
-                    selected={selectedConnectionStyles.includes(option.label)}
-                    onClick={() =>
-                      setSelectedConnectionStyles((current) =>
-                        toggleValue(current, option.label),
-                      )
-                    }
-                  />
+              {connectionStyles.map((option) => (
+                <SelectCard
+                  key={option.id}
+                  label={option.label}
+                  note={option.note}
+                  selected={selectedConnectionStyles.includes(option.id)}
+                  onClick={() =>
+                    setSelectedConnectionStyles((current) =>
+                      toggleValue(current, option.id),
+                    )
+                  }
+                />
                 ))}
               </div>
             </div>
 
             <div className="mt-8">
-              <p className="text-sm text-muted-foreground">
-                Availability
-              </p>
+              <p className="text-sm text-muted-foreground">When you&apos;re usually free</p>
               <div className="mt-3 flex flex-wrap gap-3">
-                {availabilityOptions.map((option) => (
+                {availabilitySummaryOptions.map((option) => (
                   <Chip
-                    key={option}
-                    label={option}
-                    selected={selectedAvailability.includes(option)}
+                    key={option.id}
+                    label={option.label}
+                    selected={selectedAvailability.includes(option.id)}
                     onClick={() =>
-                      setSelectedAvailability((current) => toggleValue(current, option))
+                      setSelectedAvailability((current) => toggleValue(current, option.id))
                     }
                   />
                 ))}
@@ -285,10 +288,10 @@ export default function JoinCommunityPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-border bg-card p-7">
+          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
             <SectionHeader
               title="Optional details for better introductions"
-              subtitle="Only share what helps us make a more thoughtful match."
+              subtitle="Share only what helps us make a better recommendation. Nothing here is posted publicly."
             />
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Field label="Move-in date">
@@ -347,7 +350,7 @@ export default function JoinCommunityPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-border bg-card p-7">
+          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
             <SectionHeader
               title="Contact preferences"
               subtitle="Tell us the best way to reach you once your access is approved."
@@ -370,7 +373,7 @@ export default function JoinCommunityPage() {
               <div className="mt-5 rounded-3xl border border-gold/30 bg-gold/10 p-4">
                 <p className="text-sm text-gold-foreground">{successMessage}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Once approved, activate your resident access using this same email address.
+                  Once approved, activate your resident access using this same email address so we can connect your membership safely.
                 </p>
                 <Link
                   href="/auth?next=%2Fapp%2Fprofile"

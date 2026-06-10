@@ -40,6 +40,13 @@ type ManagerIntroductionQueueItem = {
   mutualAt: string | null
   deliveredAt: string | null
   compatibilitySummary: string | null
+  managerCompatibilitySummary: string | null
+  meetupRecommendation: {
+    title: string
+    amenityLabel: string
+    timingLabel: string | null
+    reason: string
+  } | null
 }
 
 type ManagerEventItem = {
@@ -364,7 +371,7 @@ export function ManagerDashboard({
                   ))}
             </div>
 
-            <Panel title="Engagement trend" caption="Resident demand, last 6 months">
+            <Panel title="Community snapshot" caption="Resident momentum across the last 6 months">
               <div className="h-44 w-full">
                 {isLoading ? (
                   <div className="h-full animate-pulse rounded-2xl bg-secondary" />
@@ -407,19 +414,19 @@ export function ManagerDashboard({
               </div>
             </Panel>
 
-            <Panel title="Top interests" caption="Based on resident join requests">
+            <Panel title="Resident interests" caption="What residents are asking for most often">
               <BarList block={snapshot.topInterests} suffix="" isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Event traction" caption="Live from current building activity">
+            <Panel title="Event traction" caption="Live demand for current building gatherings">
               <BarList block={snapshot.eventInsights} suffix=" RSVPs" isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Join request status" caption="Current pipeline health">
+            <Panel title="Resident pipeline" caption="How access requests are moving through the building">
               <BarList block={snapshot.requestStatus} suffix="" isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Event operations" caption="Create, edit, publish, and close building events for the pilot">
+            <Panel title="Gathering operations" caption="Create, edit, publish, and close building gatherings for the pilot">
               {eventError ? (
                 <div className="mb-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                   {eventError}
@@ -455,11 +462,11 @@ export function ManagerDashboard({
               </div>
             </Panel>
 
-            <Panel title="Introduction funnel" caption="How concierge introductions are moving through the building">
+            <Panel title="Introduction funnel" caption="How concierge introductions are progressing through the community">
               <BarList block={snapshot.introductionFunnel} suffix="" isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Ready to deliver" caption="Mutual introductions that are ready for concierge follow-through">
+            <Panel title="Concierge delivery queue" caption="Mutual introductions that are ready for follow-through">
               {deliveryError ? (
                 <div className="mb-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                   {deliveryError}
@@ -474,8 +481,8 @@ export function ManagerDashboard({
             </Panel>
 
             <Panel
-              title="Resident support & safety"
-              caption="Private building-scoped requests, bug reports, and conduct concerns that need concierge awareness"
+              title="Support requests"
+              caption="Private resident requests, bug reports, and conduct concerns that need concierge awareness"
             >
               <div className="mb-5">
                 <BarList block={snapshot.supportCategoryBreakdown} suffix="" isLoading={isLoading} />
@@ -483,11 +490,11 @@ export function ManagerDashboard({
               <SupportQueue items={snapshot.supportQueue} isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Most requested events" caption="Resident demand signal for future programming">
+            <Panel title="Most requested gatherings" caption="Resident demand signal for future programming">
               <BarList block={snapshot.mostRequestedEvents} suffix="" isLoading={isLoading} />
             </Panel>
 
-            <Panel title="Amenity usage" caption="Building amenity insights">
+            <Panel title="Amenity usage" caption="How shared spaces are showing up in resident demand">
               <BarList block={snapshot.amenityUsage} suffix="%" isLoading={isLoading} />
             </Panel>
           </>
@@ -561,7 +568,7 @@ function Panel({
 }) {
   return (
     <section className="mt-4 rounded-3xl border border-border bg-card p-5">
-      <h2 className="font-serif text-xl leading-tight text-foreground">{title}</h2>
+      <h2 className="font-serif text-[1.35rem] leading-tight text-foreground">{title}</h2>
       <p className="mb-4 mt-0.5 text-xs text-muted-foreground">{caption}</p>
       {children}
     </section>
@@ -870,8 +877,30 @@ function IntroductionQueue({
             </div>
 
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {item.compatibilitySummary || "A private building introduction is ready for concierge follow-through."}
+              {item.managerCompatibilitySummary ||
+                item.compatibilitySummary ||
+                "A private building introduction is ready for concierge follow-through."}
             </p>
+
+            {item.meetupRecommendation ? (
+              <div className="mt-3 rounded-2xl border border-gold/20 bg-gold/10 px-4 py-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+                  Suggested meetup
+                </p>
+                <p className="mt-2 text-sm font-medium text-foreground">
+                  {item.meetupRecommendation.title}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-foreground/75">
+                  {item.meetupRecommendation.amenityLabel}
+                  {item.meetupRecommendation.timingLabel
+                    ? ` · ${item.meetupRecommendation.timingLabel}`
+                    : ""}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {item.meetupRecommendation.reason}
+                </p>
+              </div>
+            ) : null}
 
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span>Suggested {formatQueueDate(item.suggestedAt)}</span>

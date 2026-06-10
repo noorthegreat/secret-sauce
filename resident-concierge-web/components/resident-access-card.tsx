@@ -28,8 +28,8 @@ export function ResidentAccessCard({
       <CardFrame
         icon={ShieldCheck}
         eyebrow="Private resident access"
-        title="Sign in to unlock your building membership."
-        description="Use the same email address you used for your resident request so we can connect you to the right building."
+        title="Sign in to unlock your building community."
+        description="Use the same email address you used for your resident request so we can quietly connect you to the correct building membership."
         tone="gold"
         primaryAction={{
           label: "Sign in",
@@ -50,7 +50,7 @@ export function ResidentAccessCard({
         icon={Clock3}
         eyebrow="Syncing access"
         title="Confirming your resident status."
-        description="We are checking your approved request, membership, and profile readiness."
+        description="We’re checking your approved request, membership, and onboarding readiness."
         tone="neutral"
       />
     )
@@ -63,10 +63,10 @@ export function ResidentAccessCard({
       <CardFrame
         icon={Sparkles}
         eyebrow={snapshot?.buildingName || "Resident Concierge"}
-        title="You are live in your building community."
+        title="Your private community is now open."
         description={
           snapshot?.message ||
-          "Your building membership is active. You can view introductions, gatherings, and private resident experiences."
+          "Your building membership is active. You can now view introductions, gatherings, and private resident experiences."
         }
         tone="success"
         primaryAction={{
@@ -82,10 +82,10 @@ export function ResidentAccessCard({
       <CardFrame
         icon={FileText}
         eyebrow={snapshot?.buildingName || "Profile incomplete"}
-        title="Complete your profile before we begin."
+        title="Complete your profile before introductions begin."
         description={
           snapshot?.message ||
-          "Your access is active, but your survey is still incomplete. Finish your profile so Resident Concierge can tailor introductions and event matching."
+          "Your access is active, but your onboarding is still incomplete. Finish it so Resident Concierge can tailor introductions and gathering recommendations."
         }
         tone="gold"
         primaryAction={{
@@ -109,7 +109,7 @@ export function ResidentAccessCard({
         title="Your resident request is still under review."
         description={
           snapshot?.message ||
-          "The building team has your request. We will unlock your private building membership as soon as approval is complete."
+          "Your building team has your request. We’ll unlock access as soon as approval is complete."
         }
         tone="neutral"
         primaryAction={{
@@ -129,10 +129,10 @@ export function ResidentAccessCard({
     <CardFrame
       icon={LifeBuoy}
       eyebrow={snapshot?.buildingName || "Membership not found"}
-      title="No building membership found yet."
+      title="We couldn’t find an active building membership yet."
       description={
         snapshot?.message ||
-        "We could not connect this account to an active resident membership in the current building."
+        "This account is not yet connected to an active resident membership for the current building."
       }
       tone="neutral"
       primaryAction={{
@@ -191,7 +191,7 @@ function CardFrame({
   return (
     <div className={`overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_60px_-42px_rgba(74,56,32,0.45)] ${toneClasses}`}>
       <div className="flex items-start gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-background/80 text-gold">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-background/85 text-gold shadow-[0_10px_20px_-16px_rgba(60,46,24,0.4)]">
           <Icon className="size-5" strokeWidth={1.5} />
         </span>
         <div className="min-w-0 flex-1">

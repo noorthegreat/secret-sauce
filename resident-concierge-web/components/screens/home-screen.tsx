@@ -50,9 +50,10 @@ export function HomeScreen({
   return (
     <div className="h-full overflow-y-auto pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Tuesday · Good evening" title={`Welcome home, ${welcomeName}`} />
+        <ScreenHeader eyebrow="Good evening" title={`Welcome home, ${welcomeName}`} />
         <p className="mt-2 px-6 text-sm leading-relaxed text-muted-foreground">
-          Your concierge has {introCount} considered introduction{introCount === 1 ? "" : "s"} for you this week.
+          Your community is warming up. Your concierge has {introCount} considered
+          introduction{introCount === 1 ? "" : "s"} for you this week.
         </p>
       </div>
 
@@ -76,8 +77,8 @@ export function HomeScreen({
 
       {featured ? (
         <div className="mt-8 px-6">
-          <SectionLabel>Tonight&apos;s introduction</SectionLabel>
-          <div className="overflow-hidden rounded-3xl border border-border bg-card">
+          <SectionLabel>Suggested introduction</SectionLabel>
+          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_26px_60px_-46px_rgba(70,56,35,0.48)]">
             <div className="relative">
               <img
                 src={featured.resident.photo || "/placeholder.svg"}
@@ -85,12 +86,19 @@ export function HomeScreen({
                 className="h-56 w-full object-cover"
               />
               <span className="absolute left-4 top-4 rounded-full bg-background/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground backdrop-blur">
-                {featured.resident.shared} shared interests
+                {featured.resident.shared > 0
+                  ? `${featured.resident.shared} shared interest${featured.resident.shared === 1 ? "" : "s"}`
+                  : "Curated fit"}
               </span>
             </div>
             <div className="p-5">
               <p className="text-xs text-muted-foreground">{featured.resident.unit}</p>
-              <h3 className="mt-0.5 font-serif text-2xl leading-tight text-foreground">{featured.resident.name}</h3>
+              <h3 className="mt-0.5 font-serif text-2xl leading-tight text-foreground">
+                {featured.resident.name}
+              </h3>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+                Why this fits
+              </p>
               <p className="mt-2 text-sm leading-relaxed text-foreground/75">
                 {featured.compatibilitySummary || featured.resident.tagline}
               </p>
@@ -104,6 +112,22 @@ export function HomeScreen({
                   </span>
                 ))}
               </div>
+              {featured.meetupRecommendation ? (
+                <div className="mt-4 rounded-2xl border border-gold/25 bg-gold/10 px-4 py-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+                    Suggested meetup
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    {featured.meetupRecommendation.title}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-foreground/75">
+                    {featured.meetupRecommendation.amenityLabel}
+                    {featured.meetupRecommendation.timingLabel
+                      ? ` · ${featured.meetupRecommendation.timingLabel}`
+                      : ""}
+                  </p>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() =>
@@ -116,7 +140,7 @@ export function HomeScreen({
                 {canScheduleIntroduction(featured)
                   ? "Schedule a meetup"
                   : featured.status === "suggested"
-                    ? "Request Introduction"
+                    ? "Request introduction"
                     : "Open introductions"}
               </button>
             </div>
@@ -126,11 +150,11 @@ export function HomeScreen({
 
       {event ? (
         <div className="mt-8 px-6">
-          <SectionLabel>Happening soon</SectionLabel>
+          <SectionLabel>Upcoming gathering</SectionLabel>
           <button
             type="button"
             onClick={onGoCommunity}
-            className="flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-border bg-card p-3 text-left"
+            className="flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-border bg-card p-3 text-left shadow-[0_26px_60px_-46px_rgba(70,56,35,0.42)]"
           >
             <img
               src={event.image || "/placeholder.svg"}
@@ -138,8 +162,12 @@ export function HomeScreen({
               className="size-20 shrink-0 rounded-2xl object-cover"
             />
             <div className="min-w-0 flex-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">{event.date}</p>
-              <h3 className="mt-1 truncate font-serif text-xl leading-tight text-foreground">{event.title}</h3>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+                {event.date}
+              </p>
+              <h3 className="mt-1 truncate font-serif text-xl leading-tight text-foreground">
+                {event.title}
+              </h3>
               <p className="mt-1 text-xs text-muted-foreground">
                 {event.time} · {event.location}
               </p>
@@ -151,10 +179,15 @@ export function HomeScreen({
 
       {suggested ? (
         <div className="mt-8 px-6">
-          <SectionLabel>A suggested meetup</SectionLabel>
+          <SectionLabel>Concierge note</SectionLabel>
           <div className="rounded-3xl border border-gold/40 bg-gold/10 p-5">
             <p className="text-sm leading-relaxed text-foreground/85">
-              You and <span className="font-medium text-foreground">{suggested.resident.name}</span> share space, timing, and interests inside the building. Once there is mutual interest, your concierge can help open the meetup.
+              You and{" "}
+              <span className="font-medium text-foreground">{suggested.resident.name}</span> share
+              space, timing, and interests inside the building.
+              {suggested.meetupRecommendation
+                ? ` A ${suggested.meetupRecommendation.title.toLowerCase()} in the ${suggested.meetupRecommendation.amenityLabel.toLowerCase()} would be a natural first step.`
+                : " Once there is mutual interest, your concierge can help suggest the right moment to meet."}
             </p>
             <button
               type="button"
@@ -165,7 +198,9 @@ export function HomeScreen({
               }
               className="mt-4 w-full rounded-full border border-foreground/15 bg-card py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
             >
-              {suggested.status === "suggested" ? "Arrange an introduction" : "View introduction status"}
+              {suggested.status === "suggested"
+                ? "Arrange an introduction"
+                : "View introduction status"}
             </button>
           </div>
         </div>

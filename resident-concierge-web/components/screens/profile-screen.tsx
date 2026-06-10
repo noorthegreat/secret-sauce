@@ -198,7 +198,7 @@ export function ProfileScreen({
   return (
     <div className="h-full overflow-y-auto pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Your profile" title={residentEmail ? "Your account" : "Guest preview"} />
+        <ScreenHeader eyebrow="Your profile" title={residentEmail ? "Your resident account" : "Guest preview"} />
       </div>
 
       <div className="mt-6 px-6">
@@ -261,7 +261,7 @@ export function ProfileScreen({
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Your interests</SectionLabel>
+        <SectionLabel>Your community profile</SectionLabel>
         <div className="flex flex-wrap gap-2">
           {myInterests.map((interest) => (
             <span
@@ -275,13 +275,13 @@ export function ProfileScreen({
             type="button"
             className="rounded-full border border-dashed border-border px-4 py-1.5 text-sm text-muted-foreground"
           >
-            Edit
+            Update later
           </button>
         </div>
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Preferences</SectionLabel>
+        <SectionLabel>Resident settings</SectionLabel>
         <div className="overflow-hidden rounded-3xl border border-border bg-card">
           <Row icon={Bell} label="Introduction frequency" value="Considered" />
           <Row icon={ShieldCheck} label="Visibility" value="Neighbors only" />
@@ -420,9 +420,9 @@ export function ProfileScreen({
           </span>
           <span className="flex-1">
             <span className="block font-serif text-lg leading-tight text-foreground">
-              Property Manager Dashboard
+              Community Pulse
             </span>
-            <span className="text-xs text-muted-foreground">Engagement & amenity insights</span>
+            <span className="text-xs text-muted-foreground">Manager-side operating view</span>
           </span>
           <ChevronRight className="size-5 text-muted-foreground" />
         </button>

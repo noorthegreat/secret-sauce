@@ -38,6 +38,13 @@ export type ManagerIntroductionQueueItem = {
   mutualAt: string | null
   deliveredAt: string | null
   compatibilitySummary: string | null
+  managerCompatibilitySummary: string | null
+  meetupRecommendation: {
+    title: string
+    amenityLabel: string
+    timingLabel: string | null
+    reason: string
+  } | null
 }
 
 export type ManagerEventItem = {
@@ -112,11 +119,44 @@ type BuildingIntroductionRow = {
   mutual_at: string | null
   delivered_at: string | null
   compatibility_summary: string | null
+  shared_context: Record<string, unknown> | null
 }
 
 type ProfileNameRow = {
   id: string
   first_name: string
+}
+
+function parseMeetupRecommendation(sharedContext: Record<string, unknown> | null) {
+  if (!sharedContext) {
+    return null
+  }
+
+  const rawRecommendation = sharedContext.meetup_recommendation
+  if (!rawRecommendation || typeof rawRecommendation !== "object") {
+    return null
+  }
+
+  const recommendation = rawRecommendation as Record<string, unknown>
+
+  return {
+    title:
+      typeof recommendation.title === "string"
+        ? recommendation.title
+        : "Suggested meetup",
+    amenityLabel:
+      typeof recommendation.amenity_label === "string"
+        ? recommendation.amenity_label
+        : "Resident Lounge",
+    timingLabel:
+      typeof recommendation.timing_label === "string"
+        ? recommendation.timing_label
+        : null,
+    reason:
+      typeof recommendation.reason === "string"
+        ? recommendation.reason
+        : "A low-pressure, concierge-led first meetup.",
+  }
 }
 
 function normalizeBuildingSlug() {
@@ -352,6 +392,11 @@ function buildIntroductionQueue(
       mutualAt: introduction.mutual_at,
       deliveredAt: introduction.delivered_at,
       compatibilitySummary: introduction.compatibility_summary?.trim() || null,
+      managerCompatibilitySummary:
+        typeof introduction.shared_context?.manager_compatibility_summary === "string"
+          ? introduction.shared_context.manager_compatibility_summary
+          : null,
+      meetupRecommendation: parseMeetupRecommendation(introduction.shared_context),
     }))
 }
 
@@ -639,7 +684,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     supabase
       .from("building_introductions")
       .select(
-        "id, resident_a_user_id, resident_b_user_id, intro_type, status, source, suggested_at, mutual_at, delivered_at, compatibility_summary",
+        "id, resident_a_user_id, resident_b_user_id, intro_type, status, source, suggested_at, mutual_at, delivered_at, compatibility_summary, shared_context",
       )
       .eq("building_id", buildingId)
       .returns<BuildingIntroductionRow[]>(),

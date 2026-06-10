@@ -29,7 +29,16 @@ export type IntroductionPreview = {
     bio: string | null
     sharedInterests: string[]
     sharedGoals: string[]
+    sharedConnectionStyles: string[]
+    sharedAvailability: string[]
     compatibilitySummary: string | null
+    managerCompatibilitySummary: string | null
+    meetupRecommendation: {
+      title: string
+      amenityLabel: string
+      timingLabel: string | null
+      reason: string
+    } | null
   }
 }
 
@@ -38,4 +47,3 @@ export type IntroductionListResult = {
   buildingName: string
   introductions: IntroductionPreview[]
 }
-

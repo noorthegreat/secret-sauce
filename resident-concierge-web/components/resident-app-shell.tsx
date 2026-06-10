@@ -299,20 +299,20 @@ export function ResidentAppShell({
             src="/building.png"
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover opacity-[0.06]"
+            className="h-full w-full object-cover opacity-[0.08] blur-[2px]"
           />
         </div>
 
         <header className="relative z-10 mb-10 text-center">
           <span className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold">
-            {buildingName}
+            {buildingName} Community
           </span>
           <h1 className="mt-3 text-balance font-serif text-4xl leading-tight text-foreground sm:text-5xl">
             Resident Concierge
           </h1>
           <p className="mx-auto mt-3 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-            A private members&apos; experience for one building community, with curated introductions,
-            intentional gatherings, and beautiful shared spaces.
+            Powered by Resident Concierge. A private members&apos; experience for one building community,
+            with curated introductions, intentional gatherings, and beautiful shared spaces.
           </p>
         </header>
 
