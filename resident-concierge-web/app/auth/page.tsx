@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, Loader2 } from "lucide-react"
 
+import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
 import { Button } from "@/components/ui/button"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
@@ -110,6 +111,9 @@ function AuthPageContent() {
               Back to Fifth Circle
             </Link>
 
+            <div className="mt-10 max-w-sm">
+              <FifthCircleBrandMark caption="Your resident concierge, delivered privately." />
+            </div>
             <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.35em] text-gold">
               Private building access
             </p>

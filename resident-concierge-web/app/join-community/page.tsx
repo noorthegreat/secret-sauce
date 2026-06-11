@@ -3,31 +3,11 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 
-import { SelectCard, Chip } from "@/components/select-card"
-import {
-  availabilitySummaryOptions,
-  connectionStyles,
-  interestOptions,
-  intents,
-  type AvailabilitySummaryId,
-  type ConnectionStyleId,
-  type InterestId,
-  type MatchingGoalId,
-} from "@/lib/concierge-data"
+import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
+import { SelectCard } from "@/components/select-card"
+import { intents, type MatchingGoalId } from "@/lib/concierge-data"
+import { trackProductEvent } from "@/lib/product-analytics"
 import { submitResidentJoinRequest } from "@/lib/public-intake"
-
-const amenityOptions = [
-  "Sky deck",
-  "Pool",
-  "Game room",
-  "Lounge",
-  "Gym",
-  "Coworking space",
-  "Private dining room",
-  "Lobby cafe",
-] as const
-
-const ageRangeOptions = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"] as const
 
 function toggleValue<T extends string>(values: T[], nextValue: T) {
   return values.includes(nextValue)
@@ -36,21 +16,14 @@ function toggleValue<T extends string>(values: T[], nextValue: T) {
 }
 
 export default function JoinCommunityPage() {
+  const [step, setStep] = useState<0 | 1>(0)
   const [inviteCode, setInviteCode] = useState("CHORUS")
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [unitNumber, setUnitNumber] = useState("")
-  const [moveInDate, setMoveInDate] = useState("")
-  const [occupation, setOccupation] = useState("")
-  const [ageRange, setAgeRange] = useState<(typeof ageRangeOptions)[number] | "">("")
-  const [introduction, setIntroduction] = useState("")
-  const [selectedInterests, setSelectedInterests] = useState<InterestId[]>(["wellness", "coffee"])
   const [selectedLookingFor, setSelectedLookingFor] = useState<MatchingGoalId[]>(["friendships"])
-  const [selectedConnectionStyles, setSelectedConnectionStyles] = useState<ConnectionStyleId[]>(["one_on_one"])
-  const [selectedAvailability, setSelectedAvailability] = useState<AvailabilitySummaryId[]>(["weekday_evenings"])
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(["Lounge"])
   const [contactViaSms, setContactViaSms] = useState(true)
   const [contactViaEmail, setContactViaEmail] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -64,17 +37,17 @@ export default function JoinCommunityPage() {
     }
   }, [])
 
-  const canSubmit =
+  const canAdvanceStep0 =
     inviteCode.trim().length >= 5 &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     email.trim().length > 0 &&
     phone.trim().length > 0 &&
-    unitNumber.trim().length > 0 &&
-    selectedInterests.length > 0 &&
+    unitNumber.trim().length > 0
+
+  const canSubmit =
+    canAdvanceStep0 &&
     selectedLookingFor.length > 0 &&
-    selectedConnectionStyles.length > 0 &&
-    selectedAvailability.length > 0 &&
     (contactViaSms || contactViaEmail)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,15 +66,7 @@ export default function JoinCommunityPage() {
         email: email.trim(),
         phone: phone.trim(),
         unitNumber: unitNumber.trim(),
-        moveInDate: moveInDate || undefined,
-        occupation: occupation.trim() || undefined,
-        ageRange: ageRange || undefined,
-        introduction: introduction.trim() || undefined,
-        interests: selectedInterests,
         lookingFor: selectedLookingFor,
-        connectionStyles: selectedConnectionStyles,
-        availability: selectedAvailability,
-        amenityPreferences: selectedAmenities,
         wantsFriendships: selectedLookingFor.some((value) =>
           ["friendships", "activity_partners", "community_involvement"].includes(value),
         ),
@@ -110,6 +75,9 @@ export default function JoinCommunityPage() {
         contactViaEmail,
       })
 
+      trackProductEvent("join_request_submitted", {
+        goals: selectedLookingFor.length,
+      })
       setSuccessMessage(result.message)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to submit your request.")
@@ -126,272 +94,181 @@ export default function JoinCommunityPage() {
         </div>
         <header className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
-          <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
-            Fifth Circle resident access
-          </p>
-          <h1 className="mt-6 max-w-3xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
-            Join your building&apos;s private community.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            This is a quiet request for access, not a public profile. We use it to verify residency,
-            understand how you’d like to connect, and prepare more thoughtful introductions once
-            you’re approved.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
-            <TrustPill text="Reviewed privately by your building team" />
-            <TrustPill text="Used only for resident introductions and event recommendations" />
-            <TrustPill text="Never posted publicly inside the building" />
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
+                Fifth Circle resident access
+              </p>
+              <h1 className="mt-6 max-w-3xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
+                Join your building&apos;s private community.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                A short request for access — about two minutes. Matching preferences come after
+                approval during onboarding.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <TrustPill text="Reviewed privately by your building team" />
+                <TrustPill text="Used only for introductions and gatherings" />
+                <TrustPill text="Never posted publicly inside the building" />
+              </div>
+            </div>
+            <FifthCircleBrandMark className="mx-auto w-full max-w-sm lg:max-w-none" />
           </div>
         </header>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-            <SectionHeader
-              title="Confirm your residency"
-              subtitle="We&apos;ll use this to verify your access and contact you once approved."
-            />
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <Field label="Invite code">
-                <input
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                  className={inputClassName}
-                  required
-                />
-              </Field>
-              <Field label="Unit number">
-                <input
-                  value={unitNumber}
-                  onChange={(e) => setUnitNumber(e.target.value)}
-                  className={inputClassName}
-                  required
-                />
-              </Field>
-              <Field label="First name">
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={inputClassName}
-                  required
-                />
-              </Field>
-              <Field label="Last name">
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className={inputClassName}
-                  required
-                />
-              </Field>
-              <Field label="Email">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={inputClassName}
-                  required
-                />
-              </Field>
-              <Field label="Phone">
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={inputClassName}
-                  placeholder="+14155551234"
-                  required
-                />
-              </Field>
-            </div>
-          </section>
+          <div className="flex items-center gap-2">
+            {[0, 1].map((value) => (
+              <span
+                key={value}
+                className={`h-1 flex-1 rounded-full ${step >= value ? "bg-gold" : "bg-border"}`}
+              />
+            ))}
+          </div>
 
-          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-            <SectionHeader
-              title="What are you hoping to find?"
-              subtitle="Choose the kinds of introductions or shared moments that would feel most valuable."
-            />
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {intents.map((option) => (
-                <SelectCard
-                  key={option.id}
-                  label={option.label}
-                  note={option.note}
-                  selected={selectedLookingFor.includes(option.id)}
-                  onClick={() =>
-                    setSelectedLookingFor((current) => toggleValue(current, option.id))
-                  }
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-            <SectionHeader
-              title="Your interests and social style"
-              subtitle="A few quick signals help your concierge make stronger, more natural introductions."
-            />
-            <div className="mt-5">
-              <p className="text-sm text-muted-foreground">Interests</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {interestOptions.map((option) => (
-                  <Chip
-                    key={option.id}
-                    label={option.label}
-                    selected={selectedInterests.includes(option.id)}
-                    onClick={() =>
-                      setSelectedInterests((current) =>
-                        current.includes(option.id)
-                          ? current.filter((value) => value !== option.id)
-                          : current.length < 12
-                            ? [...current, option.id]
-                            : current,
-                      )
-                    }
+          {step === 0 ? (
+            <section className="rounded-[2rem] border border-border bg-card/95 p-7">
+              <SectionHeader
+                title="Confirm your residency"
+                subtitle="We use this to verify access and contact you once approved."
+              />
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <Field label="Invite code">
+                  <input
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    className={inputClassName}
+                    required
                   />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <p className="text-sm text-muted-foreground">How you like to connect</p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {connectionStyles.map((option) => (
-                <SelectCard
-                  key={option.id}
-                  label={option.label}
-                  note={option.note}
-                  selected={selectedConnectionStyles.includes(option.id)}
-                  onClick={() =>
-                    setSelectedConnectionStyles((current) =>
-                      toggleValue(current, option.id),
-                    )
-                  }
-                />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <p className="text-sm text-muted-foreground">When you&apos;re usually free</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {availabilitySummaryOptions.map((option) => (
-                  <Chip
-                    key={option.id}
-                    label={option.label}
-                    selected={selectedAvailability.includes(option.id)}
-                    onClick={() =>
-                      setSelectedAvailability((current) => toggleValue(current, option.id))
-                    }
+                </Field>
+                <Field label="Unit number">
+                  <input
+                    value={unitNumber}
+                    onChange={(e) => setUnitNumber(e.target.value)}
+                    className={inputClassName}
+                    required
                   />
-                ))}
+                </Field>
+                <Field label="First name">
+                  <input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className={inputClassName}
+                    required
+                  />
+                </Field>
+                <Field label="Last name">
+                  <input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className={inputClassName}
+                    required
+                  />
+                </Field>
+                <Field label="Email">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputClassName}
+                    required
+                  />
+                </Field>
+                <Field label="Phone">
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={inputClassName}
+                    placeholder="+14155551234"
+                    required
+                  />
+                </Field>
               </div>
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-            <SectionHeader
-              title="Optional details for better introductions"
-              subtitle="Share only what helps us make a better recommendation. Nothing here is posted publicly."
-            />
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <Field label="Move-in date">
-                <input
-                  type="date"
-                  value={moveInDate}
-                  onChange={(e) => setMoveInDate(e.target.value)}
-                  className={inputClassName}
+              <button
+                type="button"
+                disabled={!canAdvanceStep0}
+                onClick={() => setStep(1)}
+                className="mt-6 rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Continue
+              </button>
+            </section>
+          ) : (
+            <>
+              <section className="rounded-[2rem] border border-border bg-card/95 p-7">
+                <SectionHeader
+                  title="What are you hoping to find?"
+                  subtitle="Choose the kinds of introductions that would feel most valuable. You can refine interests and availability after approval."
                 />
-              </Field>
-              <Field label="Age range">
-                <select
-                  value={ageRange}
-                  onChange={(e) => setAgeRange(e.target.value as (typeof ageRangeOptions)[number] | "")}
-                  className={inputClassName}
-                >
-                  <option value="">Optional</option>
-                  {ageRangeOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {intents.map((option) => (
+                    <SelectCard
+                      key={option.id}
+                      label={option.label}
+                      note={option.note}
+                      selected={selectedLookingFor.includes(option.id)}
+                      onClick={() =>
+                        setSelectedLookingFor((current) => toggleValue(current, option.id))
+                      }
+                    />
                   ))}
-                </select>
-              </Field>
-              <Field label="Occupation" className="sm:col-span-2">
-                <input
-                  value={occupation}
-                  onChange={(e) => setOccupation(e.target.value)}
-                  className={inputClassName}
-                  placeholder="Optional"
-                />
-              </Field>
-              <Field label="A short note for your concierge" className="sm:col-span-2">
-                <textarea
-                  value={introduction}
-                  onChange={(e) => setIntroduction(e.target.value)}
-                  className={`${inputClassName} min-h-32 resize-y`}
-                  maxLength={400}
-                  placeholder="Examples: Looking for people to grab coffee with. Interested in startup conversations. Hoping to find tennis partners. New to the city and looking to meet neighbors."
-                />
-              </Field>
-            </div>
+                </div>
+              </section>
 
-            <div className="mt-8">
-              <p className="text-sm text-muted-foreground">Preferred amenities</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {amenityOptions.map((option) => (
-                  <Chip
-                    key={option}
-                    label={option}
-                    selected={selectedAmenities.includes(option)}
-                    onClick={() => setSelectedAmenities((current) => toggleValue(current, option))}
+              <section className="rounded-[2rem] border border-border bg-card/95 p-7">
+                <SectionHeader
+                  title="Contact preferences"
+                  subtitle="Tell us the best way to reach you once your access is approved."
+                />
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <ToggleCheck
+                    label="Text me"
+                    checked={contactViaSms}
+                    onToggle={() => setContactViaSms((value) => !value)}
                   />
-                ))}
-              </div>
-            </div>
-          </section>
+                  <ToggleCheck
+                    label="Email me"
+                    checked={contactViaEmail}
+                    onToggle={() => setContactViaEmail((value) => !value)}
+                  />
+                </div>
 
-          <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-            <SectionHeader
-              title="Contact preferences"
-              subtitle="Tell us the best way to reach you once your access is approved."
-            />
-            <div className="mt-5 flex flex-wrap gap-3">
-              <ToggleCheck
-                label="Text me"
-                checked={contactViaSms}
-                onToggle={() => setContactViaSms((value) => !value)}
-              />
-              <ToggleCheck
-                label="Email me"
-                checked={contactViaEmail}
-                onToggle={() => setContactViaEmail((value) => !value)}
-              />
-            </div>
+                {errorMessage ? <p className="mt-5 text-sm text-destructive">{errorMessage}</p> : null}
+                {successMessage ? (
+                  <div className="mt-5 rounded-3xl border border-gold/30 bg-gold/10 p-4">
+                    <p className="text-sm text-gold-foreground">{successMessage}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      After approval, complete onboarding to unlock introductions and gatherings.
+                    </p>
+                    <Link
+                      href="/auth?next=%2Fapp%2Fonboarding"
+                      className="mt-3 inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                    >
+                      Sign in or create account
+                    </Link>
+                  </div>
+                ) : null}
 
-            {errorMessage ? <p className="mt-5 text-sm text-destructive">{errorMessage}</p> : null}
-            {successMessage ? (
-              <div className="mt-5 rounded-3xl border border-gold/30 bg-gold/10 p-4">
-                <p className="text-sm text-gold-foreground">{successMessage}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Once approved, activate your access using this same email address so we can connect your membership safely.
-                </p>
-                <Link
-                  href="/auth?next=%2Fapp%2Fprofile"
-                  className="mt-3 inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
-                >
-                  Sign in or create account
-                </Link>
-              </div>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={!canSubmit || isSubmitting}
-              className="mt-6 rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isSubmitting ? "Submitting..." : "Request access"}
-            </button>
-          </section>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep(0)}
+                    className="rounded-full border border-border bg-background px-6 py-3 text-sm font-medium tracking-wide text-foreground"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!canSubmit || isSubmitting}
+                    className="rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Submitting..." : "Request access"}
+                  </button>
+                </div>
+              </section>
+            </>
+          )}
         </form>
       </div>
     </main>

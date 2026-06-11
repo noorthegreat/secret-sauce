@@ -7,6 +7,7 @@ import type {
   IntroductionStatus,
   IntroductionType,
 } from "@/lib/introduction-types"
+import { notifyIntroductionTransition } from "@/lib/introduction-notifications"
 import { compareResidents } from "@/lib/matching-engine"
 import { syncResidentAccountForUser } from "@/lib/resident-account-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
@@ -440,6 +441,7 @@ function getAcceptedTransition(
 async function updateIntroduction(
   introductionId: string,
   updates: Record<string, unknown>,
+  previousRow?: BuildingIntroductionRow,
 ) {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
@@ -454,6 +456,10 @@ async function updateIntroduction(
   if (error || !data) {
     throw new Error("Unable to update the introduction.")
   }
+
+  void notifyIntroductionTransition(previousRow ?? null, data).catch((notificationError) => {
+    console.error("introduction notification failed", notificationError)
+  })
 
   return data
 }
@@ -564,6 +570,10 @@ export async function requestIntroductionForResident(
       throw new Error("Unable to create the introduction request.")
     }
 
+    void notifyIntroductionTransition(null, data).catch((notificationError) => {
+      console.error("introduction notification failed", notificationError)
+    })
+
     const residentDirectory = new Map<string, ResidentDirectoryEntry>([
       [context.userId, currentResident],
       [target.userId, target],
@@ -598,6 +608,7 @@ export async function requestIntroductionForResident(
           ...getAcceptedTransition(existing, context.userId, "requested"),
           requested_by_user_id: existing.requested_by_user_id ?? context.userId,
         },
+    existing,
   )
 
   const residentDirectory = new Map<string, ResidentDirectoryEntry>([
@@ -649,21 +660,30 @@ export async function respondToIntroductionForResident(
         context.userId,
         row.status === "requested" ? "requested" : "accepted",
       ),
+      row,
     )
   } else if (action === "declined") {
-    updatedRow = await updateIntroduction(row.id, {
-      [currentDecisionColumn]: "declined",
-      status: "declined",
-      declined_by_user_id: context.userId,
-      updated_at: nowIso,
-    })
+    updatedRow = await updateIntroduction(
+      row.id,
+      {
+        [currentDecisionColumn]: "declined",
+        status: "declined",
+        declined_by_user_id: context.userId,
+        updated_at: nowIso,
+      },
+      row,
+    )
   } else {
-    updatedRow = await updateIntroduction(row.id, {
-      [currentDecisionColumn]: "paused",
-      status: "paused",
-      paused_by_user_id: context.userId,
-      updated_at: nowIso,
-    })
+    updatedRow = await updateIntroduction(
+      row.id,
+      {
+        [currentDecisionColumn]: "paused",
+        status: "paused",
+        paused_by_user_id: context.userId,
+        updated_at: nowIso,
+      },
+      row,
+    )
   }
 
   return toPreview(updatedRow, context.userId, currentResident, residentDirectory)

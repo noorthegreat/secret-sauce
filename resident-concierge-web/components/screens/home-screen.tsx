@@ -1,7 +1,8 @@
 "use client"
 
-import { ArrowUpRight, CalendarCheck, Lightbulb, UserPlus } from "lucide-react"
+import { ArrowUpRight, CalendarCheck, Lightbulb, Sparkles, UserPlus } from "lucide-react"
 
+import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { ScreenHeader, SectionLabel } from "@/components/screen-header"
 import type { CommunityEvent } from "@/lib/community-live"
@@ -74,6 +75,18 @@ export function HomeScreen({
         <QuickAction icon={CalendarCheck} label="RSVP" onClick={onGoCommunity} />
         <QuickAction icon={Lightbulb} label="Suggest Event" onClick={onGoCommunity} />
       </div>
+
+      {!featured ? (
+        <div className="mt-8 px-6">
+          <EmptyState
+            icon={Sparkles}
+            title="Introductions are on the way"
+            description="Your concierge will surface thoughtful neighbor matches as more residents join and complete onboarding."
+            actionLabel={isSignedIn ? "Browse gatherings" : undefined}
+            onAction={isSignedIn ? onGoCommunity : undefined}
+          />
+        </div>
+      ) : null}
 
       {featured ? (
         <div className="mt-8 px-6">

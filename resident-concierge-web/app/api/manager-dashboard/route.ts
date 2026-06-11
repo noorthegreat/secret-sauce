@@ -56,7 +56,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("manager-dashboard GET failed", error)
 
-    if (isPreviewFallbackAllowed()) {
+    const message = error instanceof Error ? error.message.toLowerCase() : ""
+    const isAccessError =
+      message.includes("manager access") ||
+      message.includes("authentication") ||
+      message.includes("authorized")
+
+    if (isPreviewFallbackAllowed() && !isAccessError) {
       return NextResponse.json(getMockManagerDashboardSnapshot(), {
         headers: {
           "Cache-Control": "no-store",

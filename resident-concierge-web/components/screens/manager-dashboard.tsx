@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { trackProductEvent } from "@/lib/product-analytics"
 import { ArrowLeft, CheckCircle2, Loader2, ShieldAlert } from "lucide-react"
 import {
   Area,
@@ -83,11 +84,18 @@ type DashboardTrendPoint = {
   value: number
 }
 
+type ManagerRoiStat = {
+  label: string
+  value: string
+  helper: string
+}
+
 type ManagerDashboardSnapshot = {
   buildingName: string
   pulseScore: number
   pulseDelta: number
   isLive: boolean
+  roiStats: ManagerRoiStat[]
   stats: DashboardStat[]
   trend: DashboardTrendPoint[]
   topInterests: DashboardListBlock
@@ -107,6 +115,7 @@ const emptySnapshot: ManagerDashboardSnapshot = {
   pulseScore: 0,
   pulseDelta: 0,
   isLive: false,
+  roiStats: [],
   stats: [],
   trend: [],
   topInterests: { items: [] },
@@ -210,6 +219,7 @@ export function ManagerDashboard({
         throw new Error(payload.error || "Unable to mark the introduction as delivered.")
       }
 
+      trackProductEvent("manager_intro_delivered")
       await loadDashboard()
     } catch (error) {
       setDeliveryError(
@@ -351,7 +361,33 @@ export function ManagerDashboard({
           </section>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <Panel title="Pilot ROI" caption="Outcomes building teams can report to ownership">
+              <div className="grid grid-cols-2 gap-3">
+                {isLoading
+                  ? [...Array.from({ length: 4 })].map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-[108px] animate-pulse rounded-3xl border border-border bg-card"
+                      />
+                    ))
+                  : snapshot.roiStats.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="rounded-3xl border border-gold/20 bg-gold/5 px-4 py-4"
+                      >
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+                          {stat.label}
+                        </p>
+                        <p className="mt-2 font-serif text-3xl text-foreground">{stat.value}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                          {stat.helper}
+                        </p>
+                      </div>
+                    ))}
+              </div>
+            </Panel>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
               {isLoading
                 ? [...Array.from({ length: 8 })].map((_, index) => (
                     <div

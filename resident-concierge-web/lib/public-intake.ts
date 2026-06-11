@@ -9,11 +9,11 @@ type ResidentJoinPayload = {
   occupation?: string
   ageRange?: "18-24" | "25-34" | "35-44" | "45-54" | "55-64" | "65+"
   introduction?: string
-  interests: string[]
+  interests?: string[]
   lookingFor: string[]
-  connectionStyles: string[]
-  availability: string[]
-  amenityPreferences: string[]
+  connectionStyles?: string[]
+  availability?: string[]
+  amenityPreferences?: string[]
   wantsFriendships: boolean
   wantsNetworking: boolean
   contactViaSms: boolean

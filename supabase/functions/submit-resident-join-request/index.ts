@@ -150,8 +150,8 @@ const residentJoinSchema = z.object({
   introduction: z.string().trim().max(400).optional().or(z.literal("")),
   interests: z.array(z.string().trim()).max(12).default([]),
   lookingFor: z.array(z.string().trim()).min(1).max(6),
-  connectionStyles: z.array(z.string().trim()).min(1).max(6),
-  availability: z.array(z.string().trim()).min(1).max(6),
+  connectionStyles: z.array(z.string().trim()).max(6).default(["flexible"]),
+  availability: z.array(z.string().trim()).max(6).default(["flexible"]),
   amenityPreferences: z.array(z.enum(amenityOptions)).max(8).default([]),
   wantsFriendships: z.boolean().default(true),
   wantsNetworking: z.boolean().default(true),
@@ -279,21 +279,15 @@ serve(async (req) => {
   );
   const normalizedAmenities = uniqueValues(validation.data.amenityPreferences);
 
-  if (normalizedInterests.length === 0) {
-    return jsonResponse(400, { error: "Choose at least one interest." });
-  }
-
   if (normalizedLookingFor.length === 0) {
     return jsonResponse(400, { error: "Choose at least one onboarding goal." });
   }
 
-  if (normalizedAvailability.length === 0) {
-    return jsonResponse(400, { error: "Choose at least one availability window." });
-  }
-
-  if (normalizedConnectionStyles.length === 0) {
-    return jsonResponse(400, { error: "Choose at least one way you like to connect." });
-  }
+  const finalInterests = normalizedInterests.length > 0 ? normalizedInterests : [];
+  const finalConnectionStyles =
+    normalizedConnectionStyles.length > 0 ? normalizedConnectionStyles : ["flexible"];
+  const finalAvailability =
+    normalizedAvailability.length > 0 ? normalizedAvailability : ["flexible"];
 
   try {
     normalizedPhone = normalizePhone(validation.data.phone);
@@ -377,10 +371,10 @@ serve(async (req) => {
         occupation: validation.data.occupation?.trim() || null,
         age_range: validation.data.ageRange ?? null,
         introduction: validation.data.introduction?.trim() || null,
-        interests: normalizedInterests,
+        interests: finalInterests,
         looking_for: normalizedLookingFor,
-        connection_styles: normalizedConnectionStyles,
-        availability: normalizedAvailability,
+        connection_styles: finalConnectionStyles,
+        availability: finalAvailability,
         amenity_preferences: normalizedAmenities,
         status: "pending_review",
         wants_friendships: validation.data.wantsFriendships,

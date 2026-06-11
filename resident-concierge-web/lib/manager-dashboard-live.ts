@@ -1,3 +1,4 @@
+import { notifyIntroductionDelivered } from "@/lib/introduction-notifications"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import {
   getManagerSupportRequestsForBuilding,
@@ -59,11 +60,18 @@ export type ManagerEventItem = {
   attendeeCount: number
 }
 
+export type ManagerRoiStat = {
+  label: string
+  value: string
+  helper: string
+}
+
 export type ManagerDashboardSnapshot = {
   buildingName: string
   pulseScore: number
   pulseDelta: number
   isLive: boolean
+  roiStats: ManagerRoiStat[]
   stats: DashboardStat[]
   trend: DashboardSeriesPoint[]
   topInterests: DashboardListBlock
@@ -406,6 +414,12 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
     pulseScore: 72,
     pulseDelta: 9,
     isLive: false,
+    roiStats: [
+      { label: "Resident opt-in rate", value: "14%", helper: "Activated residents vs. 250 estimated units." },
+      { label: "Intro request → mutual", value: "57%", helper: "Share of requested introductions that reached mutual interest." },
+      { label: "Mutual → delivered", value: "63%", helper: "Concierge handoffs completed after mutual interest." },
+      { label: "Onboarding completion", value: "67%", helper: "Activated residents who finished the concierge questionnaire." },
+    ],
     stats: [
       { label: "Residents invited", value: "Coming soon", helper: "Invitation tracking not wired yet.", isPlaceholder: true },
       { label: "Residents approved", value: "35" },
@@ -745,6 +759,35 @@ export async function getManagerDashboardSnapshotForBuilding({
   const introDeclinedOrPaused = introductions.filter(
     (introduction) => introduction.status === "declined" || introduction.status === "paused",
   ).length
+  const introRequestedOrBeyond = introductions.filter((introduction) =>
+    ["requested", "accepted", "mutual", "delivered"].includes(introduction.status),
+  ).length
+  const estimatedUnits = Math.max(approvedResidents + requests.filter((r) => r.status === "pending_review").length, 1)
+  const optInRate = percentageLabel(residentsActivated, estimatedUnits)
+  const requestToMutualRate = percentageLabel(introMutual + introDelivered, introRequestedOrBeyond)
+  const mutualToDeliveredRate = percentageLabel(introDelivered, introMutual + introDelivered)
+  const roiStats: ManagerRoiStat[] = [
+    {
+      label: "Resident opt-in rate",
+      value: optInRate,
+      helper: "Activated residents compared to approved + pending join demand.",
+    },
+    {
+      label: "Intro request → mutual",
+      value: requestToMutualRate,
+      helper: "Requested introductions that reached mutual interest or delivery.",
+    },
+    {
+      label: "Mutual → delivered",
+      value: mutualToDeliveredRate,
+      helper: "Mutual introductions the concierge team has marked as delivered.",
+    },
+    {
+      label: "Onboarding completion",
+      value: surveyCompletionRate,
+      helper: "Activated residents who completed the concierge questionnaire.",
+    },
+  ]
   const pulseBase =
     activeResidentMemberships * 2 +
     approvedResidents +
@@ -790,6 +833,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     pulseScore,
     pulseDelta,
     isLive: true,
+    roiStats,
     stats: [
       {
         label: "Residents invited",
@@ -1022,10 +1066,21 @@ export async function markIntroductionDeliveredForBuilding({
   const supabase = getSupabaseAdmin()
   const { data: existing, error: loadError } = await supabase
     .from("building_introductions")
-    .select("id, status, delivered_at")
+    .select(
+      "id, building_id, resident_a_user_id, resident_b_user_id, status, delivered_at, requested_by_user_id, compatibility_summary",
+    )
     .eq("building_id", buildingId)
     .eq("id", introductionId)
-    .maybeSingle<{ id: string; status: string; delivered_at: string | null }>()
+    .maybeSingle<{
+      id: string
+      building_id: string
+      resident_a_user_id: string
+      resident_b_user_id: string
+      status: string
+      delivered_at: string | null
+      requested_by_user_id: string | null
+      compatibility_summary: string | null
+    }>()
 
   if (loadError || !existing) {
     throw new Error("Introduction not found.")
@@ -1041,12 +1096,27 @@ export async function markIntroductionDeliveredForBuilding({
     .update({
       status: "delivered",
       delivered_at: deliveredAt,
+      delivered_channel: "email",
       updated_at: new Date().toISOString(),
     })
     .eq("id", introductionId)
 
   if (updateError) {
     throw new Error("Unable to mark the introduction as delivered.")
+  }
+
+  if (existing.status !== "delivered") {
+    void notifyIntroductionDelivered({
+      id: existing.id,
+      building_id: existing.building_id,
+      resident_a_user_id: existing.resident_a_user_id,
+      resident_b_user_id: existing.resident_b_user_id,
+      status: "delivered",
+      requested_by_user_id: existing.requested_by_user_id,
+      compatibility_summary: existing.compatibility_summary,
+    }).catch((notificationError) => {
+      console.error("introduction delivered notification failed", notificationError)
+    })
   }
 
   return {

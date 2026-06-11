@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Check, Loader2, Plus, Users } from "lucide-react"
+import { CalendarCheck, Check, Lightbulb, Loader2, Plus, Users } from "lucide-react"
 
+import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { ScreenHeader } from "@/components/screen-header"
 import type { CommunityEvent, CommunityPoll } from "@/lib/community-live"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
+import { trackProductEvent } from "@/lib/product-analytics"
 import { useResidentSession } from "@/lib/session-browser"
 import { cn } from "@/lib/utils"
 
@@ -271,6 +273,10 @@ function EventsList({
         [event.id]: Boolean(payload.attending),
       }))
 
+      if (payload.attending) {
+        trackProductEvent("event_rsvp")
+      }
+
       setRecentlyCanceled((previous) => ({
         ...previous,
         [event.id]: !payload.attending,
@@ -280,6 +286,18 @@ function EventsList({
     } finally {
       setSubmittingId(null)
     }
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="mt-6 px-6">
+        <EmptyState
+          icon={CalendarCheck}
+          title="No gatherings scheduled yet"
+          description="Your building team will publish the first event soon. Check back for RSVPs and resident meetups."
+        />
+      </div>
+    )
   }
 
   return (
@@ -483,6 +501,18 @@ function EventGroup({
 
 function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
   const [voted, setVoted] = useState<Record<string, boolean>>({})
+
+  if (eventPolls.length === 0) {
+    return (
+      <div className="mt-6 px-6">
+        <EmptyState
+          icon={Lightbulb}
+          title="Event ideas coming soon"
+          description="Your building team will open voting when it is time to shape next month’s gatherings."
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="mt-6 px-6">

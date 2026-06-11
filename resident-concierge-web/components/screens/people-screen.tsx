@@ -1,7 +1,8 @@
 "use client"
 
-import { Check, Clock, Loader2, PauseCircle, Sparkles, UserRoundCheck, X } from "lucide-react"
+import { Check, Clock, Loader2, PauseCircle, Sparkles, UserRoundCheck, Users, X } from "lucide-react"
 
+import { EmptyState } from "@/components/empty-state"
 import { ScreenHeader } from "@/components/screen-header"
 import {
   formatAvailabilitySummaryLabel,
@@ -89,7 +90,10 @@ export function PeopleScreen({
   actionResidentId,
   actionError,
 }: {
-  onSchedule: (resident: Resident) => void
+  onSchedule: (
+    resident: Resident,
+    meetupRecommendation?: ResidentIntroductionCard["meetupRecommendation"],
+  ) => void
   onRequestIntroduction: (residentId: string) => void
   onRespondToIntroduction: (
     residentId: string,
@@ -119,6 +123,14 @@ export function PeopleScreen({
       ) : null}
 
       <div className="mt-6 flex flex-col gap-4 px-6">
+        {!isLoading && introductions.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="No introductions yet"
+            description="As your building community grows, your concierge will share a short list of compatible neighbors here."
+          />
+        ) : null}
+
         {introductions.map((card) => {
           const statusCopy = getStatusCopy(card)
           const isActionLoading = actionResidentId === card.resident.id
@@ -277,7 +289,7 @@ export function PeopleScreen({
                 ) : canScheduleIntroduction(card) ? (
                   <button
                     type="button"
-                    onClick={() => onSchedule(card.resident)}
+                    onClick={() => onSchedule(card.resident, card.meetupRecommendation)}
                     className="w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
                   >
                     Schedule a meetup

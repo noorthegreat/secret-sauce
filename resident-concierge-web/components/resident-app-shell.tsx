@@ -14,6 +14,7 @@ import { PeopleScreen } from "@/components/screens/people-screen"
 import { ProfileScreen } from "@/components/screens/profile-screen"
 import { ScreenHeader } from "@/components/screen-header"
 import type { Resident } from "@/lib/concierge-data"
+import { trackProductEvent } from "@/lib/product-analytics"
 import type { IntroductionListResult, IntroductionPreview } from "@/lib/introduction-types"
 import { useResidentAccount } from "@/lib/resident-account-browser"
 import {
@@ -50,7 +51,14 @@ export function ResidentAppShell({
     isLoading: accountLoading,
     refresh: refreshResidentAccount,
   } = useResidentAccount()
-  const [meetupWith, setMeetupWith] = useState<Resident | null>(null)
+  const [meetupContext, setMeetupContext] = useState<{
+    resident: Resident
+    meetupRecommendation?: {
+      title: string
+      amenityLabel: string
+      timingLabel: string | null
+    } | null
+  } | null>(null)
   const [previewData, setPreviewData] = useState<ResidentPreviewSnapshot | null>(null)
   const [introductionData, setIntroductionData] = useState<IntroductionListResult | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
@@ -195,6 +203,8 @@ export function ResidentAppShell({
         throw new Error(payload.error || "Unable to request the introduction.")
       }
 
+      trackProductEvent("introduction_requested")
+
       setIntroductionData((current) => ({
         buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "fifth-circle",
         buildingName:
@@ -248,6 +258,8 @@ export function ResidentAppShell({
       if (!response.ok) {
         throw new Error(payload.error || "Unable to update the introduction.")
       }
+
+      trackProductEvent("introduction_responded", { action })
 
       setIntroductionData((current) => ({
         buildingId: current?.buildingId ?? accountSnapshot?.buildingId ?? "fifth-circle",
@@ -363,7 +375,9 @@ export function ResidentAppShell({
                 {activeTab === "people" &&
                   (previewData && introductionCards.length > 0 ? (
                     <PeopleScreen
-                      onSchedule={setMeetupWith}
+                      onSchedule={(resident, meetupRecommendation) =>
+                        setMeetupContext({ resident, meetupRecommendation })
+                      }
                       onRequestIntroduction={requestIntroduction}
                       onRespondToIntroduction={respondToIntroduction}
                       introductions={introductionCards}
@@ -427,9 +441,13 @@ export function ResidentAppShell({
               </div>
               <BottomNav active={activeTab} onChange={(tab) => router.push(getTabPath(tab))} />
 
-              {meetupWith && (
-                <MeetupFlow resident={meetupWith} onClose={() => setMeetupWith(null)} />
-              )}
+              {meetupContext ? (
+                <MeetupFlow
+                  resident={meetupContext.resident}
+                  meetupRecommendation={meetupContext.meetupRecommendation}
+                  onClose={() => setMeetupContext(null)}
+                />
+              ) : null}
             </div>
           </PhoneFrame>
         </div>

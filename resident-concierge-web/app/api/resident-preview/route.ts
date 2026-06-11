@@ -55,7 +55,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("resident-preview GET failed", error)
 
-    if (isPreviewFallbackAllowed()) {
+    const message = error instanceof Error ? error.message.toLowerCase() : ""
+    const isAuthOrAccessError =
+      message.includes("authentication") ||
+      message.includes("membership") ||
+      message.includes("approved")
+
+    if (isPreviewFallbackAllowed() && !isAuthOrAccessError) {
       return NextResponse.json(getMockResidentPreviewSnapshot(), {
         headers: {
           "Cache-Control": "no-store",

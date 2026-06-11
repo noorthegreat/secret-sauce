@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useState } from "react"
 
+import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
+import { trackProductEvent } from "@/lib/product-analytics"
 import { submitBuildingManagerLead } from "@/lib/public-intake"
 
 const valueCards = [
@@ -85,6 +87,7 @@ export default function ForBuildingsPage() {
         contactViaEmail,
       })
 
+      trackProductEvent("building_pilot_requested")
       setSuccessMessage(result.message)
       setInviteCode(result.inviteCode ?? null)
       setBuildingSlug(result.buildingSlug ?? null)
@@ -107,6 +110,10 @@ export default function ForBuildingsPage() {
             <section className="lg:sticky lg:top-10">
               <div className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
+                <FifthCircleBrandMark
+                  className="mb-8 max-w-xs"
+                  caption="Private resident communities, thoughtfully connected."
+                />
                 <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
                   Fifth Circle for building teams
                 </p>
@@ -151,6 +158,20 @@ export default function ForBuildingsPage() {
                   We recommend starting with one flagship property, one building lead, and a measured resident rollout.
                 </p>
               </div>
+
+              <div className="mt-6 rounded-[2rem] border border-border bg-card/95 p-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
+                  What happens after you submit
+                </p>
+                <ol className="mt-5 space-y-3 text-sm leading-relaxed text-muted-foreground">
+                  <li>Within 2 business days: fit review and pilot scope confirmation.</li>
+                  <li>Week 1: invite code, resident join link, and Community Pulse access.</li>
+                  <li>Week 2–4: measured resident rollout targeting 40+ active members.</li>
+                </ol>
+                <p className="mt-5 text-sm text-foreground/80">
+                  Pilot pricing is scoped per building. No self-serve billing during the beta.
+                </p>
+              </div>
             </section>
 
             <section>
@@ -166,7 +187,7 @@ export default function ForBuildingsPage() {
                     Tell us about the building.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                    Share the essentials. We’ll use them to prepare your launch path, building access,
+                    Share the essentials. We&apos;ll use them to prepare your launch path, building access,
                     and the first resident invite flow.
                   </p>
                 </div>

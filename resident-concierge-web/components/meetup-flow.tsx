@@ -1,45 +1,119 @@
 "use client"
 
-import { useState } from "react"
-import { meetupTypes, amenities, meetupTimes, type Resident } from "@/lib/concierge-data"
+import { useMemo, useState } from "react"
+import { amenities, meetupTypes, meetupTimes, type Resident } from "@/lib/concierge-data"
 import { SelectCard } from "@/components/select-card"
-import { ArrowLeft, ArrowRight, Check, X } from "lucide-react"
+import { ArrowLeft, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { trackProductEvent } from "@/lib/product-analytics"
+
+type MeetupRecommendation = {
+  title: string
+  amenityLabel: string
+  timingLabel: string | null
+}
+
+type MeetupPreset = {
+  id: string
+  label: string
+  note: string
+  typeId: string
+  time: string
+  amenityId: string
+  recommended?: boolean
+}
+
+function buildPresets(recommendation?: MeetupRecommendation | null): MeetupPreset[] {
+  const lounge = amenities.find((amenity) => amenity.id === "resident_lounge") ?? amenities[0]
+  const rooftop = amenities.find((amenity) => amenity.id === "rooftop") ?? amenities[1] ?? lounge
+  const coffeeType = meetupTypes.find((type) => type.id === "coffee") ?? meetupTypes[0]
+  const wellnessType = meetupTypes.find((type) => type.id === "wellness") ?? meetupTypes[1] ?? coffeeType
+  const eveningTime = meetupTimes.find((time) => time.includes("evening")) ?? meetupTimes[0]
+  const weekendTime = meetupTimes.find((time) => time.includes("Saturday")) ?? meetupTimes[1] ?? eveningTime
+
+  const recommendedAmenity =
+    amenities.find((amenity) =>
+      recommendation?.amenityLabel.toLowerCase().includes(amenity.label.toLowerCase()),
+    ) ?? lounge
+
+  const recommendedTime =
+    meetupTimes.find((time) => recommendation?.timingLabel?.includes(time.split(" ")[0] ?? "")) ??
+    eveningTime
+
+  const presets: MeetupPreset[] = [
+    {
+      id: "recommended",
+      label: recommendation?.title ?? "Coffee in the lounge",
+      note:
+        recommendation?.timingLabel && recommendation.amenityLabel
+          ? `${recommendation.timingLabel} · ${recommendation.amenityLabel}`
+          : "Concierge-recommended first meetup",
+      typeId: coffeeType.id,
+      time: recommendedTime,
+      amenityId: recommendedAmenity.id,
+      recommended: true,
+    },
+    {
+      id: "wellness",
+      label: "Wellness meetup",
+      note: weekendTime,
+      typeId: wellnessType.id,
+      time: weekendTime,
+      amenityId: lounge.id,
+    },
+    {
+      id: "rooftop",
+      label: "Rooftop catch-up",
+      note: eveningTime,
+      typeId: coffeeType.id,
+      time: eveningTime,
+      amenityId: rooftop.id,
+    },
+  ]
+
+  return presets
+}
 
 export function MeetupFlow({
   resident,
+  meetupRecommendation,
   onClose,
 }: {
   resident: Resident
+  meetupRecommendation?: MeetupRecommendation | null
   onClose: () => void
 }) {
+  const presets = useMemo(() => buildPresets(meetupRecommendation), [meetupRecommendation])
   const [step, setStep] = useState(0)
-  const [type, setType] = useState<string | null>(null)
-  const [time, setTime] = useState<string | null>(null)
-  const [amenity, setAmenity] = useState<string | null>(null)
+  const [presetId, setPresetId] = useState(presets[0]?.id ?? "recommended")
 
-  const titles = ["Choose a meetup", "Select a time", "Choose a space", "Confirm"]
-  const canContinue = [type, time, amenity, true][step]
+  const selectedPreset = presets.find((preset) => preset.id === presetId) ?? presets[0]
+  const selectedType = meetupTypes.find((type) => type.id === selectedPreset?.typeId)
+  const selectedAmenity = amenities.find((amenity) => amenity.id === selectedPreset?.amenityId)
 
-  const selectedType = meetupTypes.find((t) => t.id === type)
-  const selectedAmenity = amenities.find((a) => a.id === amenity)
+  const handleConfirm = () => {
+    trackProductEvent("meetup_scheduled", {
+      preset: selectedPreset?.id ?? "unknown",
+    })
+    onClose()
+  }
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col bg-background">
       <div className="flex items-center justify-between px-6 pb-3 pt-6">
         <button
           type="button"
-          onClick={step === 0 ? onClose : () => setStep((s) => s - 1)}
+          onClick={step === 0 ? onClose : () => setStep(0)}
           className="flex size-9 items-center justify-center rounded-full border border-border text-foreground"
           aria-label="Back"
         >
           {step === 0 ? <X className="size-4" /> : <ArrowLeft className="size-4" />}
         </button>
         <div className="flex gap-1.5">
-          {[0, 1, 2, 3].map((s) => (
+          {[0, 1].map((value) => (
             <span
-              key={s}
-              className={cn("h-1 w-6 rounded-full", s <= step ? "bg-gold" : "bg-border")}
+              key={value}
+              className={cn("h-1 w-8 rounded-full", value <= step ? "bg-gold" : "bg-border")}
             />
           ))}
         </div>
@@ -59,94 +133,63 @@ export function MeetupFlow({
           </div>
         </div>
 
-        <h2 className="mb-5 font-serif text-2xl text-foreground">{titles[step]}</h2>
-
-        {step === 0 && (
-          <div className="flex flex-col gap-3">
-            {meetupTypes.map((t) => (
-              <SelectCard
-                key={t.id}
-                label={t.label}
-                note={t.note}
-                selected={type === t.id}
-                onClick={() => setType(t.id)}
-              />
-            ))}
-          </div>
-        )}
-
-        {step === 1 && (
-          <div className="flex flex-col gap-3">
-            {meetupTimes.map((t) => (
-              <SelectCard key={t} label={t} selected={time === t} onClick={() => setTime(t)} />
-            ))}
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="grid grid-cols-2 gap-3">
-            {amenities.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                onClick={() => setAmenity(a.id)}
-                className={cn(
-                  "overflow-hidden rounded-2xl border text-left transition-all",
-                  amenity === a.id ? "border-gold ring-2 ring-gold/30" : "border-border",
-                )}
-              >
-                <img
-                  src={a.image || "/placeholder.svg"}
-                  alt={a.label}
-                  className="h-24 w-full object-cover"
+        {step === 0 ? (
+          <>
+            <h2 className="mb-2 font-serif text-2xl text-foreground">Choose a meetup</h2>
+            <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
+              Pick a low-pressure option. You can always adjust the details together later.
+            </p>
+            <div className="flex flex-col gap-3">
+              {presets.map((preset) => (
+                <SelectCard
+                  key={preset.id}
+                  label={preset.label}
+                  note={preset.recommended ? `Recommended · ${preset.note}` : preset.note}
+                  selected={presetId === preset.id}
+                  onClick={() => setPresetId(preset.id)}
                 />
-                <div className="px-3 py-2.5">
-                  <p className="font-serif text-base leading-tight text-foreground">{a.label}</p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{a.note}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            {selectedAmenity && (
-              <img
-                src={selectedAmenity.image || "/placeholder.svg"}
-                alt={selectedAmenity.label}
-                className="h-36 w-full object-cover"
-              />
-            )}
-            <div className="space-y-4 p-5">
-              <ConfirmRow label="Guest" value={resident.name} />
-              <ConfirmRow label="Meetup" value={selectedType?.label ?? ""} />
-              <ConfirmRow label="When" value={time ?? ""} />
-              <ConfirmRow label="Where" value={selectedAmenity?.label ?? ""} />
+              ))}
             </div>
-          </div>
+          </>
+        ) : (
+          <>
+            <h2 className="mb-5 font-serif text-2xl text-foreground">Confirm and send</h2>
+            <div className="overflow-hidden rounded-3xl border border-border bg-card">
+              {selectedAmenity ? (
+                <img
+                  src={selectedAmenity.image || "/placeholder.svg"}
+                  alt={selectedAmenity.label}
+                  className="h-36 w-full object-cover"
+                />
+              ) : null}
+              <div className="space-y-4 p-5">
+                <ConfirmRow label="Guest" value={resident.name} />
+                <ConfirmRow label="Meetup" value={selectedType?.label ?? ""} />
+                <ConfirmRow label="When" value={selectedPreset?.time ?? ""} />
+                <ConfirmRow label="Where" value={selectedAmenity?.label ?? ""} />
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background to-transparent px-6 pb-8 pt-4">
         <button
           type="button"
-          disabled={!canContinue}
-          onClick={step === 3 ? onClose : () => setStep((s) => s + 1)}
+          disabled={!selectedPreset}
+          onClick={step === 0 ? () => setStep(1) : handleConfirm}
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-medium tracking-wide transition-all active:scale-[0.99]",
-            canContinue
+            selectedPreset
               ? "bg-foreground text-background"
               : "cursor-not-allowed bg-secondary text-muted-foreground",
           )}
         >
-          {step === 3 ? (
-            <>
-              Send invitation <Check className="size-4" />
-            </>
+          {step === 0 ? (
+            "Review meetup"
           ) : (
             <>
-              Continue <ArrowRight className="size-4" />
+              Send invitation <Check className="size-4" />
             </>
           )}
         </button>
