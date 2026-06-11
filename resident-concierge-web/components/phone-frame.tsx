@@ -10,9 +10,9 @@ export function PhoneFrame({
 }) {
   return (
     <div className={cn("relative mx-auto w-full max-w-[390px]", className)}>
-      <div className="relative overflow-hidden rounded-[2.75rem] border border-border bg-card shadow-[0_40px_80px_-32px_rgba(60,52,40,0.45)] ring-1 ring-black/5">
+      <div className="relative overflow-hidden rounded-[2.75rem] border border-[#dfd1bd] bg-[#f6eee1] shadow-[0_45px_95px_-32px_rgba(0,0,0,0.52)] ring-1 ring-black/5">
         {/* status notch */}
-        <div className="pointer-events-none absolute left-1/2 top-0 z-30 h-7 w-36 -translate-x-1/2 rounded-b-2xl bg-foreground/90" />
+        <div className="pointer-events-none absolute left-1/2 top-0 z-30 h-7 w-36 -translate-x-1/2 rounded-b-2xl bg-[#211b16]" />
         <div className="relative h-[760px] overflow-hidden">{children}</div>
       </div>
     </div>

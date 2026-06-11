@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, CalendarCheck, Lightbulb, Sparkles, UserPlus } from "lucide-react"
+import { ArrowUpRight, CalendarCheck, Sparkles, UserPlus } from "lucide-react"
 
 import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
@@ -42,19 +42,15 @@ export function HomeScreen({
   accountLoading: boolean
 }) {
   const featured = introductionCards[0]
-  const suggested =
-    introductionCards.find((card) => card.status === "suggested") ??
-    introductionCards.find((card) => !canScheduleIntroduction(card)) ??
-    featured
   const event = events[0] ?? null
 
   return (
-    <div className="h-full overflow-y-auto pb-28">
+    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Good evening" title={`Welcome home, ${welcomeName}`} />
-        <p className="mt-2 px-6 text-sm leading-relaxed text-muted-foreground">
-          Your community is warming up. Your concierge has {introCount} considered
-          introduction{introCount === 1 ? "" : "s"} for you this week.
+        <ScreenHeader eyebrow="Resident home" title="Good evening," accent={welcomeName} />
+        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
+          Your community is warming up. There {introCount === 1 ? "is" : "are"}{" "}
+          {introCount} thoughtful introduction{introCount === 1 ? "" : "s"} in motion this week.
         </p>
       </div>
 
@@ -71,149 +67,123 @@ export function HomeScreen({
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-2.5 px-6">
-        <QuickAction icon={UserPlus} label="People" onClick={onGoPeople} />
-        <QuickAction icon={CalendarCheck} label="RSVP" onClick={onGoCommunity} />
-        <QuickAction icon={Lightbulb} label="Suggest Event" onClick={onGoCommunity} />
+        <QuickAction icon={UserPlus} label="Neighbors" onClick={onGoPeople} />
+        <QuickAction icon={CalendarCheck} label="Gatherings" onClick={onGoCommunity} />
+        <QuickAction icon={Sparkles} label="Concierge note" onClick={onGoPeople} />
       </div>
 
-      {!featured ? (
+      {featured ? (
+        <div className="mt-8 px-6">
+          <SectionLabel>You might like to be introduced to</SectionLabel>
+          <div className="grid grid-cols-2 gap-3">
+            {introductionCards.slice(0, 2).map((card) => (
+              <article
+                key={card.resident.id}
+                className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-4 shadow-[0_26px_60px_-50px_rgba(70,56,35,0.4)]"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={card.resident.photo || "/placeholder.svg"}
+                    alt={card.resident.name}
+                    className="size-12 rounded-full object-cover"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate font-serif text-lg leading-tight text-foreground">
+                      {card.resident.name}
+                    </p>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#99836a]">
+                      {card.resident.goal}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-4 text-xs leading-6 text-[#6f604f]">
+                  {card.compatibilitySummary || card.resident.tagline}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {card.resident.interests.slice(0, 2).map((interest) => (
+                    <span
+                      key={interest}
+                      className="rounded-full border border-[#e2d6c3] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[#866f54]"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    card.status === "suggested" && !card.introductionId
+                      ? onRequestIntro(card.resident.id)
+                      : onGoPeople()
+                  }
+                  className="mt-5 w-full rounded-full border border-[#2b241d] bg-[#231d17] py-2.5 text-[11px] font-medium tracking-[0.22em] text-[#f3ebdc]"
+                >
+                  {canScheduleIntroduction(card) ? "Schedule" : "Request intro"}
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : (
         <div className="mt-8 px-6">
           <EmptyState
             icon={Sparkles}
-            title="Introductions are on the way"
-            description="Your concierge will surface thoughtful neighbor matches as more residents join and complete onboarding."
+            title="We’re looking for thoughtful introductions for you."
+            description="As more residents join the community, we’ll recommend people who share your interests and goals."
             actionLabel={isSignedIn ? "Browse gatherings" : undefined}
             onAction={isSignedIn ? onGoCommunity : undefined}
           />
         </div>
-      ) : null}
+      )}
 
-      {featured ? (
-        <div className="mt-8 px-6">
-          <SectionLabel>Suggested introduction</SectionLabel>
-          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_26px_60px_-46px_rgba(70,56,35,0.48)]">
-            <div className="relative">
-              <img
-                src={featured.resident.photo || "/placeholder.svg"}
-                alt={featured.resident.name}
-                className="h-56 w-full object-cover"
-              />
-              <span className="absolute left-4 top-4 rounded-full bg-background/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground backdrop-blur">
-                {featured.resident.shared > 0
-                  ? `${featured.resident.shared} shared interest${featured.resident.shared === 1 ? "" : "s"}`
-                  : "Curated fit"}
-              </span>
-            </div>
-            <div className="p-5">
-              <p className="text-xs text-muted-foreground">{featured.resident.unit}</p>
-              <h3 className="mt-0.5 font-serif text-2xl leading-tight text-foreground">
-                {featured.resident.name}
-              </h3>
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
-                Why this fits
+      <div className="mt-8 px-6">
+        <SectionLabel>New gatherings we think you’ll enjoy</SectionLabel>
+        <div className="grid grid-cols-3 gap-3">
+          {events.slice(0, 3).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={onGoCommunity}
+              className={`overflow-hidden rounded-[1.8rem] border px-3 py-4 text-left ${
+                item.id === event?.id
+                  ? "border-[#2b241d] bg-[#231d17] text-[#f3ebdc]"
+                  : "border-[#e1d5c3] bg-[#fbf6ee] text-foreground"
+              }`}
+            >
+              <p className={`font-mono text-[10px] uppercase tracking-[0.18em] ${item.id === event?.id ? "text-[#d8c392]" : "text-[#9c8367]"}`}>
+                {item.date.split(",")[0]}
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/75">
-                {featured.compatibilitySummary || featured.resident.tagline}
+              <h3 className="mt-3 font-serif text-lg leading-tight">{item.title}</h3>
+              <p className={`mt-3 text-xs leading-5 ${item.id === event?.id ? "text-[#d9cfbf]" : "text-[#726353]"}`}>
+                {item.time} · {item.location}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {featured.resident.interests.slice(0, 3).map((interest) => (
-                  <span
-                    key={interest}
-                    className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
-                  >
-                    {interest}
-                  </span>
-                ))}
-              </div>
-              {featured.meetupRecommendation ? (
-                <div className="mt-4 rounded-2xl border border-gold/25 bg-gold/10 px-4 py-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
-                    Suggested meetup
-                  </p>
-                  <p className="mt-2 text-sm font-medium text-foreground">
-                    {featured.meetupRecommendation.title}
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-foreground/75">
-                    {featured.meetupRecommendation.amenityLabel}
-                    {featured.meetupRecommendation.timingLabel
-                      ? ` · ${featured.meetupRecommendation.timingLabel}`
-                      : ""}
-                  </p>
-                </div>
-              ) : null}
-              <button
-                type="button"
-                onClick={() =>
-                  featured.status === "suggested" && !featured.introductionId
-                    ? onRequestIntro(featured.resident.id)
-                    : onGoPeople()
-                }
-                className="mt-5 w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
-              >
-                {canScheduleIntroduction(featured)
-                  ? "Schedule a meetup"
-                  : featured.status === "suggested"
-                    ? "Request introduction"
-                    : "Open introductions"}
-              </button>
-            </div>
-          </div>
+            </button>
+          ))}
         </div>
-      ) : null}
+      </div>
 
-      {event ? (
-        <div className="mt-8 px-6">
-          <SectionLabel>Upcoming gathering</SectionLabel>
-          <button
-            type="button"
-            onClick={onGoCommunity}
-            className="flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-border bg-card p-3 text-left shadow-[0_26px_60px_-46px_rgba(70,56,35,0.42)]"
-          >
-            <img
-              src={event.image || "/placeholder.svg"}
-              alt={event.title}
-              className="size-20 shrink-0 rounded-2xl object-cover"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
-                {event.date}
-              </p>
-              <h3 className="mt-1 truncate font-serif text-xl leading-tight text-foreground">
-                {event.title}
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {event.time} · {event.location}
-              </p>
-            </div>
-            <ArrowUpRight className="size-5 shrink-0 text-muted-foreground" />
-          </button>
-        </div>
-      ) : null}
-
-      {suggested ? (
+      {featured?.meetupRecommendation ? (
         <div className="mt-8 px-6">
           <SectionLabel>Concierge note</SectionLabel>
-          <div className="rounded-3xl border border-gold/40 bg-gold/10 p-5">
-            <p className="text-sm leading-relaxed text-foreground/85">
-              You and{" "}
-              <span className="font-medium text-foreground">{suggested.resident.name}</span> share
-              space, timing, and interests inside the building.
-              {suggested.meetupRecommendation
-                ? ` A ${suggested.meetupRecommendation.title.toLowerCase()} in the ${suggested.meetupRecommendation.amenityLabel.toLowerCase()} would be a natural first step.`
-                : " Once there is mutual interest, your concierge can help suggest the right moment to meet."}
+          <div className="rounded-[1.8rem] border border-[#dccfb7] bg-[#fbf6ee] p-5">
+            <p className="text-sm leading-7 text-[#5f5142]">
+              {featured.resident.name} feels like a strong fit. A{" "}
+              <span className="font-medium text-foreground">
+                {featured.meetupRecommendation.title.toLowerCase()}
+              </span>{" "}
+              at {featured.meetupRecommendation.amenityLabel.toLowerCase()}
+              {featured.meetupRecommendation.timingLabel
+                ? ` around ${featured.meetupRecommendation.timingLabel.toLowerCase()}`
+                : ""}{" "}
+              would be a natural first introduction.
             </p>
             <button
               type="button"
-              onClick={() =>
-                suggested.status === "suggested" && !suggested.introductionId
-                  ? onRequestIntro(suggested.resident.id)
-                  : onGoPeople()
-              }
-              className="mt-4 w-full rounded-full border border-foreground/15 bg-card py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground/30"
+              onClick={onGoPeople}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#866b46]"
             >
-              {suggested.status === "suggested"
-                ? "Arrange an introduction"
-                : "View introduction status"}
+              Open introductions
+              <ArrowUpRight className="size-4" />
             </button>
           </div>
         </div>
@@ -235,7 +205,7 @@ function QuickAction({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-2 py-4 transition-colors hover:border-gold/40"
+      className="flex flex-col items-center gap-2 rounded-[1.4rem] border border-[#e2d6c3] bg-[#fbf6ee] px-2 py-4 transition-colors hover:border-gold/40"
     >
       <Icon className="size-5 text-gold" strokeWidth={1.5} />
       <span className="text-center text-[11px] leading-tight text-foreground/80">{label}</span>

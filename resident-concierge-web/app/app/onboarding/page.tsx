@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { Onboarding, type OnboardingSubmission } from "@/components/onboarding"
-import { PhoneFrame } from "@/components/phone-frame"
 import { useResidentAccount } from "@/lib/resident-account-browser"
 import { useResidentSession } from "@/lib/session-browser"
 
@@ -46,49 +45,29 @@ export default function ResidentOnboardingPage() {
     !snapshot.hasActiveMembership
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="relative flex min-h-screen flex-col items-center px-4 py-10 lg:py-16">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <img
-            src="/building.png"
-            alt=""
-            aria-hidden="true"
-            className="h-full w-full object-cover opacity-[0.06]"
+    <main className="min-h-screen bg-[#1f1a15]">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-8">
+        {sessionLoading || accountLoading ? (
+          <CenteredState
+            title="Checking your resident access..."
+            description="We are confirming your active building membership before saving your onboarding."
           />
-        </div>
-
-        <header className="relative z-10 mb-10 text-center">
-          <span className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold">
-            Resident onboarding
-          </span>
-          <h1 className="mt-3 text-balance font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Private opt-in for one building community
-          </h1>
-        </header>
-
-        <div className="relative z-10">
-          <PhoneFrame>
-            {sessionLoading || accountLoading ? (
-              <CenteredState
-                title="Checking your resident access..."
-                description="We are confirming your active building membership before saving your onboarding."
-              />
-            ) : shouldBlockSubmission ? (
-              <CenteredState
-                title="Resident onboarding unlocks after approval."
-                description={
-                  errorMessage ||
-                  snapshot?.message ||
-                  "Sign in with your approved resident account to complete your onboarding."
-                }
-                ctaLabel={user ? "Back to profile" : "Sign in"}
-                ctaHref={user ? "/app/profile" : "/auth?next=%2Fapp%2Fonboarding"}
-              />
-            ) : (
-              <Onboarding onComplete={handleComplete} />
-            )}
-          </PhoneFrame>
-        </div>
+        ) : shouldBlockSubmission ? (
+          <CenteredState
+            title="Resident onboarding unlocks after approval."
+            description={
+              errorMessage ||
+              snapshot?.message ||
+              "Sign in with your approved resident account to complete your onboarding."
+            }
+            ctaLabel={user ? "Back to profile" : "Sign in"}
+            ctaHref={user ? "/app/profile" : "/auth?next=%2Fapp%2Fonboarding"}
+          />
+        ) : (
+          <div className="rounded-[2.4rem] border border-[#3d3328] bg-[#1f1a15] shadow-[0_35px_100px_-40px_rgba(0,0,0,0.65)]">
+            <Onboarding onComplete={handleComplete} />
+          </div>
+        )}
       </div>
     </main>
   )
@@ -106,13 +85,13 @@ function CenteredState({
   ctaHref?: string
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-      <p className="font-serif text-3xl leading-tight text-foreground">{title}</p>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
+    <div className="rounded-[2.4rem] border border-[#3d3328] bg-[#1f1a15] px-8 py-10 text-center text-[#f3ebdc]">
+      <p className="font-serif text-3xl leading-tight">{title}</p>
+      <p className="mt-3 text-sm leading-relaxed text-[#b8ab97]">{description}</p>
       {ctaLabel && ctaHref ? (
         <Link
           href={ctaHref}
-          className="mt-6 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background"
+          className="mt-6 inline-flex rounded-full border border-[#43392f] bg-[#231d17] px-5 py-3 text-sm font-medium text-[#f3ebdc]"
         >
           {ctaLabel}
         </Link>

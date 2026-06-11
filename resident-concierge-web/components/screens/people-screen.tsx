@@ -17,14 +17,10 @@ function isPositiveDecision(decision: ResidentIntroductionCard["currentResidentD
 }
 
 function canRespond(card: ResidentIntroductionCard) {
-  if (!card.introductionId) {
-    return false
-  }
-
+  if (!card.introductionId) return false
   if (card.status === "delivered" || card.status === "mutual" || card.status === "declined" || card.status === "paused") {
     return false
   }
-
   return !isPositiveDecision(card.currentResidentDecision) && isPositiveDecision(card.otherResidentDecision)
 }
 
@@ -36,7 +32,7 @@ function getStatusCopy(card: ResidentIntroductionCard) {
       description:
         card.status === "delivered"
           ? "Your concierge has shared the introduction. You can now arrange the meetup."
-          : "You both said yes. Schedule the meetup when you are ready.",
+          : "You both said yes. The next step is choosing the right first meetup.",
     }
   }
 
@@ -106,11 +102,11 @@ export function PeopleScreen({
   actionError: string | null
 }) {
   return (
-    <div className="h-full overflow-y-auto pb-28">
+    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Introductions" title="Neighbors worth meeting" />
-        <p className="mt-2 px-6 text-sm leading-relaxed text-muted-foreground">
-          A short, considered list, not a directory. Private details stay hidden until there is mutual interest.
+        <ScreenHeader eyebrow="Introductions" title="Activity" accent="Matches." />
+        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
+          A short, considered list of neighbors. Private details stay hidden until there is mutual interest.
         </p>
       </div>
 
@@ -126,8 +122,8 @@ export function PeopleScreen({
         {!isLoading && introductions.length === 0 ? (
           <EmptyState
             icon={Users}
-            title="No introductions yet"
-            description="As your building community grows, your concierge will share a short list of compatible neighbors here."
+            title="We’re looking for thoughtful introductions for you."
+            description="As more residents join the community, we’ll recommend people who share your interests and goals."
           />
         ) : null}
 
@@ -136,34 +132,36 @@ export function PeopleScreen({
           const isActionLoading = actionResidentId === card.resident.id
 
           return (
-            <article key={card.resident.id} className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_26px_60px_-48px_rgba(70,56,35,0.42)]">
-              <div className="flex gap-4 p-4">
+            <article
+              key={card.resident.id}
+              className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-4 shadow-[0_26px_60px_-48px_rgba(70,56,35,0.34)]"
+            >
+              <div className="flex items-center gap-3">
                 <img
                   src={card.resident.photo || "/placeholder.svg"}
                   alt={card.resident.name}
-                  className="size-20 shrink-0 rounded-2xl object-cover"
+                  className="size-14 rounded-full object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] text-muted-foreground">{card.resident.unit}</p>
-                  <h3 className="font-serif text-xl leading-tight text-foreground">{card.resident.name}</h3>
-                  <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-[11px] text-gold-foreground">
-                    <Sparkles className="size-3 text-gold" /> {card.resident.goal}
-                  </span>
+                  <p className="font-serif text-xl leading-tight text-foreground">{card.resident.name}</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#a28363]">
+                    {card.resident.goal}
+                  </p>
                 </div>
               </div>
 
-              <p className="px-4 pt-1 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+              <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
                 Why this fits
               </p>
-              <p className="px-4 text-sm leading-relaxed text-foreground/75">
+              <p className="mt-2 text-sm leading-7 text-[#655645]">
                 {card.compatibilitySummary || card.resident.tagline}
               </p>
 
-              <div className="flex flex-wrap gap-2 px-4 pt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {card.resident.interests.slice(0, 4).map((interest) => (
                   <span
                     key={interest}
-                    className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
+                    className="rounded-full border border-[#e2d6c3] px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-[#846d53]"
                   >
                     {interest}
                   </span>
@@ -171,11 +169,11 @@ export function PeopleScreen({
               </div>
 
               {card.sharedConnectionStyles.length > 0 || card.sharedAvailability.length > 0 ? (
-                <div className="flex flex-wrap gap-2 px-4 pt-3">
+                <div className="mt-3 flex flex-wrap gap-2">
                   {card.sharedConnectionStyles.slice(0, 2).map((style) => (
                     <span
                       key={style}
-                      className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-muted-foreground"
+                      className="rounded-full bg-[#f3eadc] px-3 py-1 text-[11px] text-[#8a7b6a]"
                     >
                       {formatConnectionStyleLabel(style)}
                     </span>
@@ -183,7 +181,7 @@ export function PeopleScreen({
                   {card.sharedAvailability.slice(0, 2).map((availability) => (
                     <span
                       key={availability}
-                      className="rounded-full border border-border bg-background px-3 py-1 text-[11px] text-muted-foreground"
+                      className="rounded-full bg-[#f3eadc] px-3 py-1 text-[11px] text-[#8a7b6a]"
                     >
                       {formatAvailabilitySummaryLabel(availability)}
                     </span>
@@ -192,67 +190,60 @@ export function PeopleScreen({
               ) : null}
 
               {card.meetupRecommendation ? (
-                <div className="px-4 pt-4">
-                  <div className="rounded-2xl border border-gold/25 bg-gold/10 px-4 py-3">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
-                      Suggested meetup
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-foreground">
-                      {card.meetupRecommendation.title}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-foreground/75">
-                      {card.meetupRecommendation.amenityLabel}
-                      {card.meetupRecommendation.timingLabel
-                        ? ` · ${card.meetupRecommendation.timingLabel}`
-                        : ""}
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {card.meetupRecommendation.reason}
-                    </p>
-                  </div>
+                <div className="mt-4 rounded-[1.4rem] border border-[#e4d8c6] bg-[#f7f0e5] px-4 py-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+                    Suggested meetup
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    {card.meetupRecommendation.title}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#655645]">
+                    {card.meetupRecommendation.amenityLabel}
+                    {card.meetupRecommendation.timingLabel
+                      ? ` · ${card.meetupRecommendation.timingLabel}`
+                      : ""}
+                  </p>
                 </div>
               ) : null}
 
-              <div className="px-4 pt-4">
-                <div
-                  className={`rounded-2xl px-4 py-3 text-sm ${
-                    statusCopy.tone === "success"
-                      ? "bg-gold/15 text-gold-foreground"
-                      : statusCopy.tone === "attention"
-                        ? "bg-secondary text-foreground"
-                        : statusCopy.tone === "pending"
-                          ? "bg-secondary text-muted-foreground"
-                          : statusCopy.tone === "muted"
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-secondary text-foreground"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    {statusCopy.tone === "success" ? (
-                      <UserRoundCheck className="size-4" />
-                    ) : statusCopy.tone === "pending" ? (
-                      <Clock className="size-4" />
-                    ) : statusCopy.tone === "muted" ? (
-                      <PauseCircle className="size-4" />
-                    ) : (
-                      <Sparkles className="size-4" />
-                    )}
-                    {statusCopy.label}
-                  </div>
-                  <p className="mt-1 leading-relaxed">{statusCopy.description}</p>
+              <div
+                className={`mt-4 rounded-[1.4rem] px-4 py-3 text-sm ${
+                  statusCopy.tone === "success"
+                    ? "bg-[#ece0c4] text-[#6f5938]"
+                    : statusCopy.tone === "attention"
+                      ? "bg-[#f3eadc] text-foreground"
+                      : statusCopy.tone === "pending"
+                        ? "bg-[#f5efe6] text-[#7c6c5a]"
+                        : statusCopy.tone === "muted"
+                          ? "bg-[#efe7db] text-[#8c7c6b]"
+                          : "bg-[#f3eadc] text-foreground"
+                }`}
+              >
+                <div className="flex items-center gap-2 font-medium">
+                  {statusCopy.tone === "success" ? (
+                    <UserRoundCheck className="size-4" />
+                  ) : statusCopy.tone === "pending" ? (
+                    <Clock className="size-4" />
+                  ) : statusCopy.tone === "muted" ? (
+                    <PauseCircle className="size-4" />
+                  ) : (
+                    <Sparkles className="size-4" />
+                  )}
+                  {statusCopy.label}
                 </div>
+                <p className="mt-1 leading-relaxed">{statusCopy.description}</p>
               </div>
 
-              <div className="p-4">
+              <div className="mt-4">
                 {card.status === "suggested" && !card.introductionId ? (
                   <button
                     type="button"
                     onClick={() => onRequestIntroduction(card.resident.id)}
                     disabled={isActionLoading}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="flex w-full items-center justify-center gap-2 rounded-full border border-[#2b241d] bg-[#231d17] py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc] disabled:opacity-70"
                   >
                     {isActionLoading ? <Loader2 className="size-4 animate-spin" /> : null}
-                    Request Introduction
+                    Request introduction
                   </button>
                 ) : canRespond(card) && card.introductionId ? (
                   <div className="space-y-2.5">
@@ -260,17 +251,17 @@ export function PeopleScreen({
                       type="button"
                       onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "accepted")}
                       disabled={isActionLoading}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                      className="flex w-full items-center justify-center gap-2 rounded-full border border-[#2b241d] bg-[#231d17] py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc] disabled:opacity-70"
                     >
                       {isActionLoading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-                      Accept Introduction
+                      Accept introduction
                     </button>
                     <div className="grid grid-cols-2 gap-2.5">
                       <button
                         type="button"
                         onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "declined")}
                         disabled={isActionLoading}
-                        className="flex items-center justify-center gap-2 rounded-full border border-border bg-card py-3 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                        className="flex items-center justify-center gap-2 rounded-full border border-[#d7c9b4] bg-[#f6eee1] py-3 text-sm font-medium text-foreground disabled:opacity-70"
                       >
                         <X className="size-4" />
                         Decline
@@ -279,7 +270,7 @@ export function PeopleScreen({
                         type="button"
                         onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "paused")}
                         disabled={isActionLoading}
-                        className="flex items-center justify-center gap-2 rounded-full border border-border bg-card py-3 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                        className="flex items-center justify-center gap-2 rounded-full border border-[#d7c9b4] bg-[#f6eee1] py-3 text-sm font-medium text-foreground disabled:opacity-70"
                       >
                         <PauseCircle className="size-4" />
                         Pause
@@ -290,12 +281,12 @@ export function PeopleScreen({
                   <button
                     type="button"
                     onClick={() => onSchedule(card.resident, card.meetupRecommendation)}
-                    className="w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-transform active:scale-[0.99]"
+                    className="w-full rounded-full border border-[#2b241d] bg-[#231d17] py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc]"
                   >
                     Schedule a meetup
                   </button>
                 ) : (
-                  <div className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-secondary py-3.5 text-sm font-medium text-muted-foreground">
+                  <div className="flex w-full items-center justify-center gap-2 rounded-full border border-[#e1d5c3] bg-[#f5efe6] py-3 text-sm font-medium text-[#8a7b6a]">
                     {isLoading || isActionLoading ? <Loader2 className="size-4 animate-spin" /> : <Clock className="size-4" />}
                     {card.requestedByCurrentResident || isPositiveDecision(card.currentResidentDecision)
                       ? `Awaiting ${card.resident.name.split(" ")[0]}'s response`

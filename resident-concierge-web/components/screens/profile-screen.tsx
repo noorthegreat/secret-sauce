@@ -19,7 +19,7 @@ import type { Resident } from "@/lib/concierge-data"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
-const myInterests = ["Wellness", "Food", "Books", "Art", "Travel"]
+const myInterests = ["Wellness", "Coffee", "Travel", "Design", "Books"]
 const supportCategories = [
   { value: "harassment", label: "Harassment" },
   { value: "inappropriate_behavior", label: "Inappropriate behavior" },
@@ -61,7 +61,8 @@ export function ProfileScreen({
   onAccountRefresh: () => void
 }) {
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [supportCategory, setSupportCategory] = useState<(typeof supportCategories)[number]["value"]>("support_request")
+  const [supportCategory, setSupportCategory] =
+    useState<(typeof supportCategories)[number]["value"]>("support_request")
   const [supportSubject, setSupportSubject] = useState("")
   const [supportMessage, setSupportMessage] = useState("")
   const [reportedResidentUserId, setReportedResidentUserId] = useState("")
@@ -80,7 +81,7 @@ export function ProfileScreen({
   const initials = useMemo(() => {
     const email = residentEmail?.trim()
     if (!email) {
-      return "RC"
+      return "FC"
     }
 
     return email
@@ -129,9 +130,11 @@ export function ProfileScreen({
       setSupportSubject("")
       setSupportMessage("")
       setReportedResidentUserId("")
-      setSupportSuccess("Your request was shared with the concierge team.")
+      setSupportSuccess("Your note has been shared privately with the Fifth Circle team.")
     } catch (error) {
-      setSupportError(error instanceof Error ? error.message : "Unable to send your request right now.")
+      setSupportError(
+        error instanceof Error ? error.message : "Unable to send your request right now.",
+      )
     } finally {
       setIsSubmittingSupport(false)
     }
@@ -170,7 +173,7 @@ export function ProfileScreen({
       onAccountRefresh()
       setSupportSuccess(
         payload.paused
-          ? "Introductions are paused. You can resume anytime from this page."
+          ? "Introductions are paused for now. You can resume any time from this page."
           : "Introductions are live again for your building community.",
       )
     } catch (error) {
@@ -196,52 +199,63 @@ export function ProfileScreen({
   }
 
   return (
-    <div className="h-full overflow-y-auto pb-28">
+    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Your profile" title={residentEmail ? "Your resident account" : "Guest preview"} />
+        <ScreenHeader eyebrow="Resident profile" title="You belong" accent="here." />
+        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
+          A private profile for thoughtful introductions, concierge support, and a calmer community experience.
+        </p>
       </div>
 
       <div className="mt-6 px-6">
-        <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-5">
-          <div className="flex size-16 items-center justify-center rounded-full bg-foreground font-serif text-2xl text-background">
-            {initials || "RC"}
+        <div className="rounded-[2rem] border border-[#e0d4c3] bg-[#fbf6ee] p-5 shadow-[0_28px_60px_-46px_rgba(70,56,35,0.34)]">
+          <div className="flex items-start gap-4">
+            <div className="flex size-20 items-center justify-center rounded-full border border-gold/35 bg-[#f4ece1] font-serif text-3xl text-gold">
+              {initials || "FC"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-serif text-[1.8rem] leading-none text-foreground">
+                {residentEmail ? residentEmail.split("@")[0].replace(/[._-]/g, " ") : "Guest preview"}
+              </p>
+              <p className="mt-2 text-[11px] uppercase tracking-[0.22em] text-gold">
+                {(accountSnapshot?.buildingName || "Fifth Circle Community").toUpperCase()}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#6e5f4f]">
+                {sessionLoading
+                  ? "Checking your access..."
+                  : isSignedIn
+                    ? "Signed in to your private resident account."
+                    : "Sign in to RSVP, view introductions, and access your live building profile."}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-serif text-xl leading-tight text-foreground">
-              {residentEmail || "Resident preview mode"}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {sessionLoading
-                ? "Checking your access..."
-                : isSignedIn
-                  ? "Signed in to your resident account"
-                  : "Sign in to RSVP and access your live building profile"}
-            </p>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            {isSignedIn ? (
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                disabled={isSigningOut}
+                className="flex items-center justify-center gap-2 rounded-full border border-[#d6cab9] bg-[#f7f0e5] px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 disabled:opacity-70"
+              >
+                <LogOut className="size-4" />
+                {isSigningOut ? "Signing out..." : "Sign out"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onSignIn}
+                className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+              >
+                <LogIn className="size-4" />
+                Sign in or create account
+              </button>
+            )}
+            <span className="inline-flex items-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-[#7d6e5e]">
+              {accountSnapshot?.isPaused ? "Introductions paused" : "Introductions available"}
+            </span>
           </div>
         </div>
-      </div>
-
-      <div className="mt-6 px-6">
-        {isSignedIn ? (
-          <button
-            type="button"
-            onClick={() => void handleSignOut()}
-            disabled={isSigningOut}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 disabled:opacity-70"
-          >
-            <LogOut className="size-4" />
-            {isSigningOut ? "Signing out..." : "Sign out"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onSignIn}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-          >
-            <LogIn className="size-4" />
-            Sign in or create account
-          </button>
-        )}
       </div>
 
       <div className="mt-6 px-6">
@@ -261,51 +275,60 @@ export function ProfileScreen({
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Your community profile</SectionLabel>
-        <div className="flex flex-wrap gap-2">
-          {myInterests.map((interest) => (
-            <span
-              key={interest}
-              className="rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-sm text-foreground"
+        <SectionLabel>How neighbors may know you</SectionLabel>
+        <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+          <p className="text-sm leading-relaxed text-[#6f604f]">
+            Keep this lightweight. These cues help the concierge surface introductions that feel natural, not random.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {myInterests.map((interest) => (
+              <span
+                key={interest}
+                className="rounded-full border border-[#e2d6c3] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[#866f54]"
+              >
+                {interest}
+              </span>
+            ))}
+            <button
+              type="button"
+              className="rounded-full border border-dashed border-[#d9cdbb] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[#9b8c79]"
             >
-              {interest}
-            </span>
-          ))}
-          <button
-            type="button"
-            className="rounded-full border border-dashed border-border px-4 py-1.5 text-sm text-muted-foreground"
-          >
-            Update later
-          </button>
+              Update later
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="mt-8 px-6">
         <SectionLabel>Resident settings</SectionLabel>
-        <div className="overflow-hidden rounded-3xl border border-border bg-card">
-          <Row icon={Bell} label="Introduction frequency" value="Considered" />
+        <div className="overflow-hidden rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee]">
+          <Row icon={Bell} label="Introduction cadence" value="Considered" />
           <Row icon={ShieldCheck} label="Visibility" value="Neighbors only" />
-          <Row icon={LifeBuoy} label="Intro availability" value={accountSnapshot?.isPaused ? "Paused" : "Available"} />
+          <Row
+            icon={LifeBuoy}
+            label="Concierge support"
+            value={accountSnapshot?.isPaused ? "Paused" : "Available"}
+          />
         </div>
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Safety & support</SectionLabel>
-        <div className="rounded-3xl border border-border bg-card p-5">
+        <SectionLabel>Safety and support</SectionLabel>
+        <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
           <div className="flex items-start gap-3">
             <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
               <ShieldAlert className="size-5" strokeWidth={1.5} />
             </span>
             <div>
               <p className="font-serif text-xl leading-tight text-foreground">Tell us what needs attention.</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Share a private concern, report a bug, or ask for help from the building concierge team.
+              <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
+                Share a private concern, report a bug, or ask for help from the Fifth Circle concierge team.
               </p>
             </div>
           </div>
 
           {!canSubmitSupport ? (
-            <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 text-sm text-muted-foreground">
+            <div className="mt-5 rounded-[1.4rem] border border-[#e1d5c3] bg-[#f7f0e5] px-4 py-4 text-sm text-[#7d6e5e]">
               Support submissions open once your resident membership is active. For urgent help in the meantime, contact your building team directly.
             </div>
           ) : (
@@ -320,7 +343,7 @@ export function ProfileScreen({
                       setReportedResidentUserId("")
                     }
                   }}
-                  className="rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
+                  className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
                 >
                   {supportCategories.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -333,7 +356,7 @@ export function ProfileScreen({
                   <select
                     value={reportedResidentUserId}
                     onChange={(event) => setReportedResidentUserId(event.target.value)}
-                    className="rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
+                    className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
                   >
                     <option value="">Resident involved (optional)</option>
                     {reportableResidents.map((resident) => (
@@ -349,13 +372,13 @@ export function ProfileScreen({
                   onChange={(event) => setSupportSubject(event.target.value)}
                   placeholder="Short subject (optional)"
                   maxLength={120}
-                  className="rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
+                  className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
                 />
                 <textarea
                   value={supportMessage}
                   onChange={(event) => setSupportMessage(event.target.value)}
                   placeholder="What happened, what you need help with, or what we should look into."
-                  className="min-h-28 rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
+                  className="min-h-28 rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
                 />
               </div>
 
@@ -374,7 +397,7 @@ export function ProfileScreen({
                 </button>
                 <a
                   href="mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Support"
-                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                  className="inline-flex items-center justify-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
                 >
                   Email support instead
                 </a>
@@ -386,9 +409,9 @@ export function ProfileScreen({
 
       <div className="mt-8 px-6">
         <SectionLabel>Introduction controls</SectionLabel>
-        <div className="rounded-3xl border border-border bg-card p-5">
+        <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
           <p className="font-serif text-xl leading-tight text-foreground">Control when you are available.</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
             Pause new introductions if you want a quieter stretch. Your membership stays active and you can resume anytime.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -401,7 +424,7 @@ export function ProfileScreen({
               {isUpdatingPause ? <Loader2 className="size-4 animate-spin" /> : null}
               {pauseLabel}
             </button>
-            <span className="inline-flex items-center rounded-full border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
+            <span className="inline-flex items-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-[#7d6e5e]">
               {accountSnapshot?.isPaused ? "Currently paused" : "Currently available"}
             </span>
           </div>
@@ -413,18 +436,16 @@ export function ProfileScreen({
         <button
           type="button"
           onClick={onOpenManager}
-          className="flex w-full items-center gap-4 rounded-3xl border border-border bg-card p-5 text-left transition-colors hover:border-gold/40"
+          className="flex w-full items-center gap-4 rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5 text-left transition-colors hover:border-gold/40"
         >
           <span className="flex size-11 items-center justify-center rounded-full bg-foreground text-background">
             <LayoutDashboard className="size-5" strokeWidth={1.5} />
           </span>
           <span className="flex-1">
-            <span className="block font-serif text-lg leading-tight text-foreground">
-              Community Pulse
-            </span>
-            <span className="text-xs text-muted-foreground">Manager-side operating view</span>
+            <span className="block font-serif text-lg leading-tight text-foreground">Community Pulse</span>
+            <span className="text-xs text-[#7d6e5e]">Manager-side operating view</span>
           </span>
-          <ChevronRight className="size-5 text-muted-foreground" />
+          <ChevronRight className="size-5 text-[#8d7d6b]" />
         </button>
       </div>
     </div>
@@ -441,10 +462,10 @@ function Row({
   value: string
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-border/60 px-5 py-4 last:border-0">
+    <div className="flex items-center gap-3 border-b border-[#ece2d4] px-5 py-4 last:border-0">
       <Icon className="size-[18px] text-gold" strokeWidth={1.5} />
       <span className="flex-1 text-sm text-foreground">{label}</span>
-      <span className="text-sm text-muted-foreground">{value}</span>
+      <span className="text-sm text-[#7d6e5e]">{value}</span>
     </div>
   )
 }

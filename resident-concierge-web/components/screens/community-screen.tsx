@@ -5,7 +5,7 @@ import { CalendarCheck, Check, Lightbulb, Loader2, Plus, Users } from "lucide-re
 
 import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
-import { ScreenHeader } from "@/components/screen-header"
+import { ScreenHeader, SectionLabel } from "@/components/screen-header"
 import type { CommunityEvent, CommunityPoll } from "@/lib/community-live"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import { trackProductEvent } from "@/lib/product-analytics"
@@ -46,9 +46,12 @@ export function CommunityScreen({
   const [tab, setTab] = useState<"events" | "vote">("events")
 
   return (
-    <div className="h-full overflow-y-auto pb-28">
+    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Gatherings" title="Community" />
+        <ScreenHeader eyebrow="Private community" title="Gatherings." />
+        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
+          A quiet calendar of building gatherings, resident proposals, and events worth stepping out for.
+        </p>
       </div>
 
       <div className="mt-5 px-6">
@@ -66,19 +69,19 @@ export function CommunityScreen({
         ) : null}
       </div>
 
-      <div className="mt-5 px-6">
-        <div className="flex rounded-full border border-border bg-secondary p-1">
+      <div className="mt-6 px-6">
+        <div className="flex rounded-full border border-[#ded1bf] bg-[#efe6d8] p-1">
           {(["events", "vote"] as const).map((value) => (
             <button
               key={value}
               type="button"
               onClick={() => setTab(value)}
               className={cn(
-                "flex-1 rounded-full py-2.5 text-sm font-medium tracking-wide transition-colors",
-                tab === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+                "flex-1 rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
+                tab === value ? "bg-[#fbf6ee] text-foreground shadow-sm" : "text-[#7d6e5e]",
               )}
             >
-              {value === "events" ? "Gatherings" : "Shape next month"}
+              {value === "events" ? "Current gatherings" : "Shape the next calendar"}
             </button>
           ))}
         </div>
@@ -138,7 +141,7 @@ function getEligibilityCopy(state: RsvpEligibilityState) {
     case "rsvp_confirmed":
       return {
         button: "RSVP confirmed",
-        helper: "You’re on the list for this building gathering.",
+        helper: "You're on the guest list for this gathering.",
       }
     case "rsvp_canceled":
       return {
@@ -153,7 +156,7 @@ function getEligibilityCopy(state: RsvpEligibilityState) {
     case "needs_onboarding":
       return {
         button: "Complete profile to RSVP",
-        helper: "Finish onboarding first so we can keep participation thoughtful and building-safe.",
+        helper: "Finish onboarding first so participation stays thoughtful and building-safe.",
       }
     case "not_eligible":
       return {
@@ -188,8 +191,8 @@ function EventsList({
   const [recentlyCanceled, setRecentlyCanceled] = useState<Record<string, boolean>>({})
   const [submittingId, setSubmittingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const building = events.filter((event) => event.host === "Building")
-  const resident = events.filter((event) => event.host === "Resident")
+  const hostedByBuilding = events.filter((event) => event.host === "Building")
+  const residentProposals = events.filter((event) => event.host === "Resident")
 
   useEffect(() => {
     const accessToken = session?.access_token
@@ -294,7 +297,7 @@ function EventsList({
         <EmptyState
           icon={CalendarCheck}
           title="No gatherings scheduled yet"
-          description="Your building team will publish the first event soon. Check back for RSVPs and resident meetups."
+          description="Your building team will publish the first gathering soon. Check back for RSVPs and resident proposals."
         />
       </div>
     )
@@ -303,20 +306,20 @@ function EventsList({
   return (
     <div className="mt-6 flex flex-col gap-7 px-6">
       {!sessionLoading && !session ? (
-        <div className="rounded-3xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-foreground">
-          Sign in to RSVP and keep your gathering activity synced to your building profile.
+        <div className="rounded-[1.6rem] border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-foreground">
+          Sign in to RSVP and keep your community activity tied to your resident profile.
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-3xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-[1.6rem] border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           {errorMessage}
         </div>
       ) : null}
 
       <EventGroup
         title="Hosted by the building"
-        items={building}
+        items={hostedByBuilding}
         rsvps={rsvps}
         recentlyCanceled={recentlyCanceled}
         submittingId={submittingId}
@@ -326,10 +329,11 @@ function EventsList({
         onToggleRsvp={toggleRsvp}
         onSignIn={onSignIn}
         onCompleteProfile={onCompleteProfile}
+        featuredTone="dark"
       />
       <EventGroup
-        title="Resident suggestions"
-        items={resident}
+        title="Resident proposals"
+        items={residentProposals}
         rsvps={rsvps}
         recentlyCanceled={recentlyCanceled}
         submittingId={submittingId}
@@ -339,6 +343,7 @@ function EventsList({
         onToggleRsvp={toggleRsvp}
         onSignIn={onSignIn}
         onCompleteProfile={onCompleteProfile}
+        featuredTone="light"
       />
     </div>
   )
@@ -356,6 +361,7 @@ function EventGroup({
   onToggleRsvp,
   onSignIn,
   onCompleteProfile,
+  featuredTone,
 }: {
   title: string
   items: CommunityEvent[]
@@ -368,16 +374,15 @@ function EventGroup({
   onToggleRsvp: (event: CommunityEvent) => Promise<void>
   onSignIn: () => void
   onCompleteProfile: () => void
+  featuredTone: "dark" | "light"
 }) {
   if (items.length === 0) return null
 
   return (
     <div>
-      <h2 className="mb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-        {title}
-      </h2>
+      <SectionLabel>{title}</SectionLabel>
       <div className="flex flex-col gap-4">
-        {items.map((event) => {
+        {items.map((event, index) => {
           const going = rsvps[event.id]
           const isSubmitting = submittingId === event.id
           const eligibilityState = getEligibilityState({
@@ -391,37 +396,70 @@ function EventGroup({
           const eligibilityCopy = getEligibilityCopy(eligibilityState)
           const canToggle =
             eligibilityState === "can_rsvp" || eligibilityState === "rsvp_confirmed"
+          const isDarkCard = featuredTone === "dark" && index === 0
 
           return (
             <article
               key={event.id}
-              className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_26px_60px_-46px_rgba(70,56,35,0.42)]"
+              className={cn(
+                "overflow-hidden rounded-[1.9rem] border shadow-[0_26px_60px_-46px_rgba(70,56,35,0.42)]",
+                isDarkCard
+                  ? "border-[#2a231d] bg-[#231d17] text-[#f3ebdc]"
+                  : "border-[#e1d5c3] bg-[#fbf6ee] text-foreground",
+              )}
             >
               <img
                 src={event.image || "/placeholder.svg"}
                 alt={event.title}
-                className="h-40 w-full object-cover"
+                className={cn("w-full object-cover", isDarkCard ? "h-44 opacity-90" : "h-40")}
               />
               <div className="p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+                  <p
+                    className={cn(
+                      "font-mono text-[10px] uppercase tracking-[0.2em]",
+                      isDarkCard ? "text-[#d8c392]" : "text-gold",
+                    )}
+                  >
                     {event.date} · {event.time}
                   </p>
-                  <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]",
+                      isDarkCard
+                        ? "bg-white/8 text-[#d9cfbf]"
+                        : "bg-[#efe6d8] text-[#7d6e5e]",
+                    )}
+                  >
                     {event.enrollmentLabel}
                   </span>
                 </div>
-                <h3 className="mt-1.5 font-serif text-2xl leading-tight text-foreground">
-                  {event.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-foreground/75">
+                <h3 className="mt-2 font-serif text-2xl leading-tight">{event.title}</h3>
+                <p
+                  className={cn(
+                    "mt-2 text-sm leading-relaxed",
+                    isDarkCard ? "text-[#dfd3c0]" : "text-[#6f604f]",
+                  )}
+                >
                   {event.description}
                 </p>
-                <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div
+                  className={cn(
+                    "mt-3 flex items-center gap-1.5 text-xs",
+                    isDarkCard ? "text-[#cbbca6]" : "text-[#8a7b6a]",
+                  )}
+                >
                   <Users className="size-3.5" />
                   {event.attendees} attending · {event.location}
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">{eligibilityCopy.helper}</p>
+                <p
+                  className={cn(
+                    "mt-3 text-sm",
+                    isDarkCard ? "text-[#d9cfbf]" : "text-[#7a6b5a]",
+                  )}
+                >
+                  {eligibilityCopy.helper}
+                </p>
                 <div className="mt-4 flex gap-2.5">
                   <button
                     type="button"
@@ -447,14 +485,18 @@ function EventGroup({
                         !canToggle)
                     }
                     className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-medium tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-70",
+                      "flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70",
                       eligibilityState === "rsvp_confirmed"
                         ? "bg-gold/15 text-gold-foreground"
                         : canToggle ||
                             eligibilityState === "not_eligible" ||
                             eligibilityState === "needs_onboarding"
-                          ? "bg-foreground text-background"
-                          : "bg-secondary text-muted-foreground",
+                          ? isDarkCard
+                            ? "bg-[#f3ebdc] text-[#231d17]"
+                            : "bg-foreground text-background"
+                          : isDarkCard
+                            ? "bg-white/8 text-[#cbbca6]"
+                            : "bg-[#efe6d8] text-[#8a7b6a]",
                     )}
                   >
                     {isSubmitting ? (
@@ -477,7 +519,12 @@ function EventGroup({
                     type="button"
                     onClick={() => void onToggleRsvp(event)}
                     disabled={isSubmitting}
-                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 transition-colors hover:border-gold/40 disabled:cursor-not-allowed disabled:opacity-70"
+                    className={cn(
+                      "mt-2.5 w-full rounded-full border py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70",
+                      isDarkCard
+                        ? "border-white/12 text-[#f3ebdc] hover:border-gold/50"
+                        : "border-[#e1d5c3] text-foreground/80 hover:border-gold/40",
+                    )}
                   >
                     Cancel RSVP
                   </button>
@@ -485,9 +532,14 @@ function EventGroup({
                   <button
                     type="button"
                     disabled
-                    className="mt-2.5 w-full rounded-full border border-border py-3 text-sm font-medium text-foreground/80 opacity-70 transition-colors disabled:cursor-not-allowed"
+                    className={cn(
+                      "mt-2.5 w-full rounded-full border py-3 text-sm font-medium opacity-70 disabled:cursor-not-allowed",
+                      isDarkCard
+                        ? "border-white/12 text-[#cbbca6]"
+                        : "border-[#e1d5c3] text-foreground/80",
+                    )}
                   >
-                    Resident introductions unlock after RSVP
+                    Introductions open after RSVP
                   </button>
                 )}
               </div>
@@ -508,7 +560,7 @@ function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
         <EmptyState
           icon={Lightbulb}
           title="Event ideas coming soon"
-          description="Your building team will open voting when it is time to shape next month’s gatherings."
+          description="Your building team will open voting when it is time to shape the next calendar of gatherings."
         />
       </div>
     )
@@ -516,8 +568,8 @@ function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
 
   return (
     <div className="mt-6 px-6">
-      <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
-        Help shape next month. Add your interest to the gatherings you’d be most likely to attend.
+      <p className="mb-5 text-sm leading-relaxed text-[#726353]">
+        Help shape next month. Add your interest to the gatherings you would be most likely to attend.
       </p>
       <div className="flex flex-col gap-3.5">
         {eventPolls.map((poll) => {
@@ -528,7 +580,7 @@ function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
           return (
             <div
               key={poll.id}
-              className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_22px_50px_-42px_rgba(70,56,35,0.38)]"
+              className="overflow-hidden rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] shadow-[0_22px_50px_-42px_rgba(70,56,35,0.38)]"
             >
               <div className="flex items-center gap-4 p-3.5">
                 <img
@@ -538,13 +590,13 @@ function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
                 />
                 <div className="min-w-0 flex-1">
                   <h3 className="font-serif text-lg leading-tight text-foreground">{poll.title}</h3>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#efe6d8]">
                     <div
                       className="h-full rounded-full bg-gold transition-all duration-500"
                       style={{ width: `${percent}%` }}
                     />
                   </div>
-                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  <p className="mt-1.5 text-[11px] text-[#7d6e5e]">
                     {votes} residents interested
                   </p>
                 </div>
@@ -557,7 +609,7 @@ function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
                     "flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors",
                     isVoted
                       ? "border-gold bg-gold text-gold-foreground"
-                      : "border-border text-foreground hover:border-gold/50",
+                      : "border-[#e1d5c3] text-foreground hover:border-gold/50",
                   )}
                   aria-label={`Vote for ${poll.title}`}
                 >

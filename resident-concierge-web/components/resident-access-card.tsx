@@ -50,7 +50,7 @@ export function ResidentAccessCard({
         icon={Clock3}
         eyebrow="Syncing access"
         title="Confirming your resident status."
-        description="We’re checking your approved request, membership, and onboarding readiness."
+        description="We're checking your approved request, membership, and onboarding readiness."
         tone="neutral"
       />
     )
@@ -109,7 +109,7 @@ export function ResidentAccessCard({
         title="Your resident request is still under review."
         description={
           snapshot?.message ||
-          "Your building team has your request. We’ll unlock access as soon as approval is complete."
+          "Your building team has your request. We'll unlock access as soon as approval is complete."
         }
         tone="neutral"
         primaryAction={{
@@ -118,7 +118,7 @@ export function ResidentAccessCard({
         }}
         secondaryAction={{
           label: "Contact building manager/support",
-          href: "mailto:hello@residentconcierge.co?subject=Resident%20Concierge%20Approval%20Help",
+          href: "mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Approval%20Help",
           variant: "secondary",
         }}
       />
@@ -129,7 +129,7 @@ export function ResidentAccessCard({
     <CardFrame
       icon={LifeBuoy}
       eyebrow={snapshot?.buildingName || "Membership not found"}
-      title="We couldn’t find an active building membership yet."
+      title="We couldn't find an active building membership yet."
       description={
         snapshot?.message ||
         "This account is not yet connected to an active resident membership for the current building."
@@ -141,7 +141,7 @@ export function ResidentAccessCard({
       }}
       secondaryAction={{
         label: "Contact building manager/support",
-        href: "mailto:hello@residentconcierge.co?subject=Resident%20Concierge%20Membership%20Help",
+        href: "mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Membership%20Help",
         variant: "secondary",
       }}
     />
@@ -183,13 +183,15 @@ function CardFrame({
 }) {
   const toneClasses =
     tone === "success"
-      ? "border-gold/35 bg-[linear-gradient(135deg,rgba(193,154,81,0.12),rgba(255,255,255,0.92))]"
+      ? "border-gold/35 bg-[linear-gradient(135deg,rgba(193,154,81,0.14),rgba(251,246,238,0.96))]"
       : tone === "gold"
-        ? "border-gold/30 bg-gold/10"
-        : "border-border bg-card"
+        ? "border-gold/30 bg-[linear-gradient(135deg,rgba(193,154,81,0.12),rgba(251,246,238,0.92))]"
+        : "border-[#e2d5c2] bg-[#fbf6ee]"
 
   return (
-    <div className={`overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_60px_-42px_rgba(74,56,32,0.45)] ${toneClasses}`}>
+    <div
+      className={`overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_60px_-42px_rgba(74,56,32,0.45)] ${toneClasses}`}
+    >
       <div className="flex items-start gap-4">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-background/85 text-gold shadow-[0_10px_20px_-16px_rgba(60,46,24,0.4)]">
           <Icon className="size-5" strokeWidth={1.5} />

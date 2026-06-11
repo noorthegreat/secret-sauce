@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, Loader2 } from "lucide-react"
 
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
-import { Button } from "@/components/ui/button"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
 function normalizeNextPath(value: string | null) {
@@ -99,110 +98,114 @@ function AuthPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12">
-        <div className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="flex flex-col justify-center">
-            <Link
-              href="/"
-              className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="size-4" />
-              Back to Fifth Circle
-            </Link>
+    <main className="min-h-screen bg-[#1f1a15] text-[#f3ebdc]">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
+        <Link
+          href="/"
+          className="mb-10 inline-flex w-fit items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[#b8ab97] transition-colors hover:text-[#f3ebdc]"
+        >
+          <ArrowLeft className="size-4" />
+          Back
+        </Link>
 
-            <div className="mt-10 max-w-sm">
-              <FifthCircleBrandMark caption="Your resident concierge, delivered privately." />
-            </div>
-            <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.35em] text-gold">
-              Private building access
-            </p>
-            <h1 className="mt-4 max-w-xl font-serif text-5xl leading-[0.95] text-foreground sm:text-6xl">
-              Sign in to your building community.
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
-              Your matches, events, and resident experience stay private to your building. Use the
-              same email you plan to use for Fifth Circle.
-            </p>
-          </section>
-
-          <section className="rounded-[2rem] border border-border bg-card p-7 shadow-sm sm:p-9">
-            <div className="flex rounded-full border border-border bg-secondary p-1">
-              {(["signin", "signup"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => {
-                    setMode(value)
-                    setErrorMessage(null)
-                    setNotice(null)
-                  }}
-                  className={[
-                    "flex-1 rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
-                    mode === value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground",
-                  ].join(" ")}
-                >
-                  {value === "signin" ? "Sign in" : "Create account"}
-                </button>
-              ))}
-            </div>
-
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-              <Field
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={setEmail}
-                placeholder="you@buildingemail.com"
-              />
-              <Field
-                id="password"
-                label="Password"
-                type="password"
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                value={password}
-                onChange={setPassword}
-                placeholder="At least 8 characters"
-              />
-
-              {errorMessage ? (
-                <p className="rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                  {errorMessage}
-                </p>
-              ) : null}
-
-              {notice ? (
-                <p className="rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-foreground">
-                  {notice}
-                </p>
-              ) : null}
-
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Working...
-                  </>
-                ) : mode === "signin" ? (
-                  "Continue"
-                ) : (
-                  "Create account"
-                )}
-              </Button>
-            </form>
-
-            <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-              Resident access is still building-scoped on the backend. Creating an account does not
-              automatically approve a resident request.
-            </p>
-          </section>
+        <div className="mb-12 flex justify-center">
+          <FifthCircleBrandMark
+            theme="dark"
+            caption="Private building access"
+            className="gap-4"
+          />
         </div>
+
+        <section className="text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-[#b89655]">
+            Resident sign in
+          </p>
+          <h1 className="mt-5 font-serif text-4xl leading-[1.02]">
+            {mode === "signin" ? "Welcome to" : "Create your"}
+            <span className="block italic text-[#c29a51]">
+              {mode === "signin" ? "your building." : "account."}
+            </span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-[#b8ab97]">
+            {mode === "signin"
+              ? "Use the email tied to your resident request so we can connect you to the right building membership."
+              : "This account stays private to your building community and never becomes a public profile."}
+          </p>
+        </section>
+
+        <div className="mt-8 rounded-full border border-[#4a4034] bg-[#2a231c] p-1">
+          {(["signin", "signup"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => {
+                setMode(value)
+                setErrorMessage(null)
+                setNotice(null)
+              }}
+              className={[
+                "w-1/2 rounded-full px-4 py-3 text-sm font-medium transition-colors",
+                mode === value ? "bg-[#f3ebdc] text-[#2d241d]" : "text-[#b8ab97]",
+              ].join(" ")}
+            >
+              {value === "signin" ? "Sign in" : "Create account"}
+            </button>
+          ))}
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+          <Field
+            id="email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={setEmail}
+            placeholder="you@buildingemail.com"
+          />
+          <Field
+            id="password"
+            label="Password"
+            type="password"
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            value={password}
+            onChange={setPassword}
+            placeholder="At least 8 characters"
+          />
+
+          {errorMessage ? (
+            <p className="rounded-[1.4rem] border border-[#6d433f] bg-[#382320] px-4 py-3 text-sm text-[#efb0a6]">
+              {errorMessage}
+            </p>
+          ) : null}
+
+          {notice ? (
+            <p className="rounded-[1.4rem] border border-[#7a6640] bg-[#2d271d] px-4 py-3 text-sm text-[#f0dfbe]">
+              {notice}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#4a4034] bg-[#231d17] text-sm font-medium tracking-[0.18em] text-[#f3ebdc] transition-colors hover:border-[#b89655] disabled:opacity-60"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Working
+              </>
+            ) : mode === "signin" ? (
+              "Continue"
+            ) : (
+              "Create account"
+            )}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-[#867664]">
+          Private. Building-scoped. Concierge-led.
+        </p>
       </div>
     </main>
   )
@@ -210,9 +213,9 @@ function AuthPageContent() {
 
 function AuthPageFallback() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
-      <div className="rounded-[2rem] border border-border bg-card px-8 py-6 text-center shadow-sm">
-        <p className="font-serif text-3xl text-foreground">Loading secure access...</p>
+    <main className="flex min-h-screen items-center justify-center bg-[#1f1a15] px-6 py-12 text-[#f3ebdc]">
+      <div className="text-center">
+        <p className="font-serif text-3xl">Loading secure access...</p>
       </div>
     </main>
   )
@@ -237,7 +240,9 @@ function Field({
 }) {
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-2 block text-sm font-medium text-foreground">{label}</span>
+      <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#9f917e]">
+        {label}
+      </span>
       <input
         id={id}
         type={type}
@@ -245,7 +250,7 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-gold/50"
+        className="h-12 w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 text-sm text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"
         required
       />
     </label>
