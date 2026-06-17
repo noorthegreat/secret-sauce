@@ -4,10 +4,17 @@ export type IntroductionStatus =
   | "accepted"
   | "mutual"
   | "delivered"
+  | "scheduled"
+  | "completed"
   | "declined"
   | "paused"
 
 export type IntroductionType = "friendship" | "professional"
+export type IntroductionMatchFormat =
+  | "one_on_one"
+  | "small_group"
+  | "activity_partner"
+  | "professional_networking"
 
 export type IntroductionDecision = "requested" | "accepted" | "declined" | "paused" | null
 
@@ -15,10 +22,14 @@ export type IntroductionPreview = {
   introductionId: string
   status: IntroductionStatus
   introType: IntroductionType
+  matchFormat?: IntroductionMatchFormat
   source: string
   suggestedAt: string
   mutualAt: string | null
   deliveredAt: string | null
+  scheduledAt?: string | null
+  completedAt?: string | null
+  sensitiveDetailsRevealedAt?: string | null
   requestedByCurrentResident: boolean
   currentResidentDecision: IntroductionDecision
   otherResidentDecision: IntroductionDecision

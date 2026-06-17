@@ -45,17 +45,25 @@ type IntakeResponse = {
 }
 
 function getPublicSupabaseUrl() {
-  const value = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const value =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    process.env.SUPABASE_URL?.trim()
   if (!value) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL.")
+    throw new Error("Missing public Supabase URL. Set NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL.")
   }
   return value
 }
 
 function getPublicSupabaseAnonKey() {
-  const value = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+  const value =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    process.env.SUPABASE_ANON_KEY?.trim() ||
+    process.env.SUPABASE_PUBLISHABLE_KEY?.trim()
   if (!value) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY.")
+    throw new Error(
+      "Missing public Supabase key. Set NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
+    )
   }
   return value
 }

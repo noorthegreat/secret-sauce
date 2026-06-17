@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 import {
   authenticateResidentAccessToken,
+  type FlexibleOnboardingObject,
   getBearerToken,
   persistResidentOnboardingForUser,
   syncResidentAccountForUser,
@@ -39,6 +40,82 @@ const allowedStyleIds = new Set(connectionStyles.map((style) => style.id))
 const allowedAvailabilityIds = new Set(availabilitySummaryOptions.map((option) => option.id))
 const allowedWeekdayIds = new Set(availabilityGridDays.map((option) => option.id))
 const allowedTimeBlockIds = new Set(availabilityTimeBlocks.map((option) => option.id))
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value)
+}
+
+function sanitizeStringList(value: unknown, maxItems: number, maxLength: number) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .map((item) => item.slice(0, maxLength)),
+    ),
+  ).slice(0, maxItems)
+}
+
+function sanitizeFlexibleValue(
+  value: unknown,
+  depth = 0,
+): FlexibleOnboardingObject[keyof FlexibleOnboardingObject] | undefined {
+  if (depth > 2) {
+    return undefined
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim()
+    return trimmed ? trimmed.slice(0, 280) : undefined
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  if (typeof value === "boolean") {
+    return value
+  }
+
+  if (value === null) {
+    return null
+  }
+
+  if (Array.isArray(value)) {
+    const items = sanitizeStringList(value, 16, 80)
+    return items.length > 0 ? items : undefined
+  }
+
+  if (isPlainObject(value)) {
+    const next: FlexibleOnboardingObject = {}
+
+    for (const [key, nestedValue] of Object.entries(value).slice(0, 16)) {
+      const normalizedKey = key.trim().slice(0, 64)
+      if (!normalizedKey) {
+        continue
+      }
+
+      const sanitized = sanitizeFlexibleValue(nestedValue, depth + 1)
+      if (sanitized !== undefined) {
+        next[normalizedKey] = sanitized
+      }
+    }
+
+    return Object.keys(next).length > 0 ? next : undefined
+  }
+
+  return undefined
+}
+
+function sanitizeFlexibleObject(value: unknown) {
+  const sanitized = sanitizeFlexibleValue(value, 0)
+  return isPlainObject(sanitized) ? sanitized : {}
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,6 +155,12 @@ export async function POST(request: NextRequest) {
       availability?: unknown
       availabilityGrid?: unknown
       conciergeNote?: unknown
+      profileBasics?: unknown
+      compatibilityPrompts?: unknown
+      activityPreferences?: unknown
+      networkingPreferences?: unknown
+      introPreferences?: unknown
+      consentState?: unknown
     }
 
     const selectedInterests = Array.isArray(body.interests)
@@ -92,6 +175,12 @@ export async function POST(request: NextRequest) {
     const availabilityGrid = normalizeAvailabilityGrid(body.availabilityGrid)
     const derivedAvailability = buildAvailabilitySummaryFromGrid(availabilityGrid)
     const conciergeNote = typeof body.conciergeNote === "string" ? body.conciergeNote.trim() : ""
+    const profileBasics = sanitizeFlexibleObject(body.profileBasics)
+    const compatibilityPrompts = sanitizeFlexibleObject(body.compatibilityPrompts)
+    const activityPreferences = sanitizeStringList(body.activityPreferences, 16, 80)
+    const networkingPreferences = sanitizeFlexibleObject(body.networkingPreferences)
+    const introPreferences = sanitizeFlexibleObject(body.introPreferences)
+    const consentState = sanitizeFlexibleObject(body.consentState)
 
     const normalizedInterests = [...new Set(selectedInterests.map((value) => value.trim()))]
     const normalizedGoals = [...new Set(selectedGoals.map((value) => value.trim()))]
@@ -150,6 +239,12 @@ export async function POST(request: NextRequest) {
       availability: derivedAvailability,
       availabilityGrid,
       conciergeNote,
+      profileBasics,
+      compatibilityPrompts,
+      activityPreferences,
+      networkingPreferences,
+      introPreferences,
+      consentState,
     })
 
     return NextResponse.json(snapshot, {

@@ -1,5 +1,6 @@
 import { notifyIntroductionDelivered } from "@/lib/introduction-notifications"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
+import { getEventEngagementSnapshotForBuilding } from "@/lib/event-engagements-server"
 import {
   getManagerSupportRequestsForBuilding,
   type ManagerSupportRequestItem,
@@ -650,6 +651,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     eventsResult,
     introductionsResult,
     supportResult,
+    eventEngagementResult,
   ] = await Promise.all([
     supabase
       .from("building_memberships")
@@ -703,6 +705,7 @@ export async function getManagerDashboardSnapshotForBuilding({
       .eq("building_id", buildingId)
       .returns<BuildingIntroductionRow[]>(),
     getManagerSupportRequestsForBuilding(buildingId),
+    getEventEngagementSnapshotForBuilding(buildingId),
   ])
 
   const firstError = [
@@ -726,6 +729,7 @@ export async function getManagerDashboardSnapshotForBuilding({
   const introductions = introductionsResult.data ?? []
   const supportCategoryBreakdown = supportResult.supportCategoryBreakdown
   const supportQueue = supportResult.supportQueue
+  const mostRequestedEvents = eventEngagementResult.mostRequestedEvents
   const eventIds = events.map((event) => event.id)
   let enrollments: EnrollmentCountRow[] = []
 
@@ -918,8 +922,11 @@ export async function getManagerDashboardSnapshotForBuilding({
       emptyMessage: "No introduction activity yet.",
     },
     mostRequestedEvents: {
-      items: [],
-      emptyMessage: "Coming soon once resident event suggestions or event voting are stored in Supabase.",
+      items: mostRequestedEvents,
+      emptyMessage:
+        mostRequestedEvents.length > 0
+          ? undefined
+          : "No resident event requests, waitlist signals, or proposal votes have been captured yet.",
     },
     amenityUsage: fallbackAmenityUsage(),
     introductionQueue: buildIntroductionQueue(introductions, profilesById),

@@ -4,8 +4,8 @@ import {
   authenticateResidentAccessToken,
   getBearerToken,
 } from "@/lib/resident-account-server"
+import { requireManagerBuilding } from "@/lib/manager-access-server"
 import {
-  getAuthorizedManagerBuilding,
   getMockManagerDashboardSnapshot,
   getManagerDashboardSnapshotForBuilding,
 } from "@/lib/manager-dashboard-live"
@@ -34,14 +34,7 @@ export async function GET(request: NextRequest) {
       return jsonError("Authentication required.", 401)
     }
 
-    const building = await getAuthorizedManagerBuilding(user.id)
-
-    if (!building) {
-      return jsonError(
-        "Only authenticated building managers or admins can access Community Pulse.",
-        403,
-      )
-    }
+    const building = await requireManagerBuilding(user)
 
     const snapshot = await getManagerDashboardSnapshotForBuilding({
       buildingId: building.id,
@@ -60,7 +53,11 @@ export async function GET(request: NextRequest) {
     const isAccessError =
       message.includes("manager access") ||
       message.includes("authentication") ||
-      message.includes("authorized")
+      message.includes("authorized") ||
+      message.includes("building-team") ||
+      message.includes("pilot request") ||
+      message.includes("same work email") ||
+      message.includes("subscription")
 
     if (isPreviewFallbackAllowed() && !isAccessError) {
       return NextResponse.json(getMockManagerDashboardSnapshot(), {
@@ -73,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     return jsonError(
       error instanceof Error ? error.message : "Unable to load manager dashboard.",
-      400,
+      isAccessError ? 403 : 400,
     )
   }
 }

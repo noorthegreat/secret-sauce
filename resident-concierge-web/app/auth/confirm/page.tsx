@@ -38,6 +38,7 @@ function AuthConfirmPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const nextPath = useMemo(() => normalizeNextPath(searchParams.get("next")), [searchParams])
+  const isManagerJourney = nextPath.startsWith("/manager")
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""))
@@ -116,7 +117,9 @@ function AuthConfirmPageContent() {
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-gold">Email confirmation</p>
         <h1 className="mt-4 font-serif text-4xl text-foreground">Confirm your account</h1>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          Verify your email, then we&apos;ll send you back into the resident experience.
+          {isManagerJourney
+            ? "Verify your email, then we'll send you back into Community Pulse."
+            : "Verify your email, then we'll send you back into the resident experience."}
         </p>
 
         {errorMessage ? (

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { trackProductEvent } from "@/lib/product-analytics"
 import { ArrowLeft, CheckCircle2, Loader2, ShieldAlert } from "lucide-react"
 import {
@@ -356,6 +357,27 @@ export function ManagerDashboard({
                   {errorStatus === 403 ? "Manager access required." : "Unable to load Community Pulse."}
                 </p>
                 <p className="mt-1 leading-relaxed">{loadError}</p>
+                {errorStatus === 403 ? (
+                  <>
+                    <p className="mt-3 leading-relaxed">
+                      Sign in with the same work email used for the building pilot request. If you still cannot access Community Pulse, your building-team role likely has not been provisioned yet.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link
+                        href="/auth?next=%2Fmanager%2Fdashboard"
+                        className="rounded-full border border-destructive/25 bg-white/80 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                      >
+                        Try another sign-in
+                      </Link>
+                      <Link
+                        href="/for-buildings"
+                        className="rounded-full border border-destructive/15 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                      >
+                        Return to pilot request
+                      </Link>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
           </section>

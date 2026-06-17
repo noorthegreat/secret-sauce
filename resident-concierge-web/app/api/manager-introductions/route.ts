@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import {
-  getAuthorizedManagerBuilding,
   markIntroductionDeliveredForBuilding,
 } from "@/lib/manager-dashboard-live"
 import {
   authenticateResidentAccessToken,
   getBearerToken,
 } from "@/lib/resident-account-server"
+import { requireManagerBuilding } from "@/lib/manager-access-server"
 
 export const dynamic = "force-dynamic"
 
@@ -35,14 +35,7 @@ export async function POST(request: NextRequest) {
       return jsonError("Authentication required.", 401)
     }
 
-    const building = await getAuthorizedManagerBuilding(user.id)
-
-    if (!building) {
-      return jsonError(
-        "Only authenticated building managers or admins can manage concierge introductions.",
-        403,
-      )
-    }
+    const building = await requireManagerBuilding(user)
 
     const body = (await request.json()) as {
       introductionId?: string
@@ -73,11 +66,19 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("manager-introductions POST failed", error)
 
+    const message = error instanceof Error ? error.message.toLowerCase() : ""
+    const isAccessError =
+      message.includes("building-team") ||
+      message.includes("pilot request") ||
+      message.includes("same work email") ||
+      message.includes("manager") ||
+      message.includes("subscription")
+
     return jsonError(
       error instanceof Error
         ? error.message
         : "Unable to update the concierge introduction.",
-      400,
+      isAccessError ? 403 : 400,
     )
   }
 }

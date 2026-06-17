@@ -30,6 +30,11 @@ export type ResidentAccountSnapshot = {
   isPaused: boolean
 }
 
+export type FlexibleOnboardingObject = Record<
+  string,
+  string | number | boolean | null | string[] | FlexibleOnboardingObject
+>
+
 type BuildingRow = {
   id: string
   name: string
@@ -55,6 +60,12 @@ type JoinRequestRow = {
   availability_grid?: Record<string, unknown> | null
   wants_friendships?: boolean | null
   wants_networking?: boolean | null
+  onboarding_profile?: FlexibleOnboardingObject | null
+  compatibility_prompts?: FlexibleOnboardingObject | null
+  activity_preferences?: string[] | null
+  networking_preferences?: FlexibleOnboardingObject | null
+  intro_preferences?: FlexibleOnboardingObject | null
+  consent_state?: FlexibleOnboardingObject | null
 }
 
 type ProfileRow = {
@@ -288,6 +299,12 @@ export type ResidentOnboardingSubmission = {
   availability: string[]
   availabilityGrid: AvailabilityGrid
   conciergeNote?: string
+  profileBasics?: FlexibleOnboardingObject
+  compatibilityPrompts?: FlexibleOnboardingObject
+  activityPreferences?: string[]
+  networkingPreferences?: FlexibleOnboardingObject
+  introPreferences?: FlexibleOnboardingObject
+  consentState?: FlexibleOnboardingObject
 }
 
 export async function persistResidentOnboardingForUser(
@@ -319,6 +336,13 @@ export async function persistResidentOnboardingForUser(
     ["friendships", "activity_partners", "community_involvement"].includes(value),
   )
   const wantsNetworking = submission.lookingFor.some((value) => value === "professional_networking")
+  const normalizedActivityPreferences = Array.from(
+    new Set(
+      (submission.activityPreferences ?? [])
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  )
 
   const [{ error: profileError }, { error: requestError }] = await Promise.all([
     supabase
@@ -341,6 +365,13 @@ export async function persistResidentOnboardingForUser(
         availability_grid: normalizedAvailabilityGrid,
         wants_friendships: wantsFriendships,
         wants_networking: wantsNetworking,
+        onboarding_profile: submission.profileBasics ?? {},
+        compatibility_prompts: submission.compatibilityPrompts ?? {},
+        activity_preferences: normalizedActivityPreferences,
+        networking_preferences: submission.networkingPreferences ?? {},
+        intro_preferences: submission.introPreferences ?? {},
+        consent_state: submission.consentState ?? {},
+        onboarding_completed_at: nowIso,
         updated_at: nowIso,
       })
       .eq("id", joinRequest.id),

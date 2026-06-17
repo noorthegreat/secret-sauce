@@ -42,6 +42,7 @@ function AuthPageContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const nextPath = useMemo(() => normalizeNextPath(searchParams.get("next")), [searchParams])
+  const isManagerJourney = nextPath.startsWith("/manager")
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -88,7 +89,11 @@ function AuthPageContent() {
         throw error
       }
 
-      setNotice("Check your email to confirm your account, then come back here.")
+      setNotice(
+        isManagerJourney
+          ? "Check your email to confirm your building-team account, then come back to Community Pulse."
+          : "Check your email to confirm your account, then come back here.",
+      )
       setMode("signin")
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to continue right now.")
@@ -101,7 +106,7 @@ function AuthPageContent() {
     <main className="min-h-screen bg-[#1f1a15] text-[#f3ebdc]">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
         <Link
-          href="/"
+          href={isManagerJourney ? "/for-buildings" : "/"}
           className="mb-10 inline-flex w-fit items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[#b8ab97] transition-colors hover:text-[#f3ebdc]"
         >
           <ArrowLeft className="size-4" />
@@ -118,18 +123,30 @@ function AuthPageContent() {
 
         <section className="text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-[#b89655]">
-            Resident sign in
+            {isManagerJourney ? "Building team sign in" : "Resident sign in"}
           </p>
           <h1 className="mt-5 font-serif text-4xl leading-[1.02]">
-            {mode === "signin" ? "Welcome to" : "Create your"}
+            {mode === "signin"
+              ? isManagerJourney
+                ? "Welcome to"
+                : "Welcome to"
+              : "Create your"}
             <span className="block italic text-[#c29a51]">
-              {mode === "signin" ? "your building." : "account."}
+              {mode === "signin"
+                ? isManagerJourney
+                  ? "Community Pulse."
+                  : "your building."
+                : "account."}
             </span>
           </h1>
           <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-[#b8ab97]">
             {mode === "signin"
-              ? "Use the email tied to your resident request so we can connect you to the right building membership."
-              : "This account stays private to your building community and never becomes a public profile."}
+              ? isManagerJourney
+                ? "Use the same work email you submitted on the pilot request. Community Pulse opens once your building-team access has been provisioned."
+                : "Use the email tied to your resident request so we can connect you to the right building membership."
+              : isManagerJourney
+                ? "Create a secure building-team sign-in. Dashboard access still needs to be activated for your building."
+                : "This account stays private to your building community and never becomes a public profile."}
           </p>
         </section>
 
@@ -204,7 +221,9 @@ function AuthPageContent() {
         </form>
 
         <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-[#867664]">
-          Private. Building-scoped. Concierge-led.
+          {isManagerJourney
+            ? "Private. Building-scoped. Manager access only."
+            : "Private. Building-scoped. Concierge-led."}
         </p>
       </div>
     </main>

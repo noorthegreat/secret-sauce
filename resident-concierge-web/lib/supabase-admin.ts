@@ -17,8 +17,14 @@ export function getSupabaseAdmin() {
     return cachedClient
   }
 
-  const url = getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL")
-  const serviceRoleKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY")
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    process.env.SUPABASE_URL?.trim() ||
+    getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL")
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    process.env.SUPABASE_SECRET_KEY?.trim() ||
+    getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY")
 
   cachedClient = createClient(url, serviceRoleKey, {
     auth: {

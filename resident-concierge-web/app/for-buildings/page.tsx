@@ -314,7 +314,7 @@ export default function ForBuildingsPage() {
                       </p>
                     ) : null}
                     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                      Next, test the resident request flow and confirm secure access to Community Pulse.
+                      Next, test the resident request flow. Community Pulse access turns on after your building-team account is provisioned.
                     </p>
                     {buildingSlug ? (
                       <div className="mt-4 flex flex-wrap gap-3">
@@ -325,13 +325,16 @@ export default function ForBuildingsPage() {
                           Open resident join flow
                         </Link>
                         <Link
-                          href="/manager/dashboard"
+                          href="/auth?next=%2Fmanager%2Fdashboard"
                           className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
                         >
-                          Open Community Pulse
+                          Sign in to Community Pulse
                         </Link>
                       </div>
                     ) : null}
+                    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                      Use the same work email you submitted above. If access is not active yet, Fifth Circle still needs to provision your building-team role.
+                    </p>
                   </div>
                 ) : null}
 

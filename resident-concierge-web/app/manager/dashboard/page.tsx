@@ -69,7 +69,7 @@ export default function ManagerDashboardPage() {
                 ) : !user || !session?.access_token ? (
                   <CenteredState
                     title="Manager sign-in required."
-                    description="Community Pulse is only available after authentication for approved building staff."
+                    description="Use the same work email submitted on your pilot request. Community Pulse is only available for approved building staff."
                     ctaLabel="Sign in"
                     ctaHref="/auth?next=%2Fmanager%2Fdashboard"
                   />
