@@ -12,6 +12,7 @@ import {
   Tooltip,
   XAxis,
 } from "recharts"
+import { ManagerEventPlanningSection } from "@/components/screens/manager-event-planning-section"
 
 type DashboardStat = {
   label: string
@@ -518,6 +519,13 @@ export function ManagerDashboard({
                   onClose={(eventId) => void updateEventState(eventId, "close")}
                 />
               </div>
+            </Panel>
+
+            <Panel
+              title="Event planning"
+              caption="Pilot budget settings, recommendation drafts, and resident-suggested programming ideas"
+            >
+              <ManagerEventPlanningSection accessToken={accessToken} />
             </Panel>
 
             <Panel title="Introduction funnel" caption="How concierge introductions are progressing through the community">

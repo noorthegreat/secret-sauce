@@ -6,6 +6,7 @@ import { CalendarCheck, Check, Lightbulb, Loader2, Plus, Users } from "lucide-re
 import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { ScreenHeader, SectionLabel } from "@/components/screen-header"
+import { ResidentEventSuggestions } from "@/components/screens/resident-event-suggestions"
 import type { CommunityEvent, CommunityPoll } from "@/lib/community-live"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import { trackProductEvent } from "@/lib/product-analytics"
@@ -97,7 +98,14 @@ export function CommunityScreen({
           onCompleteProfile={onCompleteProfile}
         />
       ) : (
-        <VotingList eventPolls={eventPolls} />
+        <VotingList
+          eventPolls={eventPolls}
+          isSignedIn={isSignedIn}
+          accountSnapshot={accountSnapshot}
+          accountLoading={accountLoading}
+          onSignIn={onSignIn}
+          onCompleteProfile={onCompleteProfile}
+        />
       )}
     </div>
   )
@@ -551,75 +559,95 @@ function EventGroup({
   )
 }
 
-function VotingList({ eventPolls }: { eventPolls: CommunityPoll[] }) {
+function VotingList({
+  eventPolls,
+  isSignedIn,
+  accountSnapshot,
+  accountLoading,
+  onSignIn,
+  onCompleteProfile,
+}: {
+  eventPolls: CommunityPoll[]
+  isSignedIn: boolean
+  accountSnapshot: ResidentAccountSnapshot | null
+  accountLoading: boolean
+  onSignIn: () => void
+  onCompleteProfile: () => void
+}) {
   const [voted, setVoted] = useState<Record<string, boolean>>({})
 
-  if (eventPolls.length === 0) {
-    return (
-      <div className="mt-6 px-6">
+  return (
+    <div className="mt-6 px-6">
+      {eventPolls.length === 0 ? (
         <EmptyState
           icon={Lightbulb}
           title="Event ideas coming soon"
           description="Your building team will open voting when it is time to shape the next calendar of gatherings."
         />
-      </div>
-    )
-  }
+      ) : (
+        <>
+          <p className="mb-5 text-sm leading-relaxed text-[#726353]">
+            Help shape next month. Add your interest to the gatherings you would be most likely to attend.
+          </p>
+          <div className="flex flex-col gap-3.5">
+            {eventPolls.map((poll) => {
+              const isVoted = voted[poll.id]
+              const votes = poll.votes + (isVoted ? 1 : 0)
+              const percent = Math.min(100, poll.percent + (isVoted ? 2 : 0))
 
-  return (
-    <div className="mt-6 px-6">
-      <p className="mb-5 text-sm leading-relaxed text-[#726353]">
-        Help shape next month. Add your interest to the gatherings you would be most likely to attend.
-      </p>
-      <div className="flex flex-col gap-3.5">
-        {eventPolls.map((poll) => {
-          const isVoted = voted[poll.id]
-          const votes = poll.votes + (isVoted ? 1 : 0)
-          const percent = Math.min(100, poll.percent + (isVoted ? 2 : 0))
-
-          return (
-            <div
-              key={poll.id}
-              className="overflow-hidden rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] shadow-[0_22px_50px_-42px_rgba(70,56,35,0.38)]"
-            >
-              <div className="flex items-center gap-4 p-3.5">
-                <img
-                  src={poll.image || "/placeholder.svg"}
-                  alt={poll.title}
-                  className="size-16 shrink-0 rounded-2xl object-cover"
-                />
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-serif text-lg leading-tight text-foreground">{poll.title}</h3>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#efe6d8]">
-                    <div
-                      className="h-full rounded-full bg-gold transition-all duration-500"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                  <p className="mt-1.5 text-[11px] text-[#7d6e5e]">
-                    {votes} residents interested
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setVoted((previous) => ({ ...previous, [poll.id]: !previous[poll.id] }))
-                  }
-                  className={cn(
-                    "flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors",
-                    isVoted
-                      ? "border-gold bg-gold text-gold-foreground"
-                      : "border-[#e1d5c3] text-foreground hover:border-gold/50",
-                  )}
-                  aria-label={`Vote for ${poll.title}`}
+              return (
+                <div
+                  key={poll.id}
+                  className="overflow-hidden rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] shadow-[0_22px_50px_-42px_rgba(70,56,35,0.38)]"
                 >
-                  {isVoted ? <Check className="size-5" /> : <Plus className="size-5" />}
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                  <div className="flex items-center gap-4 p-3.5">
+                    <img
+                      src={poll.image || "/placeholder.svg"}
+                      alt={poll.title}
+                      className="size-16 shrink-0 rounded-2xl object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-serif text-lg leading-tight text-foreground">{poll.title}</h3>
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#efe6d8]">
+                        <div
+                          className="h-full rounded-full bg-gold transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-[11px] text-[#7d6e5e]">
+                        {votes} residents interested
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setVoted((previous) => ({ ...previous, [poll.id]: !previous[poll.id] }))
+                      }
+                      className={cn(
+                        "flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors",
+                        isVoted
+                          ? "border-gold bg-gold text-gold-foreground"
+                          : "border-[#e1d5c3] text-foreground hover:border-gold/50",
+                      )}
+                      aria-label={`Vote for ${poll.title}`}
+                    >
+                      {isVoted ? <Check className="size-5" /> : <Plus className="size-5" />}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      <ResidentEventSuggestions
+        isSignedIn={isSignedIn}
+        accountSnapshot={accountSnapshot}
+        accountLoading={accountLoading}
+        onSignIn={onSignIn}
+        onCompleteProfile={onCompleteProfile}
+      />
     </div>
   )
 }
