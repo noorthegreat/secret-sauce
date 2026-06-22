@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { ArrowRight, CalendarRange, Loader2, Sparkles, Users } from "lucide-react"
 
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
-import { SelectCard, Chip } from "@/components/select-card"
+import { Chip, SelectCard } from "@/components/select-card"
 import {
   availabilityGridDays,
   availabilityTimeBlocks,
@@ -25,6 +25,8 @@ import {
 import { cn } from "@/lib/utils"
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6
+type SocialEnergyId = "calm" | "balanced" | "outgoing"
+type PlanningStyleId = "spontaneous" | "planned" | "flexible"
 
 export type OnboardingSubmission = {
   lookingFor: MatchingGoalId[]
@@ -33,6 +35,31 @@ export type OnboardingSubmission = {
   availability: AvailabilitySummaryId[]
   availabilityGrid: AvailabilityGrid
   conciergeNote: string
+  profileBasics?: {
+    recognitionCue?: string
+    occupation?: string
+  }
+  compatibilityPrompts?: {
+    socialEnergy?: SocialEnergyId
+    planningStyle?: PlanningStyleId
+    favoriteTopics?: string[]
+  }
+  activityPreferences?: string[]
+  networkingPreferences?: {
+    openToNetworking?: boolean
+    openToMentoring?: boolean
+    lookingForMentorship?: boolean
+    occupation?: string
+  }
+  introPreferences?: {
+    cadence?: string
+    socialEnergy?: SocialEnergyId
+    planningStyle?: PlanningStyleId
+    connectionStyles?: ConnectionStyleId[]
+  }
+  consentState?: {
+    communityAgreementAccepted: boolean
+  }
 }
 
 const socialInterests: InterestId[] = [
@@ -41,11 +68,15 @@ const socialInterests: InterestId[] = [
   "travel",
   "books",
   "art",
+  "arts_culture",
   "design",
   "film",
+  "law",
   "music",
+  "startups",
   "technology",
   "entrepreneurship",
+  "current_events",
   "dogs",
 ]
 
@@ -68,6 +99,26 @@ const cadenceOptions = [
   { id: "4+", label: "4+", note: "Open to a fuller social calendar" },
 ] as const
 
+const socialEnergyOptions: Array<{
+  id: SocialEnergyId
+  label: string
+  note: string
+}> = [
+  { id: "calm", label: "Calm", note: "Low-key, quieter energy." },
+  { id: "balanced", label: "Balanced", note: "A mix of calm and lively." },
+  { id: "outgoing", label: "Outgoing", note: "More social and high-energy." },
+]
+
+const planningStyleOptions: Array<{
+  id: PlanningStyleId
+  label: string
+  note: string
+}> = [
+  { id: "spontaneous", label: "Spontaneous", note: "Last-minute can work." },
+  { id: "planned", label: "Planned", note: "A little notice feels best." },
+  { id: "flexible", label: "Flexible", note: "Somewhere in between." },
+]
+
 export function Onboarding({
   onComplete,
 }: {
@@ -75,10 +126,22 @@ export function Onboarding({
 }) {
   const [step, setStep] = useState<Step>(0)
   const [lookingFor, setLookingFor] = useState<MatchingGoalId[]>(["friendships"])
-  const [chosenInterests, setChosenInterests] = useState<InterestId[]>(["coffee", "walking", "wellness"])
+  const [chosenInterests, setChosenInterests] = useState<InterestId[]>([
+    "coffee",
+    "walking",
+    "wellness",
+  ])
   const [style, setStyle] = useState<ConnectionStyleId[]>(["one_on_one"])
-  const [availabilityGrid, setAvailabilityGrid] = useState<AvailabilityGrid>(() => createEmptyAvailabilityGrid())
+  const [availabilityGrid, setAvailabilityGrid] = useState<AvailabilityGrid>(() =>
+    createEmptyAvailabilityGrid(),
+  )
   const [cadence, setCadence] = useState<(typeof cadenceOptions)[number]["id"]>("2")
+  const [socialEnergy, setSocialEnergy] = useState<SocialEnergyId>("balanced")
+  const [planningStyle, setPlanningStyle] = useState<PlanningStyleId>("flexible")
+  const [occupation, setOccupation] = useState("")
+  const [openToMentoring, setOpenToMentoring] = useState(false)
+  const [lookingForMentorship, setLookingForMentorship] = useState(false)
+  const [consentAccepted, setConsentAccepted] = useState(false)
   const [recognitionCue, setRecognitionCue] = useState("")
   const [conciergeNote, setConciergeNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -109,7 +172,11 @@ export function Onboarding({
           ? chosenInterests.length >= 3
           : step === 4
             ? availabilitySummary.length > 0
-            : true
+            : step === 5
+              ? Boolean(cadence && socialEnergy && planningStyle)
+              : step === 6
+                ? consentAccepted && conciergeNote.trim().length >= 12
+                : true
 
   function next() {
     setStep((current) => Math.min(6, (current + 1) as Step))
@@ -135,6 +202,33 @@ export function Onboarding({
         availability: availabilitySummary,
         availabilityGrid,
         conciergeNote: composedConciergeNote,
+        profileBasics: {
+          recognitionCue: recognitionCue.trim() || undefined,
+          occupation: occupation.trim() || undefined,
+        },
+        compatibilityPrompts: {
+          socialEnergy,
+          planningStyle,
+          favoriteTopics: chosenInterests.filter((interest) => socialInterests.includes(interest)),
+        },
+        activityPreferences: chosenInterests.filter((interest) =>
+          activityInterests.includes(interest),
+        ),
+        networkingPreferences: {
+          openToNetworking: lookingFor.includes("professional_networking"),
+          openToMentoring,
+          lookingForMentorship,
+          occupation: occupation.trim() || undefined,
+        },
+        introPreferences: {
+          cadence,
+          socialEnergy,
+          planningStyle,
+          connectionStyles: style,
+        },
+        consentState: {
+          communityAgreementAccepted: consentAccepted,
+        },
       })
     } catch (error) {
       setErrorMessage(
@@ -241,7 +335,7 @@ export function Onboarding({
             eyebrow="Shared interests"
             title="What do you"
             accent="love to do?"
-            subtitle="Pick a mix of social interests and activities. Three to eight is usually enough for stronger introductions."
+            subtitle="Pick a mix of conversation interests and activities. Three to eight is usually enough for stronger introductions."
           >
             <InterestGroup
               title="Conversation and common ground"
@@ -278,7 +372,7 @@ export function Onboarding({
             title="How often would you"
             accent="like to meet someone"
             afterAccent="new?"
-            subtitle="We use this to keep your introduction pace comfortable and considered."
+            subtitle="We use this to keep your introduction pace comfortable and to understand the social rhythm that fits you best."
           >
             <div className="grid grid-cols-4 gap-3">
               {cadenceOptions.map((option) => (
@@ -298,6 +392,42 @@ export function Onboarding({
                 </button>
               ))}
             </div>
+
+            <div className="mt-8">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#8f7d66]">
+                Social energy
+              </p>
+              <div className="mt-3 grid gap-3">
+                {socialEnergyOptions.map((option) => (
+                  <SelectCard
+                    key={option.id}
+                    label={option.label}
+                    note={option.note}
+                    selected={socialEnergy === option.id}
+                    onClick={() => setSocialEnergy(option.id)}
+                    tone="dark"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#8f7d66]">
+                Planning style
+              </p>
+              <div className="mt-3 grid gap-3">
+                {planningStyleOptions.map((option) => (
+                  <SelectCard
+                    key={option.id}
+                    label={option.label}
+                    note={option.note}
+                    selected={planningStyle === option.id}
+                    onClick={() => setPlanningStyle(option.id)}
+                    tone="dark"
+                  />
+                ))}
+              </div>
+            </div>
           </Section>
         )}
         {step === 6 && (
@@ -305,7 +435,7 @@ export function Onboarding({
             eyebrow="Recognition"
             title="Help your neighbors"
             accent="recognise you."
-            subtitle="Give your concierge a helpful cue and a note about the kind of person or meetup that would feel right."
+            subtitle="Give your concierge a helpful cue and a note about the kind of introduction, conversation, or gathering that would feel genuinely worthwhile."
           >
             <div className="rounded-[2rem] border border-[#43392f] bg-[#251f19] p-5">
               <div className="flex items-center gap-4">
@@ -314,7 +444,9 @@ export function Onboarding({
                 </div>
                 <div>
                   <p className="font-serif text-2xl">Noor</p>
-                  <p className="mt-1 text-sm text-[#a79883]">This stays private to your concierge workflow.</p>
+                  <p className="mt-1 text-sm text-[#a79883]">
+                    This stays private to your concierge workflow.
+                  </p>
                 </div>
               </div>
 
@@ -332,16 +464,57 @@ export function Onboarding({
 
               <label className="mt-4 block">
                 <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
+                  Occupation or professional context
+                </span>
+                <input
+                  value={occupation}
+                  onChange={(event) => setOccupation(event.target.value)}
+                  placeholder="Optional: architecture, law, investing, design, founder..."
+                  className="h-12 w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 text-sm text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"
+                />
+              </label>
+
+              <label className="mt-4 block">
+                <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
                   Concierge note
                 </span>
                 <textarea
                   value={conciergeNote}
                   onChange={(event) => setConciergeNote(event.target.value)}
                   maxLength={200}
-                  placeholder="Looking for people to grab coffee with after work, hoping to find a tennis partner, or interested in a few thoughtful neighbor introductions."
+                  placeholder="Looking for people to grab coffee with after work, interested in startup conversations, hoping to find tennis partners, or new to the city and wanting to meet a few neighbors."
                   className="min-h-32 w-full rounded-[1.2rem] border border-[#42382d] bg-[#2a231c] px-4 py-3 text-sm leading-7 text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"
                 />
               </label>
+
+              {lookingFor.includes("professional_networking") ? (
+                <div className="mt-5 rounded-[1.4rem] border border-[#43392f] bg-[#201b16] p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
+                    Professional introductions
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    <ToggleRow
+                      label="Open to professional networking"
+                      note="This keeps networking opt-in and resident-led."
+                      checked={lookingFor.includes("professional_networking")}
+                      disabled
+                      onChange={() => undefined}
+                    />
+                    <ToggleRow
+                      label="Open to mentoring"
+                      note="You would be comfortable sharing guidance or making warm introductions."
+                      checked={openToMentoring}
+                      onChange={setOpenToMentoring}
+                    />
+                    <ToggleRow
+                      label="Looking for mentorship"
+                      note="You would value being introduced to a resident with experience in an area you are growing into."
+                      checked={lookingForMentorship}
+                      onChange={setLookingForMentorship}
+                    />
+                  </div>
+                </div>
+              ) : null}
 
               <div className="mt-5 rounded-[1.4rem] border border-[#43392f] bg-[#201b16] px-4 py-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
@@ -351,6 +524,18 @@ export function Onboarding({
                   {composedConciergeNote || "Your concierge note will appear here before you save."}
                 </p>
               </div>
+
+              <label className="mt-5 flex items-start gap-3 rounded-[1.4rem] border border-[#43392f] bg-[#201b16] px-4 py-4">
+                <input
+                  type="checkbox"
+                  checked={consentAccepted}
+                  onChange={(event) => setConsentAccepted(event.target.checked)}
+                  className="mt-1 size-4 rounded border-[#6e604f] bg-[#2a231c] text-[#b89655] accent-[#b89655]"
+                />
+                <span className="text-sm leading-7 text-[#d9cfbf]">
+                  I understand Fifth Circle keeps introductions private, building-scoped, and voluntary.
+                </span>
+              </label>
             </div>
 
             {errorMessage ? (
@@ -423,7 +608,10 @@ function WelcomeStep() {
       <div className="mt-10 space-y-4">
         <Promise icon={Users} text="A thoughtful list of neighbors, not a directory." />
         <Promise icon={CalendarRange} text="Availability overlap to suggest realistic meetups." />
-        <Promise icon={Sparkles} text="Calm, concierge-led introductions that feel natural." />
+        <Promise
+          icon={Sparkles}
+          text="Calm, concierge-led introductions with stronger matching context."
+        />
       </div>
     </div>
   )
@@ -603,5 +791,40 @@ function AvailabilityGridRow({
         )
       })}
     </>
+  )
+}
+
+function ToggleRow({
+  label,
+  note,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: string
+  note: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+}) {
+  return (
+    <label
+      className={cn(
+        "flex items-start gap-3 rounded-[1.2rem] border border-[#43392f] px-4 py-3",
+        disabled ? "opacity-75" : "cursor-pointer",
+      )}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        disabled={disabled}
+        className="mt-1 size-4 rounded border-[#6e604f] bg-[#2a231c] text-[#b89655] accent-[#b89655]"
+      />
+      <span>
+        <span className="block text-sm text-[#f3ebdc]">{label}</span>
+        <span className="mt-1 block text-xs leading-6 text-[#a79883]">{note}</span>
+      </span>
+    </label>
   )
 }

@@ -17,11 +17,15 @@ export type InterestId =
   | "books"
   | "wellness"
   | "art"
+  | "arts_culture"
   | "design"
   | "film"
+  | "law"
   | "music"
+  | "startups"
   | "technology"
   | "entrepreneurship"
+  | "current_events"
   | "fitness"
   | "running"
   | "hiking"
@@ -37,6 +41,10 @@ export type ConnectionStyleId =
   | "small_group"
   | "event_based"
   | "flexible"
+
+export type SocialEnergyId = "calm" | "balanced" | "outgoing"
+
+export type PlanningStyleId = "spontaneous" | "planned" | "flexible"
 
 export type AvailabilitySummaryId =
   | "weekday_mornings"
@@ -82,6 +90,14 @@ export type Resident = {
   interests: string[]
   shared: number
   matchScore?: number
+  occupation?: string
+  recognitionCue?: string | null
+  socialEnergy?: string | null
+  planningStyle?: string | null
+  connectionPreference?: string | null
+  compatibilityDetails?: string[]
+  conciergeSnippet?: string | null
+  meetupReason?: string | null
 }
 
 export const residents: Resident[] = [
@@ -234,7 +250,7 @@ const allIntentOptions: ChoiceOption<MatchingGoalId>[] = [
   },
 ]
 
-export const intents = allIntentOptions.filter((option) => option.id !== "professional_networking")
+export const intents = allIntentOptions
 
 export const interestOptions: ChoiceOption<InterestId>[] = [
   { id: "coffee", label: "Coffee" },
@@ -243,11 +259,15 @@ export const interestOptions: ChoiceOption<InterestId>[] = [
   { id: "books", label: "Books" },
   { id: "wellness", label: "Wellness" },
   { id: "art", label: "Art" },
+  { id: "arts_culture", label: "Arts & culture" },
   { id: "design", label: "Design" },
   { id: "film", label: "Film" },
+  { id: "law", label: "Law" },
   { id: "music", label: "Music" },
+  { id: "startups", label: "Startups" },
   { id: "technology", label: "Technology" },
   { id: "entrepreneurship", label: "Entrepreneurship" },
+  { id: "current_events", label: "Current events" },
   { id: "fitness", label: "Fitness" },
   { id: "running", label: "Running" },
   { id: "hiking", label: "Hiking" },
@@ -369,6 +389,16 @@ const interestLabelLookup = new Map(interestOptions.map((option) => [option.id, 
 const connectionStyleLabelLookup = new Map(
   connectionStyles.map((option) => [option.id, option.label]),
 )
+const socialEnergyLabelLookup = new Map<SocialEnergyId, string>([
+  ["calm", "Calm"],
+  ["balanced", "Balanced"],
+  ["outgoing", "Outgoing"],
+])
+const planningStyleLabelLookup = new Map<PlanningStyleId, string>([
+  ["spontaneous", "Spontaneous"],
+  ["planned", "Planned"],
+  ["flexible", "Flexible"],
+])
 const availabilitySummaryLabelLookup = new Map(
   availabilitySummaryOptions.map((option) => [option.id, option.label]),
 )
@@ -384,6 +414,14 @@ export function formatInterestLabel(value: string) {
 
 export function formatConnectionStyleLabel(value: string) {
   return connectionStyleLabelLookup.get(value as ConnectionStyleId) ?? value
+}
+
+export function formatSocialEnergyLabel(value: string) {
+  return socialEnergyLabelLookup.get(value as SocialEnergyId) ?? value
+}
+
+export function formatPlanningStyleLabel(value: string) {
+  return planningStyleLabelLookup.get(value as PlanningStyleId) ?? value
 }
 
 export function formatAvailabilitySummaryLabel(value: string) {

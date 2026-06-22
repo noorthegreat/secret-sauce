@@ -11,6 +11,12 @@ import { notifyIntroductionTransition } from "@/lib/introduction-notifications"
 import { compareResidents } from "@/lib/matching-engine"
 import { syncResidentAccountForUser } from "@/lib/resident-account-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
+import {
+  formatPlanningStyleLabel,
+  formatSocialEnergyLabel,
+  type PlanningStyleId,
+  type SocialEnergyId,
+} from "@/lib/concierge-data"
 
 type BuildingIntroductionRow = {
   id: string
@@ -57,6 +63,11 @@ type JoinRequestRow = {
   connection_styles: string[] | null
   availability: string[] | null
   availability_grid: Record<string, unknown> | null
+  onboarding_profile?: Record<string, unknown> | null
+  compatibility_prompts?: Record<string, unknown> | null
+  activity_preferences?: string[] | null
+  networking_preferences?: Record<string, unknown> | null
+  intro_preferences?: Record<string, unknown> | null
 }
 
 type ResidentDirectoryEntry = {
@@ -71,6 +82,15 @@ type ResidentDirectoryEntry = {
   availability: string[]
   availabilityGrid: Record<string, unknown> | null
   conciergeNote: string | null
+  occupation: string | null
+  recognitionCue: string | null
+  socialEnergy: SocialEnergyId | null
+  planningStyle: PlanningStyleId | null
+  connectionPreference: string | null
+  openToNetworking: boolean
+  openToMentoring: boolean
+  lookingForMentorship: boolean
+  activityPreferences: string[]
 }
 
 
@@ -105,6 +125,23 @@ function uniqueValues(values: string[] | null | undefined) {
 function intersection(left: string[], right: string[]) {
   const rightSet = new Set(right)
   return left.filter((value) => rightSet.has(value))
+}
+
+function readObjectString(source: Record<string, unknown> | null | undefined, key: string) {
+  const value = source?.[key]
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null
+}
+
+function readObjectBoolean(source: Record<string, unknown> | null | undefined, key: string) {
+  return source?.[key] === true
+}
+
+function getSocialEnergyLabel(value: SocialEnergyId | null) {
+  return value ? formatSocialEnergyLabel(value) : null
+}
+
+function getPlanningStyleLabel(value: PlanningStyleId | null) {
+  return value ? formatPlanningStyleLabel(value) : null
 }
 
 function getCurrentDecisionColumn(currentUserId: string, row: BuildingIntroductionRow) {
@@ -143,6 +180,11 @@ function buildSharedContext(
     shared_connection_styles: match.sharedConnectionStyles,
     shared_availability: match.overlapSummaries,
     shared_timing_label: match.timingLabel,
+    shared_social_energy: match.sharedSocialEnergy,
+    shared_planning_style: match.sharedPlanningStyle,
+    networking_alignment: match.networkingAlignment,
+    mentoring_alignment: match.mentoringAlignment,
+    compatibility_details: match.compatibilityDetails,
     resident_compatibility_summary: match.compatibilitySummary,
     manager_compatibility_summary: match.managerCompatibilitySummary,
     meetup_recommendation: {
@@ -221,7 +263,9 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
     normalizedEmails.length > 0
       ? await supabase
           .from("resident_join_requests")
-          .select("normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid")
+          .select(
+            "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid, onboarding_profile, compatibility_prompts, activity_preferences, networking_preferences, intro_preferences",
+          )
           .eq("building_id", buildingId)
           .in("normalized_email", normalizedEmails)
           .returns<JoinRequestRow[]>()
@@ -240,6 +284,21 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
   for (const profile of profiles ?? []) {
     const normalizedEmail = emailByUserId.get(profile.id)
     const joinRequest = normalizedEmail ? joinRequestByEmail.get(normalizedEmail) : undefined
+    const onboardingProfile = joinRequest?.onboarding_profile ?? null
+    const compatibilityPrompts = joinRequest?.compatibility_prompts ?? null
+    const networkingPreferences = joinRequest?.networking_preferences ?? null
+    const introPreferences = joinRequest?.intro_preferences ?? null
+    const socialEnergy = readObjectString(compatibilityPrompts, "socialEnergy") as SocialEnergyId | null
+    const planningStyle = readObjectString(compatibilityPrompts, "planningStyle") as PlanningStyleId | null
+    const connectionPreference = readObjectString(compatibilityPrompts, "connectionPreference")
+    const occupation = readObjectString(onboardingProfile, "occupation")
+    const recognitionCue =
+      readObjectString(onboardingProfile, "recognitionCue") || profile.bio?.trim() || null
+    const conciergeNote =
+      joinRequest?.introduction?.trim() ||
+      readObjectString(compatibilityPrompts, "conciergeNote") ||
+      profile.bio?.trim() ||
+      null
 
     directory.set(profile.id, {
       userId: profile.id,
@@ -252,7 +311,16 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
       connectionStyles: uniqueValues(joinRequest?.connection_styles),
       availability: uniqueValues(joinRequest?.availability),
       availabilityGrid: joinRequest?.availability_grid ?? null,
-      conciergeNote: joinRequest?.introduction?.trim() || profile.bio?.trim() || null,
+      conciergeNote,
+      occupation,
+      recognitionCue,
+      socialEnergy,
+      planningStyle,
+      connectionPreference,
+      openToNetworking: readObjectBoolean(networkingPreferences, "openToNetworking"),
+      openToMentoring: readObjectBoolean(networkingPreferences, "openToMentoring"),
+      lookingForMentorship: readObjectBoolean(networkingPreferences, "lookingForMentorship"),
+      activityPreferences: uniqueValues(joinRequest?.activity_preferences),
     })
   }
 
@@ -381,6 +449,27 @@ function toPreview(
       sharedConnectionStyles: match.sharedConnectionStyles,
       sharedAvailability: match.overlapSummaries,
       compatibilitySummary: row.compatibility_summary?.trim() || match.compatibilitySummary,
+      compatibilityDetails:
+        (Array.isArray(row.shared_context?.compatibility_details)
+          ? row.shared_context.compatibility_details.filter(
+              (detail): detail is string => typeof detail === "string" && detail.trim().length > 0,
+            )
+          : null) || match.compatibilityDetails,
+      occupation: otherResident.occupation,
+      recognitionCue: otherResident.recognitionCue,
+      socialEnergy:
+        getSocialEnergyLabel(
+          (typeof row.shared_context?.shared_social_energy === "string"
+            ? row.shared_context.shared_social_energy
+            : null) as SocialEnergyId | null,
+        ) || getSocialEnergyLabel(otherResident.socialEnergy),
+      planningStyle:
+        getPlanningStyleLabel(
+          (typeof row.shared_context?.shared_planning_style === "string"
+            ? row.shared_context.shared_planning_style
+            : null) as PlanningStyleId | null,
+        ) || getPlanningStyleLabel(otherResident.planningStyle),
+      connectionPreference: otherResident.connectionPreference,
       managerCompatibilitySummary:
         (typeof row.shared_context?.manager_compatibility_summary === "string"
           ? row.shared_context.manager_compatibility_summary

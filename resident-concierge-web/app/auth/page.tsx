@@ -10,7 +10,7 @@ import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/app/profile"
+    return "/app/onboarding"
   }
 
   return value
@@ -143,7 +143,7 @@ function AuthPageContent() {
             {mode === "signin"
               ? isManagerJourney
                 ? "Use the same work email you submitted on the pilot request. Community Pulse opens once your building-team access has been provisioned."
-                : "Use the email tied to your resident request so we can connect you to the right building membership."
+                : "Use the email tied to your resident request so we can connect you to the right building membership and unlock your onboarding."
               : isManagerJourney
                 ? "Create a secure building-team sign-in. Dashboard access still needs to be activated for your building."
                 : "This account stays private to your building community and never becomes a public profile."}

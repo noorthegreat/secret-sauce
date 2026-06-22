@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Loader2, Save, Sparkles } from "lucide-react"
+import { Lightbulb, Loader2, Save, Sparkles, Users2 } from "lucide-react"
 
 type BudgetPeriod = "monthly" | "yearly"
 type RecommendationSource = "manual" | "resident_suggestion" | "ai_draft"
@@ -119,7 +119,7 @@ const suggestionCategoryLabels: Record<SuggestionCategory, string> = {
   venue: "Venue",
   food_truck: "Food truck",
   caterer: "Caterer",
-  dj_performer: "DJ / performer",
+  dj_performer: "DJ or performer",
   fitness_instructor: "Fitness instructor",
   wellness_provider: "Wellness provider",
   artist: "Artist",
@@ -138,6 +138,48 @@ function formatTimestamp(value: string | null) {
     hour: "numeric",
     minute: "2-digit",
   })
+}
+
+function formatMoney(value: number | null) {
+  if (value === null || value === undefined) {
+    return "Not set"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function formatEnumLabel(value: string) {
+  return value.replaceAll("_", " ")
+}
+
+function summarizeBudget(settings: ManagerEventBudgetSettings) {
+  if (settings.eventBudgetAmount === null || !settings.eventBudgetPeriod) {
+    return "Budget not set"
+  }
+
+  return `${formatMoney(settings.eventBudgetAmount)} per ${settings.eventBudgetPeriod === "monthly" ? "month" : "year"}`
+}
+
+function PlanningStat({
+  label,
+  value,
+  helper,
+}: {
+  label: string
+  value: string
+  helper: string
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-background px-4 py-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">{label}</p>
+      <p className="mt-3 font-serif text-2xl leading-none text-foreground">{value}</p>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{helper}</p>
+    </div>
+  )
 }
 
 export function ManagerEventPlanningSection({
@@ -232,10 +274,49 @@ export function ManagerEventPlanningSection({
     void loadPlanning()
   }, [accessToken])
 
-  const defaultSignals = useMemo(
-    () => snapshot.demandSignals.slice(0, 5),
-    [snapshot.demandSignals],
-  )
+  const defaultSignals = useMemo(() => snapshot.demandSignals.slice(0, 5), [snapshot.demandSignals])
+
+  const planningStats = useMemo(() => {
+    const suggestionCounts = snapshot.residentSuggestions.reduce(
+      (counts, suggestion) => {
+        counts.total += 1
+        if (suggestion.status === "under_review") counts.underReview += 1
+        if (suggestion.status === "shortlisted") counts.shortlisted += 1
+        if (suggestion.status === "approved" || suggestion.status === "used_for_event") counts.approved += 1
+        if (suggestion.residentVisibility === "visible_for_voting") counts.visible += 1
+        return counts
+      },
+      {
+        total: 0,
+        underReview: 0,
+        shortlisted: 0,
+        approved: 0,
+        visible: 0,
+      },
+    )
+
+    const recommendationCounts = snapshot.recommendations.reduce(
+      (counts, recommendation) => {
+        counts.total += 1
+        if (recommendation.status === "proposed") counts.proposed += 1
+        if (recommendation.status === "approved" || recommendation.status === "scheduled") counts.ready += 1
+        return counts
+      },
+      {
+        total: 0,
+        proposed: 0,
+        ready: 0,
+      },
+    )
+
+    const totalSignalVolume = snapshot.demandSignals.reduce((total, signal) => total + signal.value, 0)
+
+    return {
+      suggestionCounts,
+      recommendationCounts,
+      totalSignalVolume,
+    }
+  }, [snapshot])
 
   function startRecommendationEdit(recommendation?: EventRecommendationDraft) {
     setEditingRecommendationId(recommendation?.id ?? null)
@@ -256,8 +337,7 @@ export function ManagerEventPlanningSection({
           ? String(recommendation.expectedAttendance)
           : "",
       recommendedCapacity:
-        recommendation?.recommendedCapacity !== null &&
-        recommendation?.recommendedCapacity !== undefined
+        recommendation?.recommendedCapacity !== null && recommendation?.recommendedCapacity !== undefined
           ? String(recommendation.recommendedCapacity)
           : "",
       suggestedLocation: recommendation?.suggestedLocation ?? "",
@@ -414,13 +494,62 @@ export function ManagerEventPlanningSection({
         </div>
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="grid gap-3 lg:grid-cols-4">
+        <PlanningStat
+          label="Budget stance"
+          value={summarizeBudget(snapshot.budgetSettings)}
+          helper="Sets the planning ceiling the building team should respect."
+        />
+        <PlanningStat
+          label="Resident demand"
+          value={String(planningStats.totalSignalVolume)}
+          helper="Combined proposal, vote, waitlist, RSVP, and feedback signals."
+        />
+        <PlanningStat
+          label="Suggestion pipeline"
+          value={String(planningStats.suggestionCounts.total)}
+          helper={`${planningStats.suggestionCounts.underReview} under review, ${planningStats.suggestionCounts.shortlisted} shortlisted.`}
+        />
+        <PlanningStat
+          label="Calendar-ready ideas"
+          value={String(planningStats.recommendationCounts.ready)}
+          helper={`${planningStats.recommendationCounts.proposed} proposed and awaiting a calendar decision.`}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-border bg-background p-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+          Demand to event workflow
+        </p>
+        <div className="mt-3 grid gap-3 lg:grid-cols-3">
+          <div className="rounded-2xl border border-border bg-card px-4 py-4">
+            <p className="font-serif text-lg text-foreground">1. Listen for demand</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Resident requests, waitlists, feedback, and visible suggestions show where organic momentum is building.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card px-4 py-4">
+            <p className="font-serif text-lg text-foreground">2. Shape a strong concept</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Turn the strongest signals into budget-aware recommendation drafts with an expected turnout and a suggested setting.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card px-4 py-4">
+            <p className="font-serif text-lg text-foreground">3. Move it onto the calendar</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Once a concept is approved, publish the live gathering and watch RSVP traction inside Community Pulse.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div className="rounded-2xl border border-border bg-background p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="font-serif text-lg text-foreground">Event budget planning</p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Keep gathering plans aligned with the pilot budget and cadence.
+                Keep gathering plans aligned with the pilot budget, cadence, and event mix.
               </p>
             </div>
             <span className="text-[11px] text-muted-foreground">
@@ -435,7 +564,7 @@ export function ManagerEventPlanningSection({
           ) : null}
 
           <div className="mt-4 grid gap-3">
-            <div className="grid grid-cols-[1fr_140px] gap-3">
+            <div className="grid grid-cols-[1fr_160px] gap-3">
               <input
                 value={budgetForm.eventBudgetAmount}
                 onChange={(event) =>
@@ -444,7 +573,7 @@ export function ManagerEventPlanningSection({
                     eventBudgetAmount: event.target.value,
                   }))
                 }
-                placeholder="Event budget amount"
+                placeholder="Budget amount"
                 className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
               />
               <select
@@ -480,7 +609,7 @@ export function ManagerEventPlanningSection({
                   preferredEventTypes: event.target.value,
                 }))
               }
-              placeholder="Preferred event types (comma-separated)"
+              placeholder="Preferred event types, separated by commas"
               className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none"
             />
             <textarea
@@ -512,7 +641,7 @@ export function ManagerEventPlanningSection({
             <div>
               <p className="font-serif text-lg text-foreground">Resident demand signals</p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Live proposal, vote, waitlist, RSVP, and feedback data we can reuse for event planning.
+                Live proposals, visible support, waitlists, RSVPs, and feedback that can guide the next gathering.
               </p>
             </div>
             <Sparkles className="size-4 text-gold" />
@@ -521,20 +650,26 @@ export function ManagerEventPlanningSection({
           {isLoading ? (
             <div className="mt-4 h-32 animate-pulse rounded-2xl bg-secondary" />
           ) : snapshot.demandSignals.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">
-              No live demand signals yet. This will start filling in once residents begin proposing gatherings, voting, and RSVPing.
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              No demand signals yet. This fills in as residents begin suggesting, supporting, and RSVPing to gatherings.
             </p>
           ) : (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {snapshot.demandSignals.map((signal) => (
-                <span
-                  key={`${signal.source}:${signal.label}`}
-                  className="rounded-full border border-gold/20 bg-gold/10 px-3 py-2 text-xs text-foreground"
-                >
-                  {signal.label} · {signal.value} {signal.source}
-                </span>
-              ))}
-            </div>
+            <>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {snapshot.demandSignals.map((signal) => (
+                  <span
+                    key={`${signal.source}:${signal.label}`}
+                    className="rounded-full border border-gold/20 bg-gold/10 px-3 py-2 text-xs text-foreground"
+                  >
+                    {signal.label} / {signal.value} {signal.source}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                Strongest visible idea pool: {planningStats.suggestionCounts.visible} resident suggestion
+                {planningStats.suggestionCounts.visible === 1 ? "" : "s"} open for community signal.
+              </p>
+            </>
           )}
         </div>
       </div>
@@ -544,7 +679,7 @@ export function ManagerEventPlanningSection({
           <div>
             <p className="font-serif text-lg text-foreground">Recommendation drafts</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Save manual event concepts, track their budget fit, and keep a shortlist for the pilot calendar.
+              Shape event concepts from live demand, assign budget fit, and decide which ideas are ready for the pilot calendar.
             </p>
           </div>
           <button
@@ -567,6 +702,9 @@ export function ManagerEventPlanningSection({
             <p className="font-medium text-foreground">
               {editingRecommendationId ? "Edit recommendation" : "Create recommendation"}
             </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Keep it specific enough that a manager could publish the idea after one review pass.
+            </p>
             <div className="mt-4 grid gap-3">
               <input
                 value={recommendationForm.title}
@@ -587,7 +725,7 @@ export function ManagerEventPlanningSection({
                     description: event.target.value,
                   }))
                 }
-                placeholder="Short description"
+                placeholder="What would this gathering feel like?"
                 className="min-h-24 rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
               />
               <div className="grid grid-cols-2 gap-3">
@@ -668,7 +806,7 @@ export function ManagerEventPlanningSection({
                     reasonRecommended: event.target.value,
                   }))
                 }
-                placeholder="Why this is a good fit for the building"
+                placeholder="Why is this a good fit for the building right now?"
                 className="min-h-24 rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none"
               />
               <div className="grid grid-cols-3 gap-3">
@@ -749,7 +887,7 @@ export function ManagerEventPlanningSection({
               </>
             ) : snapshot.recommendations.length === 0 ? (
               <div className="rounded-2xl border border-border bg-card px-4 py-5 text-sm text-muted-foreground">
-                No recommendation drafts yet.
+                No recommendation drafts yet. Use resident demand, support signals, and RSVP history to shape the first event concepts.
               </div>
             ) : (
               snapshot.recommendations.map((recommendation) => (
@@ -761,7 +899,7 @@ export function ManagerEventPlanningSection({
                     <div>
                       <p className="font-serif text-lg text-foreground">{recommendation.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {recommendation.status.replaceAll("_", " ")} · {recommendation.budgetFitLabel.replaceAll("_", " ")}
+                        {formatEnumLabel(recommendation.status)} / {formatEnumLabel(recommendation.budgetFitLabel)}
                       </p>
                     </div>
                     <button
@@ -781,9 +919,15 @@ export function ManagerEventPlanningSection({
                         key={`${recommendation.id}:${signal.source}:${signal.label}`}
                         className="rounded-full bg-gold/10 px-2.5 py-1 text-[11px] text-foreground"
                       >
-                        {signal.label} · {signal.value}
+                        {signal.label} / {signal.value}
                       </span>
                     ))}
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                    <p>Suggested setting: {recommendation.suggestedLocation || "Not set yet"}</p>
+                    <p>Timing: {recommendation.suggestedTiming || "Still open"}</p>
+                    <p>Expected attendance: {recommendation.expectedAttendance ?? "TBD"}</p>
+                    <p>Budget range: {formatMoney(recommendation.estimatedMinCost)} to {formatMoney(recommendation.estimatedMaxCost)}</p>
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
                     Updated {formatTimestamp(recommendation.updatedAt)}
@@ -796,16 +940,44 @@ export function ManagerEventPlanningSection({
       </div>
 
       <div className="rounded-2xl border border-border bg-background p-4">
-        <p className="font-serif text-lg text-foreground">Resident suggestions</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          Review vendor, venue, workshop, and experience ideas coming in from residents.
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="font-serif text-lg text-foreground">Resident suggestions</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Review vendor, venue, workshop, and experience ideas coming in from residents, then decide which ones should stay private, surface for voting, or move toward approval.
+            </p>
+          </div>
+          <Users2 className="size-4 text-gold" />
+        </div>
 
         {suggestionError ? (
           <div className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
             {suggestionError}
           </div>
         ) : null}
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-4">
+          <PlanningStat
+            label="Submitted"
+            value={String(planningStats.suggestionCounts.total)}
+            helper="All resident-originated ideas in the planning queue."
+          />
+          <PlanningStat
+            label="Under review"
+            value={String(planningStats.suggestionCounts.underReview)}
+            helper="Ideas that still need a building-team decision."
+          />
+          <PlanningStat
+            label="Shortlisted"
+            value={String(planningStats.suggestionCounts.shortlisted)}
+            helper="Strong candidates for an upcoming gathering."
+          />
+          <PlanningStat
+            label="Visible for voting"
+            value={String(planningStats.suggestionCounts.visible)}
+            helper="Suggestions currently open to wider resident signal."
+          />
+        </div>
 
         <div className="mt-4 space-y-3">
           {isLoading ? (
@@ -815,7 +987,7 @@ export function ManagerEventPlanningSection({
             </>
           ) : snapshot.residentSuggestions.length === 0 ? (
             <div className="rounded-2xl border border-border bg-card px-4 py-5 text-sm text-muted-foreground">
-              No resident suggestions yet.
+              No resident suggestions yet. Once residents begin sharing ideas for workshops, food, performers, or spaces, they will appear here for review.
             </div>
           ) : (
             snapshot.residentSuggestions.map((suggestion) => {
@@ -834,22 +1006,22 @@ export function ManagerEventPlanningSection({
                     <div>
                       <p className="font-serif text-lg text-foreground">{suggestion.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {suggestionCategoryLabels[suggestion.category]} · from{" "}
+                        {suggestionCategoryLabels[suggestion.category]} / from{" "}
                         {suggestion.submittedByResidentFirstName ?? "Resident"}
                       </p>
                     </div>
                     <span className="rounded-full bg-gold/10 px-3 py-1 text-[11px] text-foreground">
-                      {suggestion.status.replaceAll("_", " ")}
+                      {formatEnumLabel(suggestion.status)}
                     </span>
                   </div>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {suggestion.description || suggestion.whyResidentsWouldLikeIt || "No extra details yet."}
                   </p>
                   <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-                    <p>For event type: {suggestion.suggestedForEventType || "Open use"}</p>
+                    <p>Best for: {suggestion.suggestedForEventType || "Open use"}</p>
                     <p>Cost: {suggestion.estimatedCostRange || "Not shared"}</p>
                     <p>Location: {suggestion.location || "Flexible"}</p>
-                    <p>Visibility: {suggestion.residentVisibility.replaceAll("_", " ")}</p>
+                    <p>Visibility: {formatEnumLabel(suggestion.residentVisibility)}</p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-foreground">
                     <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
@@ -860,6 +1032,9 @@ export function ManagerEventPlanningSection({
                     </span>
                     <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
                       Would attend {suggestion.supportSummary.wouldAttend}
+                    </span>
+                    <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
+                      Total signal {suggestion.supportSummary.total}
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
@@ -909,6 +1084,12 @@ export function ManagerEventPlanningSection({
                       Save
                     </button>
                   </div>
+                  {suggestion.contactInfo || suggestion.websiteOrSocialLink ? (
+                    <div className="mt-3 rounded-2xl border border-border bg-background px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+                      {suggestion.contactInfo ? <p>Contact: {suggestion.contactInfo}</p> : null}
+                      {suggestion.websiteOrSocialLink ? <p>Reference: {suggestion.websiteOrSocialLink}</p> : null}
+                    </div>
+                  ) : null}
                 </div>
               )
             })

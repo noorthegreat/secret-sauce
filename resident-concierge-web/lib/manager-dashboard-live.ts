@@ -49,6 +49,46 @@ export type ManagerIntroductionQueueItem = {
   } | null
 }
 
+export type ManagerResidentItem = {
+  id: string
+  firstName: string
+  stage:
+    | "pending_review"
+    | "approved_not_active"
+    | "active_needs_onboarding"
+    | "active_ready"
+    | "active_paused"
+  submittedAt: string | null
+  joinedAt: string | null
+  summary: string
+}
+
+export type ManagerIntroductionWatchItem = {
+  id: string
+  residentAFirstName: string
+  residentBFirstName: string
+  introType: "friendship" | "professional"
+  status: "requested" | "accepted" | "mutual" | "delivered" | "paused" | "declined" | "suggested"
+  source: string
+  compatibilitySummary: string | null
+  managerCompatibilitySummary: string | null
+  meetupRecommendation: {
+    title: string
+    amenityLabel: string
+    timingLabel: string | null
+    reason: string
+  } | null
+  nextStep: string
+  lastUpdatedAt: string
+}
+
+export type ManagerCommunicationCue = {
+  id: string
+  priority: "now" | "soon" | "watch"
+  title: string
+  description: string
+}
+
 export type ManagerEventItem = {
   id: string
   name: string
@@ -81,6 +121,9 @@ export type ManagerDashboardSnapshot = {
   introductionFunnel: DashboardListBlock
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
+  residentRoster: ManagerResidentItem[]
+  introductionWatchlist: ManagerIntroductionWatchItem[]
+  communicationCues: ManagerCommunicationCue[]
   introductionQueue: ManagerIntroductionQueueItem[]
   managerEvents: ManagerEventItem[]
   supportCategoryBreakdown: DashboardListBlock
@@ -107,6 +150,9 @@ type EventRow = {
 }
 
 type JoinRequestRow = {
+  id: string
+  first_name: string
+  normalized_email: string
   status: "pending_review" | "approved" | "rejected" | "withdrawn" | string
   interests: string[] | null
   looking_for: string[] | null
@@ -134,6 +180,25 @@ type BuildingIntroductionRow = {
 type ProfileNameRow = {
   id: string
   first_name: string
+}
+
+type ResidentProfileRow = {
+  id: string
+  first_name: string
+  completed_questionnaire: boolean | null
+  completed_friendship_questionnaire: boolean | null
+  is_paused: boolean | null
+  updated_at: string | null
+}
+
+type ActiveResidentMembershipRow = {
+  user_id: string
+  joined_at: string | null
+}
+
+type PrivateProfileEmailRow = {
+  user_id: string
+  email: string | null
 }
 
 function parseMeetupRecommendation(sharedContext: Record<string, unknown> | null) {
@@ -409,6 +474,253 @@ function buildIntroductionQueue(
     }))
 }
 
+function buildResidentRoster({
+  requests,
+  activeMemberships,
+  activeProfiles,
+  activeEmails,
+}: {
+  requests: JoinRequestRow[]
+  activeMemberships: ActiveResidentMembershipRow[]
+  activeProfiles: ResidentProfileRow[]
+  activeEmails: Map<string, string>
+}): ManagerResidentItem[] {
+  const roster: ManagerResidentItem[] = []
+  const activeUserIds = new Set(activeMemberships.map((membership) => membership.user_id))
+  const joinedAtByUserId = new Map(activeMemberships.map((membership) => [membership.user_id, membership.joined_at]))
+  const activatedEmails = new Set(
+    [...activeEmails.values()]
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  )
+
+  for (const request of requests) {
+    if (request.status === "pending_review") {
+      roster.push({
+        id: `request-${request.id}`,
+        firstName: request.first_name?.trim() || "Resident",
+        stage: "pending_review",
+        submittedAt: request.created_at,
+        joinedAt: null,
+        summary: "Awaiting building-team review before resident access is approved.",
+      })
+      continue
+    }
+
+    if (request.status === "approved" && !activatedEmails.has(request.normalized_email.trim().toLowerCase())) {
+      roster.push({
+        id: `request-${request.id}`,
+        firstName: request.first_name?.trim() || "Resident",
+        stage: "approved_not_active",
+        submittedAt: request.created_at,
+        joinedAt: null,
+        summary: "Approved for access, but they have not finished claiming their account yet.",
+      })
+    }
+  }
+
+  for (const profile of activeProfiles) {
+    if (!activeUserIds.has(profile.id)) {
+      continue
+    }
+
+    const completed =
+      Boolean(profile.completed_questionnaire) || Boolean(profile.completed_friendship_questionnaire)
+    const paused = Boolean(profile.is_paused)
+    const stage: ManagerResidentItem["stage"] = paused
+      ? "active_paused"
+      : completed
+        ? "active_ready"
+        : "active_needs_onboarding"
+
+    roster.push({
+      id: profile.id,
+      firstName: profile.first_name?.trim() || "Resident",
+      stage,
+      submittedAt: null,
+      joinedAt: joinedAtByUserId.get(profile.id) ?? null,
+      summary:
+        stage === "active_ready"
+          ? "Ready for thoughtful introductions, circles, and gathering RSVPs."
+          : stage === "active_paused"
+            ? "Participation is currently paused until the resident opts back in."
+            : "Activated, but still missing the onboarding signals needed for strong matching.",
+    })
+  }
+
+  const stageRank: Record<ManagerResidentItem["stage"], number> = {
+    pending_review: 0,
+    approved_not_active: 1,
+    active_needs_onboarding: 2,
+    active_paused: 3,
+    active_ready: 4,
+  }
+
+  return roster
+    .sort((left, right) => {
+      if (stageRank[left.stage] !== stageRank[right.stage]) {
+        return stageRank[left.stage] - stageRank[right.stage]
+      }
+
+      const leftDate = left.submittedAt ?? left.joinedAt ?? ""
+      const rightDate = right.submittedAt ?? right.joinedAt ?? ""
+      return rightDate.localeCompare(leftDate)
+    })
+    .slice(0, 12)
+}
+
+function getIntroductionNextStep(status: BuildingIntroductionRow["status"]) {
+  switch (status) {
+    case "requested":
+      return "Waiting on the second resident to review the introduction."
+    case "accepted":
+      return "One resident said yes. Hold until the second resident responds."
+    case "mutual":
+      return "Mutual interest confirmed. Concierge can now deliver the introduction."
+    case "delivered":
+      return "Introduction has been delivered. Watch for meetup follow-through or resident feedback."
+    case "paused":
+      return "The introduction is paused. No outreach is needed unless a resident asks to resume."
+    case "declined":
+      return "The introduction was declined and can remain quietly closed."
+    default:
+      return "Review resident readiness before moving this introduction forward."
+  }
+}
+
+function buildIntroductionWatchlist(
+  introductions: BuildingIntroductionRow[],
+  profilesById: Map<string, string>,
+): ManagerIntroductionWatchItem[] {
+  return introductions
+    .filter((introduction) =>
+      ["requested", "accepted", "mutual", "delivered", "paused"].includes(introduction.status),
+    )
+    .sort((left, right) => {
+      const leftDate = left.delivered_at ?? left.mutual_at ?? left.suggested_at
+      const rightDate = right.delivered_at ?? right.mutual_at ?? right.suggested_at
+      return rightDate.localeCompare(leftDate)
+    })
+    .slice(0, 10)
+    .map((introduction) => ({
+      id: introduction.id,
+      residentAFirstName: profilesById.get(introduction.resident_a_user_id) ?? "Resident",
+      residentBFirstName: profilesById.get(introduction.resident_b_user_id) ?? "Resident",
+      introType: introduction.intro_type,
+      status: introduction.status,
+      source: introduction.source,
+      compatibilitySummary: introduction.compatibility_summary?.trim() || null,
+      managerCompatibilitySummary:
+        typeof introduction.shared_context?.manager_compatibility_summary === "string"
+          ? introduction.shared_context.manager_compatibility_summary
+          : null,
+      meetupRecommendation: parseMeetupRecommendation(introduction.shared_context),
+      nextStep: getIntroductionNextStep(introduction.status),
+      lastUpdatedAt: introduction.delivered_at ?? introduction.mutual_at ?? introduction.suggested_at,
+    }))
+}
+
+function buildCommunicationCues({
+  residentRoster,
+  introductionWatchlist,
+  supportQueueCount,
+  publishedEventCount,
+}: {
+  residentRoster: ManagerResidentItem[]
+  introductionWatchlist: ManagerIntroductionWatchItem[]
+  supportQueueCount: number
+  publishedEventCount: number
+}) {
+  const cues: ManagerCommunicationCue[] = []
+  const pendingReview = residentRoster.filter((resident) => resident.stage === "pending_review").length
+  const approvedNotActive = residentRoster.filter((resident) => resident.stage === "approved_not_active").length
+  const needsOnboarding = residentRoster.filter((resident) => resident.stage === "active_needs_onboarding").length
+  const mutualReady = introductionWatchlist.filter((item) => item.status === "mutual").length
+  const waitingSecondResponse = introductionWatchlist.filter(
+    (item) => item.status === "requested" || item.status === "accepted",
+  ).length
+
+  if (pendingReview > 0) {
+    cues.push({
+      id: "review-pending-residents",
+      priority: "now",
+      title: `Review ${pendingReview} pending resident request${pendingReview === 1 ? "" : "s"}`,
+      description: "The fastest way to create early momentum is to move qualified residents into approved status quickly.",
+    })
+  }
+
+  if (approvedNotActive > 0) {
+    cues.push({
+      id: "activate-approved-residents",
+      priority: "now",
+      title: `Nudge ${approvedNotActive} approved resident${approvedNotActive === 1 ? "" : "s"} to activate`,
+      description: "These residents are approved but have not yet claimed access. A short concierge follow-up can unblock the building launch.",
+    })
+  }
+
+  if (needsOnboarding > 0) {
+    cues.push({
+      id: "complete-onboarding",
+      priority: "soon",
+      title: `Guide ${needsOnboarding} active resident${needsOnboarding === 1 ? "" : "s"} through onboarding`,
+      description: "Introductions improve quickly once residents finish the concierge questionnaire and share their availability.",
+    })
+  }
+
+  if (mutualReady > 0) {
+    cues.push({
+      id: "deliver-mutual-introductions",
+      priority: "now",
+      title: `${mutualReady} mutual introduction${mutualReady === 1 ? "" : "s"} ready for concierge delivery`,
+      description: "These residents have both said yes. Move them into a thoughtful handoff while momentum is warm.",
+    })
+  }
+
+  if (waitingSecondResponse > 0) {
+    cues.push({
+      id: "watch-pending-intros",
+      priority: "watch",
+      title: `${waitingSecondResponse} introduction${waitingSecondResponse === 1 ? "" : "s"} waiting on a second response`,
+      description: "No outreach is usually needed yet, but this queue helps you spot where interest is building.",
+    })
+  }
+
+  if (publishedEventCount === 0 && residentRoster.length > 0) {
+    cues.push({
+      id: "publish-first-gathering",
+      priority: "soon",
+      title: "Publish the first gathering",
+      description: "Residents already have enough context to engage. A first gathering gives the building an early shared rhythm.",
+    })
+  }
+
+  if (supportQueueCount > 0) {
+    cues.push({
+      id: "follow-up-support",
+      priority: "now",
+      title: `Review ${supportQueueCount} resident support request${supportQueueCount === 1 ? "" : "s"}`,
+      description: "Fast follow-through reinforces that the community feels private, responsive, and well cared for.",
+    })
+  }
+
+  if (cues.length === 0) {
+    cues.push({
+      id: "steady-pilot",
+      priority: "watch",
+      title: "The pilot is in a steady state",
+      description: "There are no urgent manager follow-ups right now. Use this moment to watch resident demand and refine the next gathering.",
+    })
+  }
+
+  const priorityRank: Record<ManagerCommunicationCue["priority"], number> = {
+    now: 0,
+    soon: 1,
+    watch: 2,
+  }
+
+  return cues.sort((left, right) => priorityRank[left.priority] - priorityRank[right.priority])
+}
+
 export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
   return {
     buildingName: "Chorus Apartments",
@@ -417,8 +729,8 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
     isLive: false,
     roiStats: [
       { label: "Resident opt-in rate", value: "14%", helper: "Activated residents vs. 250 estimated units." },
-      { label: "Intro request → mutual", value: "57%", helper: "Share of requested introductions that reached mutual interest." },
-      { label: "Mutual → delivered", value: "63%", helper: "Concierge handoffs completed after mutual interest." },
+      { label: "Intro request to mutual", value: "57%", helper: "Share of requested introductions that reached mutual interest." },
+      { label: "Mutual to delivered", value: "63%", helper: "Concierge handoffs completed after mutual interest." },
       { label: "Onboarding completion", value: "67%", helper: "Activated residents who finished the concierge questionnaire." },
     ],
     stats: [
@@ -482,6 +794,66 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
       emptyMessage: "Coming soon once resident event-request voting is stored in Supabase.",
     },
     amenityUsage: fallbackAmenityUsage(),
+    residentRoster: [
+      {
+        id: "resident-pending-1",
+        firstName: "Maya",
+        stage: "pending_review",
+        submittedAt: new Date().toISOString(),
+        joinedAt: null,
+        summary: "Awaiting building-team review before resident access is approved.",
+      },
+      {
+        id: "resident-onboarding-1",
+        firstName: "Ava",
+        stage: "active_needs_onboarding",
+        submittedAt: null,
+        joinedAt: new Date().toISOString(),
+        summary: "Activated, but still missing the onboarding signals needed for strong matching.",
+      },
+      {
+        id: "resident-ready-1",
+        firstName: "Marcus",
+        stage: "active_ready",
+        submittedAt: null,
+        joinedAt: new Date().toISOString(),
+        summary: "Ready for thoughtful introductions, circles, and gathering RSVPs.",
+      },
+    ],
+    introductionWatchlist: [
+      {
+        id: "intro-watch-1",
+        residentAFirstName: "Ava",
+        residentBFirstName: "Marcus",
+        introType: "friendship",
+        status: "mutual",
+        source: "resident_request",
+        compatibilitySummary: "They both enjoy wellness-oriented gatherings and intentional one-on-one conversations.",
+        managerCompatibilitySummary: "Both residents are looking for a calm first introduction and have overlapping evening availability.",
+        meetupRecommendation: {
+          title: "Rooftop coffee",
+          amenityLabel: "Sky Deck",
+          timingLabel: "Wednesday evening",
+          reason: "A short, low-pressure first meetup fits their shared pace and availability.",
+        },
+        nextStep: "Mutual interest confirmed. Concierge can now deliver the introduction.",
+        lastUpdatedAt: new Date().toISOString(),
+      },
+    ],
+    communicationCues: [
+      {
+        id: "cue-review",
+        priority: "now",
+        title: "Review the first resident requests",
+        description: "The fastest way to create early pilot momentum is to move qualified residents into approved status quickly.",
+      },
+      {
+        id: "cue-onboarding",
+        priority: "soon",
+        title: "Encourage onboarding completion",
+        description: "Introductions get meaningfully stronger once active residents finish the concierge questionnaire and share availability.",
+      },
+    ],
     introductionQueue: [
       {
         id: "intro-1",
@@ -494,6 +866,13 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
         mutualAt: new Date().toISOString(),
         deliveredAt: null,
         compatibilitySummary: "They both share wellness interests and enjoy intentional one-on-one conversations.",
+        managerCompatibilitySummary: "Both residents prefer a calmer first introduction and have overlapping evening availability.",
+        meetupRecommendation: {
+          title: "Rooftop coffee",
+          amenityLabel: "Sky Deck",
+          timingLabel: "Wednesday evening",
+          reason: "A short, low-pressure first meetup fits their shared pace and early friendship intent.",
+        },
       },
       {
         id: "intro-2",
@@ -506,6 +885,13 @@ export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
         mutualAt: new Date().toISOString(),
         deliveredAt: new Date().toISOString(),
         compatibilitySummary: "They both value design, food, and community events in the building.",
+        managerCompatibilitySummary: "They share strong curiosity around design-minded gatherings and have already moved through concierge delivery.",
+        meetupRecommendation: {
+          title: "Resident club supper",
+          amenityLabel: "Private Dining Room",
+          timingLabel: "Saturday evening",
+          reason: "A hosted meal gives them an easy first setting after the introduction has been delivered.",
+        },
       },
     ],
     managerEvents: [
@@ -646,7 +1032,6 @@ export async function getManagerDashboardSnapshotForBuilding({
     activeManagerMembershipsResult,
     activeMembershipsResult,
     residentProfilesResult,
-    surveyCompletedProfilesResult,
     requestsResult,
     eventsResult,
     introductionsResult,
@@ -661,10 +1046,11 @@ export async function getManagerDashboardSnapshotForBuilding({
       .eq("status", "invited"),
     supabase
       .from("building_memberships")
-      .select("*", { count: "exact", head: true })
+      .select("user_id, joined_at")
       .eq("building_id", buildingId)
       .eq("role", "resident")
-      .eq("status", "active"),
+      .eq("status", "active")
+      .returns<ActiveResidentMembershipRow[]>(),
     supabase
       .from("building_memberships")
       .select("*", { count: "exact", head: true })
@@ -678,16 +1064,12 @@ export async function getManagerDashboardSnapshotForBuilding({
       .eq("status", "active"),
     supabase
       .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("building_id", buildingId),
-    supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
+      .select("id, first_name, completed_questionnaire, completed_friendship_questionnaire, is_paused, updated_at")
       .eq("building_id", buildingId)
-      .or("completed_questionnaire.eq.true,completed_friendship_questionnaire.eq.true"),
+      .returns<ResidentProfileRow[]>(),
     supabase
       .from("resident_join_requests")
-      .select("status, interests, looking_for, created_at")
+      .select("id, first_name, normalized_email, status, interests, looking_for, created_at")
       .eq("building_id", buildingId)
       .order("created_at", { ascending: false })
       .returns<JoinRequestRow[]>(),
@@ -714,7 +1096,6 @@ export async function getManagerDashboardSnapshotForBuilding({
     activeManagerMembershipsResult.error,
     activeMembershipsResult.error,
     residentProfilesResult.error,
-    surveyCompletedProfilesResult.error,
     requestsResult.error,
     eventsResult.error,
     introductionsResult.error,
@@ -727,6 +1108,7 @@ export async function getManagerDashboardSnapshotForBuilding({
   const requests = requestsResult.data ?? []
   const events = eventsResult.data ?? []
   const introductions = introductionsResult.data ?? []
+  const residentProfiles = residentProfilesResult.data ?? []
   const supportCategoryBreakdown = supportResult.supportCategoryBreakdown
   const supportQueue = supportResult.supportQueue
   const mostRequestedEvents = eventEngagementResult.mostRequestedEvents
@@ -748,12 +1130,15 @@ export async function getManagerDashboardSnapshotForBuilding({
   }
 
   const residentsInvited = residentInvitesResult.count ?? 0
-  const residentsActivated = residentProfilesResult.count ?? 0
-  const activeResidentMemberships = activeResidentMembershipsResult.count ?? 0
+  const activeResidentMembershipRows = activeResidentMembershipsResult.data ?? []
+  const residentsActivated = residentProfiles.length
+  const activeResidentMemberships = activeResidentMembershipRows.length
   const activeManagerMemberships = activeManagerMembershipsResult.count ?? 0
   const activeMemberships = activeMembershipsResult.count ?? 0
   const approvedResidents = requests.filter((request) => request.status === "approved").length
-  const surveyCompletedResidents = surveyCompletedProfilesResult.count ?? 0
+  const surveyCompletedResidents = residentProfiles.filter(
+    (profile) => profile.completed_questionnaire || profile.completed_friendship_questionnaire,
+  ).length
   const surveyCompletionRate = percentageLabel(surveyCompletedResidents, residentsActivated)
   const eventRsvps = enrollments.length
   const introRequests = introductions.filter((introduction) => introduction.status === "requested").length
@@ -777,14 +1162,14 @@ export async function getManagerDashboardSnapshotForBuilding({
       helper: "Activated residents compared to approved + pending join demand.",
     },
     {
-      label: "Intro request → mutual",
+      label: "Intro request to mutual",
       value: requestToMutualRate,
       helper: "Requested introductions that reached mutual interest or delivery.",
     },
     {
-      label: "Mutual → delivered",
+      label: "Mutual to delivered",
       value: mutualToDeliveredRate,
-      helper: "Mutual introductions the concierge team has marked as delivered.",
+      helper: "Mutual to delivered.",
     },
     {
       label: "Onboarding completion",
@@ -831,6 +1216,40 @@ export async function getManagerDashboardSnapshotForBuilding({
   for (const profile of introProfiles ?? []) {
     profilesById.set(profile.id, profile.first_name?.trim() || "Resident")
   }
+
+  const activeResidentUserIds = activeResidentMembershipRows.map((membership) => membership.user_id)
+  const { data: activeResidentEmails, error: activeResidentEmailsError } = activeResidentUserIds.length
+    ? await supabase
+        .from("private_profile_data")
+        .select("user_id, email")
+        .in("user_id", activeResidentUserIds)
+        .returns<PrivateProfileEmailRow[]>()
+    : { data: [] as PrivateProfileEmailRow[], error: null }
+
+  if (activeResidentEmailsError) {
+    throw new Error("Unable to load building analytics.")
+  }
+
+  const activeEmailsByUserId = new Map<string, string>()
+  for (const item of activeResidentEmails ?? []) {
+    if (item.email?.trim()) {
+      activeEmailsByUserId.set(item.user_id, item.email.trim().toLowerCase())
+    }
+  }
+
+  const residentRoster = buildResidentRoster({
+    requests,
+    activeMemberships: activeResidentMembershipRows,
+    activeProfiles: residentProfiles,
+    activeEmails: activeEmailsByUserId,
+  })
+  const introductionWatchlist = buildIntroductionWatchlist(introductions, profilesById)
+  const communicationCues = buildCommunicationCues({
+    residentRoster,
+    introductionWatchlist,
+    supportQueueCount: supportQueue.length,
+    publishedEventCount: events.filter((event) => getManagerEventState(event) === "published").length,
+  })
 
   return {
     buildingName,
@@ -896,7 +1315,7 @@ export async function getManagerDashboardSnapshotForBuilding({
       {
         label: "Introductions delivered",
         value: String(introDelivered),
-        helper: "Mutual intros that the concierge team has marked as delivered.",
+        helper: "Mutual to delivered.",
       },
       {
         label: "Declined or paused",
@@ -929,6 +1348,9 @@ export async function getManagerDashboardSnapshotForBuilding({
           : "No resident event requests, waitlist signals, or proposal votes have been captured yet.",
     },
     amenityUsage: fallbackAmenityUsage(),
+    residentRoster,
+    introductionWatchlist,
+    communicationCues,
     introductionQueue: buildIntroductionQueue(introductions, profilesById),
     managerEvents: buildManagerEvents(events, enrollments),
     supportCategoryBreakdown: {

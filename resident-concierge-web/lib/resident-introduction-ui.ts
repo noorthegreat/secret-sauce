@@ -37,16 +37,20 @@ function statusPriority(status: IntroductionStatus) {
       return 0
     case "delivered":
       return 1
-    case "requested":
+    case "scheduled":
       return 2
-    case "accepted":
+    case "completed":
       return 3
-    case "suggested":
+    case "requested":
       return 4
-    case "paused":
+    case "accepted":
       return 5
-    case "declined":
+    case "suggested":
       return 6
+    case "paused":
+      return 7
+    case "declined":
+      return 8
   }
 }
 
@@ -58,12 +62,24 @@ export function buildResidentIntroductionCards(
   residents: Resident[],
   introductions: IntroductionPreview[],
 ) {
-  const cards: ResidentIntroductionCard[] = residents.map((resident) => {
-    const introduction = introductions.find((entry) => entry.resident.userId === resident.id)
+  const residentById = new Map(residents.map((resident) => [resident.id, resident]))
+  const residentIds = new Set(residents.map((resident) => resident.id))
+
+  for (const introduction of introductions) {
+    residentIds.add(introduction.resident.userId)
+  }
+
+  const cards: ResidentIntroductionCard[] = Array.from(residentIds).map((residentId) => {
+    const resident = residentById.get(residentId)
+    const introduction = introductions.find((entry) => entry.resident.userId === residentId)
+
+    if (!resident && !introduction) {
+      throw new Error("Unable to build the introduction card.")
+    }
 
     if (!introduction) {
       return {
-        resident,
+        resident: resident!,
         introductionId: null,
         status: "suggested",
         source: "resident_preview",
@@ -82,19 +98,42 @@ export function buildResidentIntroductionCards(
 
     return {
       resident: {
-        ...resident,
-        name: resident.name || introduction.resident.firstName,
-        photo: resident.photo || introduction.resident.photoUrl || "/placeholder.svg",
+        ...(resident ?? {
+          id: introduction.resident.userId,
+          name: introduction.resident.firstName,
+          unit: introduction.resident.recognitionCue ?? "Fifth Circle resident",
+          photo: introduction.resident.photoUrl || "/placeholder.svg",
+          tagline: introduction.resident.bio || "A private building introduction shaped by shared fit.",
+          goal: introduction.resident.sharedGoals[0]
+            ? formatIntentLabel(introduction.resident.sharedGoals[0])
+            : "Community involvement",
+          interests: introduction.resident.sharedInterests.length
+            ? introduction.resident.sharedInterests.map(formatInterestLabel)
+            : [],
+          shared: introduction.resident.sharedInterests.length,
+        }),
+        name: resident?.name || introduction.resident.firstName,
+        photo: resident?.photo || introduction.resident.photoUrl || "/placeholder.svg",
         tagline:
           introduction.resident.compatibilitySummary?.trim() ||
-          resident.tagline,
+          resident?.tagline ||
+          introduction.resident.bio ||
+          "A private building introduction shaped by shared fit.",
         interests: introduction.resident.sharedInterests.length
           ? introduction.resident.sharedInterests.map(formatInterestLabel)
-          : resident.interests,
+          : resident?.interests ?? [],
         goal: introduction.resident.sharedGoals[0]
           ? formatIntentLabel(introduction.resident.sharedGoals[0])
-          : resident.goal,
-        shared: introduction.resident.sharedInterests.length || resident.shared,
+          : resident?.goal ?? "Community involvement",
+        shared: introduction.resident.sharedInterests.length || resident?.shared || 0,
+        occupation: resident?.occupation ?? introduction.resident.occupation ?? null,
+        recognitionCue: resident?.recognitionCue ?? introduction.resident.recognitionCue ?? null,
+        socialEnergy: resident?.socialEnergy ?? introduction.resident.socialEnergy ?? null,
+        planningStyle: resident?.planningStyle ?? introduction.resident.planningStyle ?? null,
+        connectionPreference:
+          resident?.connectionPreference ?? introduction.resident.connectionPreference ?? null,
+        compatibilityDetails:
+          resident?.compatibilityDetails ?? introduction.resident.compatibilityDetails ?? [],
       },
       introductionId: introduction.introductionId,
       status: introduction.status,

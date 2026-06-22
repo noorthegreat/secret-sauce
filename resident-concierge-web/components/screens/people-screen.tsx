@@ -1,9 +1,19 @@
 "use client"
 
-import { Check, Clock, Loader2, PauseCircle, Sparkles, UserRoundCheck, Users, X } from "lucide-react"
+import {
+  Check,
+  CheckCheck,
+  Clock3,
+  Loader2,
+  PauseCircle,
+  Sparkles,
+  UserRoundCheck,
+  Users,
+  X,
+} from "lucide-react"
 
 import { EmptyState } from "@/components/empty-state"
-import { ScreenHeader } from "@/components/screen-header"
+import { ScreenHeader, SectionLabel } from "@/components/screen-header"
 import {
   formatAvailabilitySummaryLabel,
   formatConnectionStyleLabel,
@@ -18,62 +28,119 @@ function isPositiveDecision(decision: ResidentIntroductionCard["currentResidentD
 
 function canRespond(card: ResidentIntroductionCard) {
   if (!card.introductionId) return false
-  if (card.status === "delivered" || card.status === "mutual" || card.status === "declined" || card.status === "paused") {
+  if (
+    card.status === "delivered" ||
+    card.status === "mutual" ||
+    card.status === "scheduled" ||
+    card.status === "completed" ||
+    card.status === "declined" ||
+    card.status === "paused"
+  ) {
     return false
   }
-  return !isPositiveDecision(card.currentResidentDecision) && isPositiveDecision(card.otherResidentDecision)
+  return (
+    !isPositiveDecision(card.currentResidentDecision) &&
+    isPositiveDecision(card.otherResidentDecision)
+  )
 }
 
-function getStatusCopy(card: ResidentIntroductionCard) {
-  if (canScheduleIntroduction(card)) {
+function getMeetLoopState(card: ResidentIntroductionCard) {
+  if (card.status === "completed") {
     return {
-      label: card.status === "delivered" ? "Concierge intro sent" : "Mutual interest",
+      label: "Meetup completed",
+      description: "You met. The next step is simply reflecting on how it felt.",
       tone: "success" as const,
-      description:
-        card.status === "delivered"
-          ? "Your concierge has shared the introduction. You can now arrange the meetup."
-          : "You both said yes. The next step is choosing the right first meetup.",
+      icon: CheckCheck,
     }
   }
 
-  if (card.status === "declined") {
+  if (card.status === "scheduled") {
     return {
-      label: "Declined",
-      tone: "muted" as const,
-      description: "This introduction has been quietly closed.",
+      label: "Meetup confirmed",
+      description:
+        "A first meetup has been set. You can now simply show up and see how the conversation feels.",
+      tone: "success" as const,
+      icon: UserRoundCheck,
+    }
+  }
+
+  if (card.status === "delivered") {
+    return {
+      label: "Concierge coordinating",
+      description:
+        "The introduction has been delivered privately. The next step is reviewing the suggested meetup and settling on a simple first plan.",
+      tone: "pending" as const,
+      icon: UserRoundCheck,
+    }
+  }
+
+  if (card.status === "mutual") {
+    return {
+      label: "Mutual interest confirmed",
+      description:
+        "You both said yes. The concierge can now turn this into a real introduction and suggest a first meetup.",
+      tone: "pending" as const,
+      icon: Clock3,
+    }
+  }
+
+  if (
+    card.status === "accepted" ||
+    (card.status === "requested" && isPositiveDecision(card.currentResidentDecision))
+  ) {
+    return {
+      label: "Waiting on other resident",
+      description:
+        "You are in. We are waiting on the other resident before anything further is shared.",
+      tone: "pending" as const,
+      icon: Check,
+    }
+  }
+
+  if (canRespond(card)) {
+    return {
+      label: "Introduction available",
+      description:
+        "This resident would like an introduction. Review the fit, then accept, pause, or decline.",
+      tone: "attention" as const,
+      icon: Sparkles,
     }
   }
 
   if (card.status === "paused") {
     return {
       label: "Paused",
+      description: "This introduction is paused for now. Nothing is shared further.",
       tone: "muted" as const,
-      description: "This introduction is paused for now.",
+      icon: PauseCircle,
     }
   }
 
-  if (canRespond(card)) {
+  if (card.status === "declined") {
     return {
-      label: "Requested you",
-      tone: "attention" as const,
-      description: "This resident would like an introduction. You can accept, decline, or pause it.",
+      label: "Closed",
+      description: "This introduction has been quietly closed.",
+      tone: "muted" as const,
+      icon: X,
     }
   }
 
-  if (card.status === "requested" || card.status === "accepted") {
+  if (card.requestedByCurrentResident) {
     return {
-      label: card.requestedByCurrentResident ? "Awaiting response" : "Accepted by you",
+      label: "Preparing introduction",
+      description:
+        "Your request is in motion. We will open the next step once there is mutual interest.",
       tone: "pending" as const,
-      description: card.requestedByCurrentResident
-        ? "Your request has been sent. We will unlock the meetup once they accept."
-        : "You are in. We are waiting for the other resident to confirm.",
+      icon: Clock3,
     }
   }
 
   return {
-    label: "Suggested for you",
+    label: "Preparing introduction",
+    description:
+      "A private, building-scoped introduction shaped around shared goals, timing, and social fit.",
     tone: "suggested" as const,
-    description: "A private, building-scoped introduction based on shared interests and goals.",
+    icon: Sparkles,
   }
 }
 
@@ -104,9 +171,10 @@ export function PeopleScreen({
   return (
     <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Introductions" title="Activity" accent="Matches." />
+        <ScreenHeader eyebrow="Chosen for you" title="Neighbors worth meeting." />
         <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
-          A short, considered list of neighbors. Private details stay hidden until there is mutual interest.
+          A short, considered list, not a directory. Sensitive details stay private until mutual
+          interest opens the next step.
         </p>
       </div>
 
@@ -123,50 +191,70 @@ export function PeopleScreen({
           <EmptyState
             icon={Users}
             title="We’re looking for thoughtful introductions for you."
-            description="As more residents join the community, we’ll recommend people who share your interests and goals."
+            description="As more residents join the community, we’ll recommend people who share your interests, goals, and social rhythm."
           />
         ) : null}
 
         {introductions.map((card) => {
-          const statusCopy = getStatusCopy(card)
+          const meetLoopState = getMeetLoopState(card)
           const isActionLoading = actionResidentId === card.resident.id
+          const StatusIcon = meetLoopState.icon
 
           return (
             <article
-              key={card.resident.id}
-              className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-4 shadow-[0_26px_60px_-48px_rgba(70,56,35,0.34)]"
+              key={`${card.resident.id}-${card.status}-${card.introductionId ?? "suggested"}`}
+              className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-4 shadow-[0_26px_60px_-48px_rgba(70,56,35,0.34)]"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3">
                 <img
                   src={card.resident.photo || "/placeholder.svg"}
                   alt={card.resident.name}
                   className="size-14 rounded-full object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="font-serif text-xl leading-tight text-foreground">{card.resident.name}</p>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#a28363]">
-                    {card.resident.goal}
+                  <p className="font-serif text-xl leading-tight text-foreground">
+                    {card.resident.name}
+                  </p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#a28363]">
+                    {card.resident.recognitionCue || card.resident.unit}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#655645]">
+                    {card.resident.occupation
+                      ? `${card.resident.occupation}. ${card.resident.tagline}`
+                      : card.resident.tagline}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
-                Why this fits
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[#655645]">
-                {card.compatibilitySummary || card.resident.tagline}
-              </p>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {card.resident.interests.slice(0, 4).map((interest) => (
-                  <span
-                    key={interest}
-                    className="rounded-full border border-[#e2d6c3] px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-[#846d53]"
-                  >
-                    {interest}
-                  </span>
-                ))}
+              <div className="mt-4 rounded-[1.4rem] border border-[#e2d6c3] bg-[#f7f0e5] px-4 py-3">
+                <div className="flex items-center gap-2 font-medium text-[#6f5938]">
+                  <StatusIcon className="size-4" />
+                  {meetLoopState.label}
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
+                  {meetLoopState.description}
+                </p>
               </div>
+
+              <div className="mt-4">
+                <SectionLabel>Why this fits</SectionLabel>
+                <p className="text-sm leading-7 text-[#655645]">
+                  {card.compatibilitySummary || card.resident.tagline}
+                </p>
+              </div>
+
+              {card.resident.compatibilityDetails?.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {card.resident.compatibilityDetails.slice(0, 4).map((detail) => (
+                    <span
+                      key={detail}
+                      className="rounded-full border border-[#e2d6c3] px-3 py-1 text-[11px] text-[#846d53]"
+                    >
+                      {detail}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
 
               {card.sharedConnectionStyles.length > 0 || card.sharedAvailability.length > 0 ? (
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -203,36 +291,11 @@ export function PeopleScreen({
                       ? ` · ${card.meetupRecommendation.timingLabel}`
                       : ""}
                   </p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#6f604f]">
+                    {card.meetupRecommendation.reason}
+                  </p>
                 </div>
               ) : null}
-
-              <div
-                className={`mt-4 rounded-[1.4rem] px-4 py-3 text-sm ${
-                  statusCopy.tone === "success"
-                    ? "bg-[#ece0c4] text-[#6f5938]"
-                    : statusCopy.tone === "attention"
-                      ? "bg-[#f3eadc] text-foreground"
-                      : statusCopy.tone === "pending"
-                        ? "bg-[#f5efe6] text-[#7c6c5a]"
-                        : statusCopy.tone === "muted"
-                          ? "bg-[#efe7db] text-[#8c7c6b]"
-                          : "bg-[#f3eadc] text-foreground"
-                }`}
-              >
-                <div className="flex items-center gap-2 font-medium">
-                  {statusCopy.tone === "success" ? (
-                    <UserRoundCheck className="size-4" />
-                  ) : statusCopy.tone === "pending" ? (
-                    <Clock className="size-4" />
-                  ) : statusCopy.tone === "muted" ? (
-                    <PauseCircle className="size-4" />
-                  ) : (
-                    <Sparkles className="size-4" />
-                  )}
-                  {statusCopy.label}
-                </div>
-                <p className="mt-1 leading-relaxed">{statusCopy.description}</p>
-              </div>
 
               <div className="mt-4">
                 {card.status === "suggested" && !card.introductionId ? (
@@ -249,17 +312,25 @@ export function PeopleScreen({
                   <div className="space-y-2.5">
                     <button
                       type="button"
-                      onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "accepted")}
+                      onClick={() =>
+                        onRespondToIntroduction(card.resident.id, card.introductionId!, "accepted")
+                      }
                       disabled={isActionLoading}
                       className="flex w-full items-center justify-center gap-2 rounded-full border border-[#2b241d] bg-[#231d17] py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc] disabled:opacity-70"
                     >
-                      {isActionLoading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                      {isActionLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Check className="size-4" />
+                      )}
                       Accept introduction
                     </button>
                     <div className="grid grid-cols-2 gap-2.5">
                       <button
                         type="button"
-                        onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "declined")}
+                        onClick={() =>
+                          onRespondToIntroduction(card.resident.id, card.introductionId!, "declined")
+                        }
                         disabled={isActionLoading}
                         className="flex items-center justify-center gap-2 rounded-full border border-[#d7c9b4] bg-[#f6eee1] py-3 text-sm font-medium text-foreground disabled:opacity-70"
                       >
@@ -268,7 +339,9 @@ export function PeopleScreen({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onRespondToIntroduction(card.resident.id, card.introductionId!, "paused")}
+                        onClick={() =>
+                          onRespondToIntroduction(card.resident.id, card.introductionId!, "paused")
+                        }
                         disabled={isActionLoading}
                         className="flex items-center justify-center gap-2 rounded-full border border-[#d7c9b4] bg-[#f6eee1] py-3 text-sm font-medium text-foreground disabled:opacity-70"
                       >
@@ -283,14 +356,24 @@ export function PeopleScreen({
                     onClick={() => onSchedule(card.resident, card.meetupRecommendation)}
                     className="w-full rounded-full border border-[#2b241d] bg-[#231d17] py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc]"
                   >
-                    Schedule a meetup
+                    Review suggested meetup
                   </button>
+                ) : card.status === "completed" ? (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-full border border-[#e1d5c3] bg-[#f5efe6] py-3 text-sm font-medium text-[#8a7b6a]">
+                    <CheckCheck className="size-4" />
+                    Meetup completed
+                  </div>
                 ) : (
                   <div className="flex w-full items-center justify-center gap-2 rounded-full border border-[#e1d5c3] bg-[#f5efe6] py-3 text-sm font-medium text-[#8a7b6a]">
-                    {isLoading || isActionLoading ? <Loader2 className="size-4 animate-spin" /> : <Clock className="size-4" />}
-                    {card.requestedByCurrentResident || isPositiveDecision(card.currentResidentDecision)
-                      ? `Awaiting ${card.resident.name.split(" ")[0]}'s response`
-                      : "Waiting for the right moment"}
+                    {isLoading || isActionLoading ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Clock3 className="size-4" />
+                    )}
+                    {card.requestedByCurrentResident ||
+                    isPositiveDecision(card.currentResidentDecision)
+                      ? `Waiting on ${card.resident.name.split(" ")[0]}`
+                      : "Preparing the next step"}
                   </div>
                 )}
               </div>

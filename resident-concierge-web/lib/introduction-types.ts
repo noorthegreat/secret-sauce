@@ -38,10 +38,16 @@ export type IntroductionPreview = {
     firstName: string
     photoUrl: string | null
     bio: string | null
+    occupation?: string | null
+    recognitionCue?: string | null
+    socialEnergy?: string | null
+    planningStyle?: string | null
+    connectionPreference?: string | null
     sharedInterests: string[]
     sharedGoals: string[]
     sharedConnectionStyles: string[]
     sharedAvailability: string[]
+    compatibilityDetails?: string[]
     compatibilitySummary: string | null
     managerCompatibilitySummary: string | null
     meetupRecommendation: {

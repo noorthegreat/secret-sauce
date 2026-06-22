@@ -1,13 +1,23 @@
 import {
   eventPolls as mockPolls,
   events as mockEvents,
+  formatConnectionStyleLabel,
   formatIntentLabel,
   formatInterestLabel,
+  formatPlanningStyleLabel,
+  formatSocialEnergyLabel,
   type AvailabilityGrid,
+  type PlanningStyleId,
   type Resident,
+  type SocialEnergyId,
 } from "@/lib/concierge-data"
 import { getCommunityFeed, type CommunityEvent, type CommunityPoll } from "@/lib/community-live"
-import { compareMatchInsightsByStrength, compareResidents } from "@/lib/matching-engine"
+import {
+  compareMatchInsightsByStrength,
+  compareResidents,
+  meetsCuratedIntroductionThreshold,
+  type MatchInsights,
+} from "@/lib/matching-engine"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type ResidentPreviewSnapshot = {
@@ -45,15 +55,29 @@ type JoinRequestRow = {
   connection_styles: string[] | null
   availability: string[] | null
   availability_grid: AvailabilityGrid | null
+  onboarding_profile?: Record<string, unknown> | null
+  compatibility_prompts?: Record<string, unknown> | null
+  activity_preferences?: string[] | null
+  networking_preferences?: Record<string, unknown> | null
+  intro_preferences?: Record<string, unknown> | null
 }
 
 type ResidentProfileCandidate = {
   profile: ProfileRow
   joinRequest: JoinRequestRow | null
+  match: MatchInsights
   matchScore: number
   compatibilitySummary: string
+  compatibilityDetails: string[]
   sharedInterests: string[]
   goal: string
+  occupation: string | null
+  recognitionCue: string | null
+  socialEnergy: string | null
+  planningStyle: string | null
+  connectionPreference: string | null
+  conciergeSnippet: string | null
+  meetupReason: string | null
 }
 
 function toTitleCase(value: string) {
@@ -66,6 +90,37 @@ function toTitleCase(value: string) {
 
 function uniqueValues(values: string[] | null | undefined) {
   return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)))
+}
+
+function readObjectString(
+  value: Record<string, unknown> | null | undefined,
+  key: string,
+): string | null {
+  const raw = value?.[key]
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null
+}
+
+function readObjectBoolean(
+  value: Record<string, unknown> | null | undefined,
+  key: string,
+) {
+  return value?.[key] === true
+}
+
+function getSocialEnergyLabel(joinRequest: JoinRequestRow | null) {
+  const socialEnergy =
+    readObjectString(joinRequest?.compatibility_prompts, "socialEnergy") ??
+    readObjectString(joinRequest?.intro_preferences, "socialEnergy")
+
+  return socialEnergy ? formatSocialEnergyLabel(socialEnergy as SocialEnergyId) : null
+}
+
+function getPlanningStyleLabel(joinRequest: JoinRequestRow | null) {
+  const planningStyle =
+    readObjectString(joinRequest?.compatibility_prompts, "planningStyle") ??
+    readObjectString(joinRequest?.intro_preferences, "planningStyle")
+
+  return planningStyle ? formatPlanningStyleLabel(planningStyle as PlanningStyleId) : null
 }
 
 function buildResidentFromCandidate(candidate: ResidentProfileCandidate, index: number): Resident {
@@ -97,6 +152,14 @@ function buildResidentFromCandidate(candidate: ResidentProfileCandidate, index: 
         : ["Conversation", "Community"],
     shared: candidate.sharedInterests.length,
     matchScore: candidate.matchScore,
+    occupation: candidate.occupation,
+    recognitionCue: candidate.recognitionCue,
+    socialEnergy: candidate.socialEnergy,
+    planningStyle: candidate.planningStyle,
+    connectionPreference: candidate.connectionPreference,
+    compatibilityDetails: candidate.compatibilityDetails,
+    conciergeSnippet: candidate.conciergeSnippet,
+    meetupReason: candidate.meetupReason,
   }
 }
 
@@ -149,7 +212,8 @@ const mockResidents = [
     name: "Sophie Laurent",
     unit: "Residence 21C",
     photo: "/residents/sophie.png",
-    tagline: "A one-on-one introduction feels natural here, especially around books and slower weekends.",
+    tagline:
+      "A one-on-one introduction feels natural here, especially around books and slower weekends.",
     goal: "Friendships",
     interests: ["Books", "Art", "Wellness", "Walking"],
     shared: 3,
@@ -198,27 +262,29 @@ export async function getResidentPreviewSnapshot({
   const currentJoinRequestResult = await supabase
     .from("resident_join_requests")
     .select(
-      "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid",
+      "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid, onboarding_profile, compatibility_prompts, activity_preferences, networking_preferences, intro_preferences",
     )
     .eq("building_id", buildingId)
     .eq("normalized_email", residentEmail)
     .maybeSingle<JoinRequestRow>()
 
   if (residentIds.length > 0 && currentJoinRequestResult.data) {
-    const [{ data: profiles, error: profileError }, { data: privateProfiles, error: privateProfileError }] =
-      await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, first_name, bio, photo_url, is_paused")
-          .in("id", residentIds)
-          .limit(8)
-          .returns<ProfileRow[]>(),
-        supabase
-          .from("private_profile_data")
-          .select("user_id, email")
-          .in("user_id", residentIds)
-          .returns<PrivateProfileRow[]>(),
-      ])
+    const [
+      { data: profiles, error: profileError },
+      { data: privateProfiles, error: privateProfileError },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, first_name, bio, photo_url, is_paused")
+        .in("id", residentIds)
+        .limit(8)
+        .returns<ProfileRow[]>(),
+      supabase
+        .from("private_profile_data")
+        .select("user_id, email")
+        .in("user_id", residentIds)
+        .returns<PrivateProfileRow[]>(),
+    ])
 
     if (profileError || privateProfileError) {
       throw new Error("Unable to load resident preview.")
@@ -238,7 +304,7 @@ export async function getResidentPreviewSnapshot({
       ? await supabase
           .from("resident_join_requests")
           .select(
-            "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid",
+            "normalized_email, introduction, interests, looking_for, connection_styles, availability, availability_grid, onboarding_profile, compatibility_prompts, activity_preferences, networking_preferences, intro_preferences",
           )
           .eq("building_id", buildingId)
           .in("normalized_email", residentEmails)
@@ -261,6 +327,32 @@ export async function getResidentPreviewSnapshot({
       availability: uniqueValues(currentJoinRequestResult.data.availability),
       availabilityGrid: currentJoinRequestResult.data.availability_grid,
       conciergeNote: currentJoinRequestResult.data.introduction?.trim() || null,
+      occupation:
+        readObjectString(currentJoinRequestResult.data.onboarding_profile, "occupation") ??
+        readObjectString(currentJoinRequestResult.data.networking_preferences, "occupation"),
+      socialEnergy:
+        (readObjectString(currentJoinRequestResult.data.compatibility_prompts, "socialEnergy") ??
+          readObjectString(currentJoinRequestResult.data.intro_preferences, "socialEnergy")) as
+          | SocialEnergyId
+          | null,
+      planningStyle:
+        (readObjectString(currentJoinRequestResult.data.compatibility_prompts, "planningStyle") ??
+          readObjectString(currentJoinRequestResult.data.intro_preferences, "planningStyle")) as
+          | PlanningStyleId
+          | null,
+      openToNetworking: readObjectBoolean(
+        currentJoinRequestResult.data.networking_preferences,
+        "openToNetworking",
+      ),
+      openToMentoring: readObjectBoolean(
+        currentJoinRequestResult.data.networking_preferences,
+        "openToMentoring",
+      ),
+      lookingForMentorship: readObjectBoolean(
+        currentJoinRequestResult.data.networking_preferences,
+        "lookingForMentorship",
+      ),
+      activityPreferences: uniqueValues(currentJoinRequestResult.data.activity_preferences),
     }
 
     const rankedCandidates: ResidentProfileCandidate[] = visibleProfiles
@@ -275,18 +367,63 @@ export async function getResidentPreviewSnapshot({
           availability: uniqueValues(joinRequest?.availability),
           availabilityGrid: joinRequest?.availability_grid ?? null,
           conciergeNote: joinRequest?.introduction?.trim() || profile.bio?.trim() || null,
+          occupation:
+            readObjectString(joinRequest?.onboarding_profile, "occupation") ??
+            readObjectString(joinRequest?.networking_preferences, "occupation"),
+          socialEnergy:
+            (readObjectString(joinRequest?.compatibility_prompts, "socialEnergy") ??
+              readObjectString(joinRequest?.intro_preferences, "socialEnergy")) as
+              | SocialEnergyId
+              | null,
+          planningStyle:
+            (readObjectString(joinRequest?.compatibility_prompts, "planningStyle") ??
+              readObjectString(joinRequest?.intro_preferences, "planningStyle")) as
+              | PlanningStyleId
+              | null,
+          openToNetworking: readObjectBoolean(
+            joinRequest?.networking_preferences,
+            "openToNetworking",
+          ),
+          openToMentoring: readObjectBoolean(
+            joinRequest?.networking_preferences,
+            "openToMentoring",
+          ),
+          lookingForMentorship: readObjectBoolean(
+            joinRequest?.networking_preferences,
+            "lookingForMentorship",
+          ),
+          activityPreferences: uniqueValues(joinRequest?.activity_preferences),
         })
 
         return {
           profile,
           joinRequest,
+          match,
           matchScore: match.score,
           compatibilitySummary: match.compatibilitySummary,
+          compatibilityDetails: match.compatibilityDetails,
           sharedInterests: match.sharedInterests,
-          goal: formatIntentLabel(match.sharedGoals[0] || uniqueValues(joinRequest?.looking_for)[0] || "friendships"),
-          match,
+          goal: formatIntentLabel(
+            match.sharedGoals[0] || uniqueValues(joinRequest?.looking_for)[0] || "friendships",
+          ),
+          occupation:
+            readObjectString(joinRequest?.onboarding_profile, "occupation") ??
+            readObjectString(joinRequest?.networking_preferences, "occupation"),
+          recognitionCue: readObjectString(joinRequest?.onboarding_profile, "recognitionCue"),
+          socialEnergy: getSocialEnergyLabel(joinRequest),
+          planningStyle: getPlanningStyleLabel(joinRequest),
+          connectionPreference: match.sharedConnectionStyles[0]
+            ? `${formatIntentLabel(match.sharedGoals[0] || "friendships")} · ${formatConnectionStyleLabel(match.sharedConnectionStyles[0])}`
+            : formatIntentLabel(match.sharedGoals[0] || "friendships"),
+          conciergeSnippet:
+            match.compatibilityDetails[0] ??
+            joinRequest?.introduction?.trim() ??
+            profile.bio?.trim() ??
+            null,
+          meetupReason: match.meetupRecommendation.reason,
         }
       })
+      .filter((candidate) => meetsCuratedIntroductionThreshold(candidate.match))
       .sort((left, right) => compareMatchInsightsByStrength(left.match, right.match))
       .map(({ match, ...candidate }) => candidate)
 

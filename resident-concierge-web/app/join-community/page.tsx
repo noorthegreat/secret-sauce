@@ -50,7 +50,7 @@ export default function JoinCommunityPage() {
     selectedLookingFor.length > 0 &&
     (contactViaSms || contactViaEmail)
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canSubmit || isSubmitting) return
 
@@ -87,89 +87,77 @@ export default function JoinCommunityPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="relative mx-auto max-w-5xl overflow-hidden px-6 py-10 sm:px-8 lg:py-14">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.1]">
-          <img src="/building.png" alt="" aria-hidden="true" className="h-full w-full object-cover blur-[3px]" />
+    <main className="min-h-screen bg-[#1f1a15] text-[#f3ebdc]">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 pb-12 pt-6">
+        <div className="mb-10 flex justify-center">
+          <FifthCircleBrandMark
+            theme="dark"
+            caption="Private building access"
+            className="gap-4"
+          />
         </div>
-        <header className="relative overflow-hidden rounded-[2.5rem] border border-border bg-card/95 px-8 py-10 shadow-[0_32px_70px_-42px_rgba(70,56,35,0.35)]">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(191,151,85,0.1),transparent)]" />
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-gold">
-                Fifth Circle resident access
-              </p>
-              <h1 className="mt-6 max-w-3xl text-balance font-serif text-5xl leading-[0.98] text-foreground sm:text-6xl">
-                Join your building&apos;s private community.
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                A short request for access — about two minutes. Matching preferences come after
-                approval during onboarding.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
-                <TrustPill text="Reviewed privately by your building team" />
-                <TrustPill text="Used only for introductions and gatherings" />
-                <TrustPill text="Never posted publicly inside the building" />
-              </div>
-            </div>
-            <FifthCircleBrandMark className="mx-auto w-full max-w-sm lg:max-w-none" />
-          </div>
-        </header>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="flex items-center gap-2">
-            {[0, 1].map((value) => (
-              <span
-                key={value}
-                className={`h-1 flex-1 rounded-full ${step >= value ? "bg-gold" : "bg-border"}`}
-              />
-            ))}
-          </div>
+        <div className="mb-8 flex items-center justify-center gap-2">
+          {[0, 1].map((value) => (
+            <span
+              key={value}
+              className={`h-1.5 w-12 rounded-full transition-colors ${
+                step >= value ? "bg-[#b89655]" : "bg-[#43392f]"
+              }`}
+            />
+          ))}
+        </div>
 
+        <form onSubmit={handleSubmit} className="space-y-8">
           {step === 0 ? (
-            <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-              <SectionHeader
-                title="Confirm your residency"
-                subtitle="We use this to verify access and contact you once approved."
+            <section className="space-y-6">
+              <HeroBlock
+                eyebrow="Your building community"
+                title="Welcome to"
+                accent="your building."
+                description="A short private request for access. We verify residency first, then invite you into the full onboarding once approved."
               />
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+              <div className="space-y-4 rounded-[2rem] border border-[#3f352c] bg-[#251f19] p-5">
                 <Field label="Invite code">
                   <input
                     value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
                     className={inputClassName}
                     required
                   />
                 </Field>
-                <Field label="Unit number">
+                <Field label="Apartment or unit">
                   <input
                     value={unitNumber}
-                    onChange={(e) => setUnitNumber(e.target.value)}
+                    onChange={(event) => setUnitNumber(event.target.value)}
                     className={inputClassName}
                     required
                   />
                 </Field>
-                <Field label="First name">
-                  <input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className={inputClassName}
-                    required
-                  />
-                </Field>
-                <Field label="Last name">
-                  <input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className={inputClassName}
-                    required
-                  />
-                </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="First name">
+                    <input
+                      value={firstName}
+                      onChange={(event) => setFirstName(event.target.value)}
+                      className={inputClassName}
+                      required
+                    />
+                  </Field>
+                  <Field label="Last name">
+                    <input
+                      value={lastName}
+                      onChange={(event) => setLastName(event.target.value)}
+                      className={inputClassName}
+                      required
+                    />
+                  </Field>
+                </div>
                 <Field label="Email">
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                     className={inputClassName}
                     required
                   />
@@ -178,50 +166,56 @@ export default function JoinCommunityPage() {
                   <input
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className={inputClassName}
+                    onChange={(event) => setPhone(event.target.value)}
                     placeholder="+14155551234"
+                    className={inputClassName}
                     required
                   />
                 </Field>
               </div>
-              <button
+
+              <PrimaryButton
                 type="button"
                 disabled={!canAdvanceStep0}
                 onClick={() => setStep(1)}
-                className="mt-6 rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continue
-              </button>
+              </PrimaryButton>
             </section>
           ) : (
-            <>
-              <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-                <SectionHeader
-                  title="What are you hoping to find?"
-                  subtitle="Choose the kinds of introductions that would feel most valuable. You can refine interests and availability after approval."
-                />
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {intents.map((option) => (
-                    <SelectCard
-                      key={option.id}
-                      label={option.label}
-                      note={option.note}
-                      selected={selectedLookingFor.includes(option.id)}
-                      onClick={() =>
-                        setSelectedLookingFor((current) => toggleValue(current, option.id))
-                      }
-                    />
-                  ))}
-                </div>
-              </section>
+            <section className="space-y-6">
+              <HeroBlock
+                eyebrow="Quiet introductions"
+                title="What kind of"
+                accent="connections"
+                afterAccent="matter most to you?"
+                description="Choose only what feels genuinely useful. We use this to shape thoughtful introductions after approval, not to create a public profile."
+              />
 
-              <section className="rounded-[2rem] border border-border bg-card/95 p-7">
-                <SectionHeader
-                  title="Contact preferences"
-                  subtitle="Tell us the best way to reach you once your access is approved."
-                />
-                <div className="mt-5 flex flex-wrap gap-3">
+              <div className="space-y-3">
+                {intents.map((option) => (
+                  <SelectCard
+                    key={option.id}
+                    label={option.label}
+                    note={option.note}
+                    selected={selectedLookingFor.includes(option.id)}
+                    onClick={() =>
+                      setSelectedLookingFor((current) => toggleValue(current, option.id))
+                    }
+                    tone="dark"
+                  />
+                ))}
+              </div>
+
+              <div className="rounded-[2rem] border border-[#3f352c] bg-[#251f19] p-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#a89274]">
+                  How should we reach you?
+                </p>
+                <p className="mt-2 text-sm leading-7 text-[#b8ab97]">
+                  We’ll only use this to confirm access, share approval updates, and send your next step into onboarding.
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-3">
                   <ToggleCheck
                     label="Text me"
                     checked={contactViaSms}
@@ -233,83 +227,84 @@ export default function JoinCommunityPage() {
                     onToggle={() => setContactViaEmail((value) => !value)}
                   />
                 </div>
+              </div>
 
-                {errorMessage ? <p className="mt-5 text-sm text-destructive">{errorMessage}</p> : null}
-                {successMessage ? (
-                  <div className="mt-5 rounded-3xl border border-gold/30 bg-gold/10 p-4">
-                    <p className="text-sm text-gold-foreground">{successMessage}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      After approval, complete onboarding to unlock introductions and gatherings.
+              {errorMessage ? <Message tone="error">{errorMessage}</Message> : null}
+              {successMessage ? (
+                <Message tone="success">
+                  <div className="space-y-3">
+                    <p>{successMessage}</p>
+                    <p className="text-xs leading-6 text-[#d9cfbf]">
+                      Once approved, sign in to complete your private onboarding and unlock introductions, circles, and gatherings.
                     </p>
                     <Link
                       href="/auth?next=%2Fapp%2Fonboarding"
-                      className="mt-3 inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                      className="inline-flex rounded-full border border-[#4a4034] bg-[#1f1a15] px-4 py-2 text-sm font-medium text-[#f3ebdc]"
                     >
                       Sign in or create account
                     </Link>
                   </div>
-                ) : null}
+                </Message>
+              ) : null}
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep(0)}
-                    className="rounded-full border border-border bg-background px-6 py-3 text-sm font-medium tracking-wide text-foreground"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!canSubmit || isSubmitting}
-                    className="rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Submitting..." : "Request access"}
-                  </button>
-                </div>
-              </section>
-            </>
+              <div className="flex flex-wrap gap-3">
+                <SecondaryButton type="button" onClick={() => setStep(0)}>
+                  Back
+                </SecondaryButton>
+                <PrimaryButton type="submit" disabled={!canSubmit || isSubmitting}>
+                  {isSubmitting ? "Requesting access..." : "Request access"}
+                </PrimaryButton>
+              </div>
+            </section>
           )}
         </form>
+
+        <p className="mt-8 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-[#8f7d66]">
+          Private. Building-scoped. Concierge-led.
+        </p>
       </div>
     </main>
   )
 }
 
-function TrustPill({ text }: { text: string }) {
-  return (
-    <span className="rounded-full border border-gold/20 bg-background px-4 py-2 text-sm">
-      {text}
-    </span>
-  )
-}
-
-function SectionHeader({
+function HeroBlock({
+  eyebrow,
   title,
-  subtitle,
+  accent,
+  afterAccent,
+  description,
 }: {
+  eyebrow: string
   title: string
-  subtitle: string
+  accent: string
+  afterAccent?: string
+  description: string
 }) {
   return (
-    <>
-      <h2 className="font-serif text-3xl text-foreground">{title}</h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{subtitle}</p>
-    </>
+    <div className="text-center">
+      <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[#b89655]">{eyebrow}</p>
+      <h1 className="mt-5 font-serif text-[2.7rem] leading-[0.96] text-[#f3ebdc]">
+        {title}
+        <span className="block italic text-[#c29a51]">{accent}</span>
+        {afterAccent ? <span className="block">{afterAccent}</span> : null}
+      </h1>
+      <p className="mt-4 text-sm leading-7 text-[#b8ab97]">{description}</p>
+    </div>
   )
 }
 
 function Field({
   label,
   children,
-  className,
 }: {
   label: string
   children: React.ReactNode
-  className?: string
 }) {
   return (
-    <label className={className}>
-      <span className="mb-2 block text-sm text-muted-foreground">{label}</span>
+    <label className="block">
+      <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#9f917e]">
+        {label}
+      </span>
       {children}
     </label>
   )
@@ -329,7 +324,9 @@ function ToggleCheck({
       type="button"
       onClick={onToggle}
       className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-        checked ? "border-gold bg-foreground text-background" : "border-border bg-background text-foreground"
+        checked
+          ? "border-[#b89655] bg-[#f3ebdc] text-[#2d241d]"
+          : "border-[#43392f] bg-[#1f1a15] text-[#f3ebdc]"
       }`}
     >
       {label}
@@ -337,5 +334,53 @@ function ToggleCheck({
   )
 }
 
+function PrimaryButton({
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      className="w-full rounded-full border border-[#4a4034] bg-[#231d17] px-6 py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc] transition-colors hover:border-[#b89655] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {children}
+    </button>
+  )
+}
+
+function SecondaryButton({
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      className="rounded-full border border-[#4a4034] bg-[#1f1a15] px-6 py-3 text-sm font-medium tracking-[0.18em] text-[#f3ebdc]"
+    >
+      {children}
+    </button>
+  )
+}
+
+function Message({
+  children,
+  tone,
+}: {
+  children: React.ReactNode
+  tone: "error" | "success"
+}) {
+  return (
+    <div
+      className={`rounded-[1.6rem] border px-4 py-3 text-sm ${
+        tone === "error"
+          ? "border-[#6d433f] bg-[#382320] text-[#efb0a6]"
+          : "border-[#7a6640] bg-[#2d271d] text-[#f0dfbe]"
+      }`}
+    >
+      {children}
+    </div>
+  )
+}
+
 const inputClassName =
-  "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-gold/60"
+  "h-12 w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 text-sm text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"

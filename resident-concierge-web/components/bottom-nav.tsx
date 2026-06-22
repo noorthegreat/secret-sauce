@@ -1,14 +1,15 @@
 "use client"
 
-import { Home, Users, CalendarHeart, UserRound } from "lucide-react"
+import { Home, Users, CalendarHeart, UserRound, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export type ResidentTab = "home" | "people" | "community" | "profile"
+export type ResidentTab = "home" | "people" | "concierge" | "community" | "profile"
 
 const items: { id: ResidentTab; label: string; icon: typeof Home }[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "people", label: "People", icon: Users },
-  { id: "community", label: "Community", icon: CalendarHeart },
+  { id: "concierge", label: "Concierge", icon: Sparkles },
+  { id: "community", label: "Gatherings", icon: CalendarHeart },
   { id: "profile", label: "Profile", icon: UserRound },
 ]
 

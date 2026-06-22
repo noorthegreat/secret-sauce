@@ -1,16 +1,89 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ShieldCheck } from "lucide-react"
+import { Loader2, ShieldAlert, ShieldCheck, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
 import { ManagerDashboard } from "@/components/screens/manager-dashboard"
 import { useResidentSession } from "@/lib/session-browser"
+import { getSupabaseBrowser } from "@/lib/supabase-browser"
+
+type ManagerAccessSnapshot = {
+  state:
+    | "authorized"
+    | "provisioned"
+    | "awaiting_provisioning"
+    | "no_matching_lead"
+    | "building_inactive"
+    | "conflict"
+  message: string
+  buildingName: string | null
+  buildingSlug: string | null
+  isAdmin: boolean
+  isManager: boolean
+  provisionedNow: boolean
+}
 
 export default function ManagerDashboardPage() {
   const router = useRouter()
   const { session, user, isLoading } = useResidentSession()
+  const [access, setAccess] = useState<ManagerAccessSnapshot | null>(null)
+  const [accessLoading, setAccessLoading] = useState(false)
+  const [accessError, setAccessError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!session?.access_token || !user) {
+      setAccess(null)
+      setAccessError(null)
+      setAccessLoading(false)
+      return
+    }
+
+    let isMounted = true
+
+    async function loadAccess() {
+      setAccessLoading(true)
+      setAccessError(null)
+
+      try {
+        const response = await fetch("/api/manager-access", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          cache: "no-store",
+        })
+
+        const payload = (await response.json()) as ManagerAccessSnapshot & { error?: string }
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Unable to verify manager access.")
+        }
+
+        if (!isMounted) return
+        setAccess(payload)
+      } catch (error) {
+        if (!isMounted) return
+        setAccess(null)
+        setAccessError(
+          error instanceof Error ? error.message : "Unable to verify manager access.",
+        )
+      } finally {
+        if (!isMounted) return
+        setAccessLoading(false)
+      }
+    }
+
+    void loadAccess()
+
+    return () => {
+      isMounted = false
+    }
+  }, [session?.access_token, user])
+
+  const canOpenDashboard = access?.state === "authorized" || access?.state === "provisioned"
 
   return (
     <main className="min-h-screen bg-[#201a15] text-[#f3ebdc]">
@@ -73,8 +146,35 @@ export default function ManagerDashboardPage() {
                     ctaLabel="Sign in"
                     ctaHref="/auth?next=%2Fmanager%2Fdashboard"
                   />
+                ) : accessLoading ? (
+                  <CenteredState
+                    title="Preparing Community Pulse..."
+                    description="We’re checking your building-team access and launch status."
+                    icon={<Loader2 className="size-6 animate-spin" strokeWidth={1.5} />}
+                  />
+                ) : accessError ? (
+                  <CenteredState
+                    title="We couldn’t confirm manager access yet."
+                    description={accessError}
+                    ctaLabel="Return to pilot request"
+                    ctaHref="/for-buildings"
+                    tone="alert"
+                  />
+                ) : access && canOpenDashboard ? (
+                  <ManagerDashboard
+                    accessToken={session.access_token}
+                    onBack={() => router.push("/")}
+                    access={access}
+                  />
                 ) : (
-                  <ManagerDashboard accessToken={session.access_token} onBack={() => router.push("/")} />
+                  <ManagerAccessState
+                    access={access}
+                    onSignOut={async () => {
+                      await getSupabaseBrowser().auth.signOut()
+                      router.replace("/auth?next=%2Fmanager%2Fdashboard")
+                      router.refresh()
+                    }}
+                  />
                 )}
               </div>
             </div>
@@ -90,16 +190,26 @@ function CenteredState({
   description,
   ctaLabel,
   ctaHref,
+  icon,
+  tone = "default",
 }: {
   title: string
   description?: string
   ctaLabel?: string
   ctaHref?: string
+  icon?: React.ReactNode
+  tone?: "default" | "alert"
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-8 py-20 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold">
-        <ShieldCheck className="size-6" strokeWidth={1.5} />
+      <span
+        className={`flex size-14 items-center justify-center rounded-full ${
+          tone === "alert"
+            ? "border border-destructive/20 bg-destructive/5 text-destructive"
+            : "border border-gold/25 bg-gold/10 text-gold"
+        }`}
+      >
+        {icon ?? <ShieldCheck className="size-6" strokeWidth={1.5} />}
       </span>
       <p className="mt-5 font-serif text-3xl leading-tight text-foreground">{title}</p>
       {description ? (
@@ -113,6 +223,125 @@ function CenteredState({
           {ctaLabel}
         </Link>
       ) : null}
+    </div>
+  )
+}
+
+function ManagerAccessState({
+  access,
+  onSignOut,
+}: {
+  access: ManagerAccessSnapshot | null
+  onSignOut: () => Promise<void>
+}) {
+  const titleByState: Record<ManagerAccessSnapshot["state"], string> = {
+    authorized: "Manager access is ready.",
+    provisioned: "Community Pulse is ready.",
+    awaiting_provisioning: "Your building team sign-in is almost ready.",
+    no_matching_lead: "We couldn't find a building-team pilot request for this account.",
+    building_inactive: "Your building is not live yet.",
+    conflict: "We need to confirm which building this account should manage.",
+  }
+
+  const eyebrowByState: Record<ManagerAccessSnapshot["state"], string> = {
+    authorized: "Building team access",
+    provisioned: "Access activated",
+    awaiting_provisioning: "Pending manager activation",
+    no_matching_lead: "No active pilot request found",
+    building_inactive: "Pilot not launched yet",
+    conflict: "Access needs review",
+  }
+
+  if (!access) {
+    return null
+  }
+
+  const waiting = access.state === "awaiting_provisioning" || access.state === "building_inactive"
+  const conflict = access.state === "conflict" || access.state === "no_matching_lead"
+
+  return (
+    <div className="flex h-full items-center justify-center px-6 py-14">
+      <div className="w-full max-w-3xl rounded-[2rem] border border-[#d8cab7] bg-[#fffaf2]/96 p-8 shadow-[0_40px_90px_-50px_rgba(70,56,35,0.28)]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-gold">
+              {eyebrowByState[access.state]}
+            </p>
+            <h2 className="mt-4 font-serif text-4xl leading-[1.02] text-foreground">
+              {titleByState[access.state]}
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">{access.message}</p>
+            {access.buildingName ? (
+              <p className="mt-4 inline-flex rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-foreground">
+                {access.buildingName}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="rounded-[1.7rem] border border-border bg-white/70 p-5 lg:max-w-[290px]">
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex size-10 items-center justify-center rounded-full ${
+                  waiting
+                    ? "border border-gold/25 bg-gold/10 text-gold"
+                    : "border border-destructive/20 bg-destructive/5 text-destructive"
+                }`}
+              >
+                {waiting ? <Sparkles className="size-4" /> : <ShieldAlert className="size-4" />}
+              </span>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {waiting ? "What happens next" : "How to unblock access"}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Fifth Circle keeps manager access explicit and building-scoped during the pilot.
+                </p>
+              </div>
+            </div>
+            <ol className="mt-4 space-y-2 text-sm leading-relaxed text-muted-foreground">
+              <li>1. Use the same work email submitted on your building pilot request.</li>
+              <li>2. Wait for Fifth Circle to provision your building-team role.</li>
+              <li>3. Return here to open Community Pulse once access is active.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          {waiting ? (
+            <>
+              <Link
+                href="/for-buildings"
+                className="rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background"
+              >
+                Review pilot request
+              </Link>
+              <button
+                type="button"
+                onClick={() => void onSignOut()}
+                className="rounded-full border border-border px-5 py-3 text-sm font-medium text-foreground"
+              >
+                Sign out and try another account
+              </button>
+            </>
+          ) : conflict ? (
+            <>
+              <Link
+                href="/for-buildings"
+                className="rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background"
+              >
+                Start or review pilot request
+              </Link>
+              <button
+                type="button"
+                onClick={() => void onSignOut()}
+                className="rounded-full border border-border px-5 py-3 text-sm font-medium text-foreground"
+              >
+                Sign out
+              </button>
+            </>
+          ) : null}
+        </div>
+      </div>
     </div>
   )
 }

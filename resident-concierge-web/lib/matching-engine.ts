@@ -7,10 +7,14 @@ import {
   formatConnectionStyleLabel,
   formatIntentLabel,
   formatInterestLabel,
+  formatPlanningStyleLabel,
+  formatSocialEnergyLabel,
   normalizeAvailabilityGrid,
   type AmenityId,
   type AvailabilityGrid,
   type AvailabilitySummaryId,
+  type PlanningStyleId,
+  type SocialEnergyId,
   type TimeBlockId,
   type WeekdayId,
 } from "@/lib/concierge-data"
@@ -22,6 +26,13 @@ export type MatchCandidate = {
   availability: string[]
   availabilityGrid: AvailabilityGrid | null
   conciergeNote: string | null
+  occupation?: string | null
+  socialEnergy?: SocialEnergyId | null
+  planningStyle?: PlanningStyleId | null
+  openToNetworking?: boolean
+  openToMentoring?: boolean
+  lookingForMentorship?: boolean
+  activityPreferences?: string[]
 }
 
 export type MatchOverlapSlot = {
@@ -44,6 +55,9 @@ export type MatchInsights = {
     goals: number
     styles: number
     availability: number
+    energy: number
+    planning: number
+    networking: number
     noteHints: number
   }
   sharedInterests: string[]
@@ -52,6 +66,11 @@ export type MatchInsights = {
   overlapSlots: MatchOverlapSlot[]
   overlapSummaries: AvailabilitySummaryId[]
   timingLabel: string | null
+  sharedSocialEnergy: SocialEnergyId | null
+  sharedPlanningStyle: PlanningStyleId | null
+  networkingAlignment: string | null
+  mentoringAlignment: string | null
+  compatibilityDetails: string[]
   compatibilitySummary: string
   managerCompatibilitySummary: string
   meetupRecommendation: MeetupRecommendation
@@ -100,6 +119,10 @@ function uniqueValues(values: string[] | null | undefined) {
 function intersection(left: string[], right: string[]) {
   const rightSet = new Set(right)
   return left.filter((value) => rightSet.has(value))
+}
+
+function normalizeBoolean(value: unknown) {
+  return value === true
 }
 
 function slotWeight(day: WeekdayId, block: TimeBlockId) {
@@ -238,6 +261,123 @@ function formatList(labels: string[]) {
   return `${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]}`
 }
 
+function scoreSharedEnergy(
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
+) {
+  if (
+    currentResident.socialEnergy &&
+    currentResident.socialEnergy === otherResident.socialEnergy
+  ) {
+    return 8
+  }
+
+  if (
+    currentResident.socialEnergy &&
+    otherResident.socialEnergy &&
+    ((currentResident.socialEnergy === "balanced" && otherResident.socialEnergy !== "balanced") ||
+      (otherResident.socialEnergy === "balanced" && currentResident.socialEnergy !== "balanced"))
+  ) {
+    return 4
+  }
+
+  return 0
+}
+
+function scorePlanningFit(
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
+) {
+  if (
+    currentResident.planningStyle &&
+    currentResident.planningStyle === otherResident.planningStyle
+  ) {
+    return 8
+  }
+
+  if (
+    currentResident.planningStyle &&
+    otherResident.planningStyle &&
+    ((currentResident.planningStyle === "flexible" && otherResident.planningStyle !== "flexible") ||
+      (otherResident.planningStyle === "flexible" && currentResident.planningStyle !== "flexible"))
+  ) {
+    return 4
+  }
+
+  return 0
+}
+
+function getNetworkingAlignment(
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
+) {
+  const currentWantsNetworking =
+    currentResident.lookingFor.includes("professional_networking") ||
+    normalizeBoolean(currentResident.openToNetworking)
+  const otherWantsNetworking =
+    otherResident.lookingFor.includes("professional_networking") ||
+    normalizeBoolean(otherResident.openToNetworking)
+
+  if (currentWantsNetworking && otherWantsNetworking) {
+    return "You both opted into professional networking."
+  }
+
+  return null
+}
+
+function getMentoringAlignment(
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
+) {
+  if (
+    normalizeBoolean(currentResident.lookingForMentorship) &&
+    normalizeBoolean(otherResident.openToMentoring)
+  ) {
+    return "They are open to mentoring, and you are open to guidance."
+  }
+
+  if (
+    normalizeBoolean(otherResident.lookingForMentorship) &&
+    normalizeBoolean(currentResident.openToMentoring)
+  ) {
+    return "You are open to mentoring, and they are looking for guidance."
+  }
+
+  if (
+    normalizeBoolean(currentResident.openToMentoring) &&
+    normalizeBoolean(otherResident.openToMentoring)
+  ) {
+    return "You both signaled openness to mentoring conversations."
+  }
+
+  return null
+}
+
+function scoreNetworkingFit(
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
+) {
+  let score = 0
+
+  if (getNetworkingAlignment(currentResident, otherResident)) {
+    score += 6
+  }
+
+  if (getMentoringAlignment(currentResident, otherResident)) {
+    score += 4
+  }
+
+  if (
+    currentResident.occupation &&
+    otherResident.occupation &&
+    currentResident.occupation.trim().toLowerCase() === otherResident.occupation.trim().toLowerCase()
+  ) {
+    score += 2
+  }
+
+  return score
+}
+
 function normalizeNoteText(note: string | null | undefined) {
   return (note ?? "").trim().toLowerCase()
 }
@@ -250,6 +390,8 @@ function detectRecommendationHint(
   sharedInterests: string[],
   sharedGoals: string[],
   sharedStyles: string[],
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
   currentNote: string | null,
   otherNote: string | null,
 ): RecommendationHint {
@@ -259,6 +401,8 @@ function detectRecommendationHint(
   const combinedNotes = `${normalizeNoteText(currentNote)} ${normalizeNoteText(otherNote)}`.trim()
 
   if (
+    (currentResident.lookingFor.includes("professional_networking") &&
+      otherResident.lookingFor.includes("professional_networking")) ||
     interestSet.has("technology") ||
     interestSet.has("entrepreneurship") ||
     interestSet.has("coworking") ||
@@ -271,6 +415,10 @@ function detectRecommendationHint(
     interestSet.has("fitness") ||
     interestSet.has("running") ||
     interestSet.has("walking") ||
+    intersection(
+      uniqueValues(currentResident.activityPreferences),
+      uniqueValues(otherResident.activityPreferences),
+    ).length > 0 ||
     interestSet.has("yoga") ||
     interestSet.has("wellness") ||
     interestSet.has("hiking") ||
@@ -309,6 +457,8 @@ function buildMeetupRecommendation(
   sharedGoals: string[],
   sharedStyles: string[],
   timingLabel: string | null,
+  currentResident: MatchCandidate,
+  otherResident: MatchCandidate,
   currentNote: string | null,
   otherNote: string | null,
 ): MeetupRecommendation {
@@ -316,6 +466,8 @@ function buildMeetupRecommendation(
     sharedInterests,
     sharedGoals,
     sharedStyles,
+    currentResident,
+    otherResident,
     currentNote,
     otherNote,
   )
@@ -327,7 +479,7 @@ function buildMeetupRecommendation(
       amenityId,
       amenityLabel: formatAmenityLabel(amenityId),
       timingLabel,
-      reason: "Their overlap points to a thoughtful, productive introduction with room for conversation.",
+      reason: "A productive in-building setting gives this introduction structure without losing warmth.",
     }
   }
 
@@ -338,7 +490,7 @@ function buildMeetupRecommendation(
       amenityId,
       amenityLabel: formatAmenityLabel(amenityId),
       timingLabel,
-      reason: "Shared active interests make a low-pressure wellness-oriented meetup feel natural.",
+      reason: "Shared activity preferences make this feel easy, active, and low-pressure.",
     }
   }
 
@@ -349,7 +501,7 @@ function buildMeetupRecommendation(
       amenityId,
       amenityLabel: formatAmenityLabel(amenityId),
       timingLabel,
-      reason: "Their social style leans toward a more communal, building-led introduction.",
+      reason: "Their goals and social style point toward a more communal first touchpoint.",
     }
   }
 
@@ -379,6 +531,10 @@ function buildResidentSummary(
   sharedGoals: string[],
   sharedStyles: string[],
   overlapSummaries: AvailabilitySummaryId[],
+  sharedSocialEnergy: SocialEnergyId | null,
+  sharedPlanningStyle: PlanningStyleId | null,
+  networkingAlignment: string | null,
+  mentoringAlignment: string | null,
 ) {
   const parts: string[] = []
 
@@ -412,6 +568,24 @@ function buildResidentSummary(
     )
   }
 
+  if (sharedSocialEnergy) {
+    parts.push(
+      `You share a ${formatSocialEnergyLabel(sharedSocialEnergy).toLowerCase()} social rhythm.`,
+    )
+  }
+
+  if (sharedPlanningStyle) {
+    parts.push(
+      `You both lean ${formatPlanningStyleLabel(sharedPlanningStyle).toLowerCase()} when making plans.`,
+    )
+  }
+
+  if (networkingAlignment) {
+    parts.push(networkingAlignment)
+  } else if (mentoringAlignment) {
+    parts.push(mentoringAlignment)
+  }
+
   if (parts.length === 0) {
     return "A private building introduction shaped around shared community fit."
   }
@@ -425,6 +599,10 @@ function buildManagerSummary(
   sharedStyles: string[],
   overlapSummaries: AvailabilitySummaryId[],
   timingLabel: string | null,
+  sharedSocialEnergy: SocialEnergyId | null,
+  sharedPlanningStyle: PlanningStyleId | null,
+  networkingAlignment: string | null,
+  mentoringAlignment: string | null,
 ) {
   const descriptors: string[] = []
 
@@ -442,6 +620,14 @@ function buildManagerSummary(
     descriptors.push(`format: ${formatConnectionStyleLabel(sharedStyles[0]).toLowerCase()}`)
   }
 
+  if (sharedSocialEnergy) {
+    descriptors.push(`energy: ${formatSocialEnergyLabel(sharedSocialEnergy).toLowerCase()}`)
+  }
+
+  if (sharedPlanningStyle) {
+    descriptors.push(`planning: ${formatPlanningStyleLabel(sharedPlanningStyle).toLowerCase()}`)
+  }
+
   if (timingLabel) {
     descriptors.push(`timing: ${timingLabel.toLowerCase()}`)
   } else if (overlapSummaries.length > 0) {
@@ -450,9 +636,64 @@ function buildManagerSummary(
     )
   }
 
+  if (networkingAlignment) {
+    descriptors.push("networking: shared interest")
+  } else if (mentoringAlignment) {
+    descriptors.push("mentoring: complementary fit")
+  }
+
   return descriptors.length > 0
     ? descriptors.join(" · ")
     : "Private building introduction with general community fit."
+}
+
+function buildCompatibilityDetails(
+  sharedInterests: string[],
+  sharedGoals: string[],
+  sharedStyles: string[],
+  overlapSummaries: AvailabilitySummaryId[],
+  sharedSocialEnergy: SocialEnergyId | null,
+  sharedPlanningStyle: PlanningStyleId | null,
+  networkingAlignment: string | null,
+  mentoringAlignment: string | null,
+) {
+  const details: string[] = []
+
+  if (sharedInterests.length > 0) {
+    details.push(
+      `Shared interests: ${formatList(sharedInterests.slice(0, 3).map(formatInterestLabel))}`,
+    )
+  }
+
+  if (sharedGoals.length > 0) {
+    details.push(
+      `Shared goals: ${formatList(sharedGoals.slice(0, 2).map(formatIntentLabel))}`,
+    )
+  }
+
+  if (sharedStyles.length > 0) {
+    details.push(`Best format: ${formatConnectionStyleLabel(sharedStyles[0])}`)
+  }
+
+  if (overlapSummaries.length > 0) {
+    details.push(`Timing overlap: ${formatAvailabilitySummaryLabel(overlapSummaries[0])}`)
+  }
+
+  if (sharedSocialEnergy) {
+    details.push(`Social energy: ${formatSocialEnergyLabel(sharedSocialEnergy)}`)
+  }
+
+  if (sharedPlanningStyle) {
+    details.push(`Planning style: ${formatPlanningStyleLabel(sharedPlanningStyle)}`)
+  }
+
+  if (networkingAlignment) {
+    details.push(networkingAlignment)
+  } else if (mentoringAlignment) {
+    details.push(mentoringAlignment)
+  }
+
+  return details.slice(0, 5)
 }
 
 function scoreInterestOverlap(sharedInterests: string[]) {
@@ -553,6 +794,37 @@ export function compareMatchInsightsByStrength(left: MatchInsights, right: Match
   return 0
 }
 
+export function meetsCuratedIntroductionThreshold(insights: MatchInsights) {
+  const hasSharedGoal = insights.sharedGoals.length > 0
+  const hasMeaningfulInterestOverlap = insights.sharedInterests.length >= 2
+  const hasTimingSignal =
+    insights.overlapSlots.length > 0 || insights.overlapSummaries.length > 0
+  const hasRelationalSignal =
+    insights.sharedConnectionStyles.length > 0 ||
+    Boolean(insights.sharedSocialEnergy) ||
+    Boolean(insights.sharedPlanningStyle)
+  const hasProfessionalSignal =
+    Boolean(insights.networkingAlignment) || Boolean(insights.mentoringAlignment)
+
+  const scoreFloor =
+    hasSharedGoal && (hasMeaningfulInterestOverlap || hasTimingSignal || hasRelationalSignal)
+      ? 34
+      : hasMeaningfulInterestOverlap && hasTimingSignal
+        ? 36
+        : hasProfessionalSignal && hasMeaningfulInterestOverlap
+          ? 36
+          : 42
+
+  return (
+    insights.score >= scoreFloor &&
+    (hasSharedGoal || hasMeaningfulInterestOverlap || hasProfessionalSignal) &&
+    (hasTimingSignal ||
+      hasRelationalSignal ||
+      hasProfessionalSignal ||
+      hasMeaningfulInterestOverlap)
+  )
+}
+
 export function compareResidents(
   currentResident: MatchCandidate,
   otherResident: MatchCandidate,
@@ -584,6 +856,18 @@ export function compareResidents(
   const finalOverlapSummaries =
     overlapSummaries.length > 0 ? overlapSummaries : filteredFallbackAvailability
   const timingLabel = buildTimingLabel(overlapSlots, finalOverlapSummaries)
+  const sharedSocialEnergy =
+    currentResident.socialEnergy &&
+    currentResident.socialEnergy === otherResident.socialEnergy
+      ? currentResident.socialEnergy
+      : null
+  const sharedPlanningStyle =
+    currentResident.planningStyle &&
+    currentResident.planningStyle === otherResident.planningStyle
+      ? currentResident.planningStyle
+      : null
+  const networkingAlignment = getNetworkingAlignment(currentResident, otherResident)
+  const mentoringAlignment = getMentoringAlignment(currentResident, otherResident)
 
   const scoreBreakdown = {
     interests: scoreInterestOverlap(sharedInterests),
@@ -594,6 +878,9 @@ export function compareResidents(
       uniqueValues(currentResident.availability),
       uniqueValues(otherResident.availability),
     ),
+    energy: scoreSharedEnergy(currentResident, otherResident),
+    planning: scorePlanningFit(currentResident, otherResident),
+    networking: scoreNetworkingFit(currentResident, otherResident),
     noteHints: scoreNoteHints(currentResident.conciergeNote, otherResident.conciergeNote),
   }
 
@@ -604,8 +891,20 @@ export function compareResidents(
     sharedGoals,
     sharedConnectionStyles,
     timingLabel,
+    currentResident,
+    otherResident,
     currentResident.conciergeNote,
     otherResident.conciergeNote,
+  )
+  const compatibilityDetails = buildCompatibilityDetails(
+    sharedInterests,
+    sharedGoals,
+    sharedConnectionStyles,
+    finalOverlapSummaries,
+    sharedSocialEnergy,
+    sharedPlanningStyle,
+    networkingAlignment,
+    mentoringAlignment,
   )
 
   return {
@@ -617,11 +916,20 @@ export function compareResidents(
     overlapSlots,
     overlapSummaries: finalOverlapSummaries,
     timingLabel,
+    sharedSocialEnergy,
+    sharedPlanningStyle,
+    networkingAlignment,
+    mentoringAlignment,
+    compatibilityDetails,
     compatibilitySummary: buildResidentSummary(
       sharedInterests,
       sharedGoals,
       sharedConnectionStyles,
       finalOverlapSummaries,
+      sharedSocialEnergy,
+      sharedPlanningStyle,
+      networkingAlignment,
+      mentoringAlignment,
     ),
     managerCompatibilitySummary: buildManagerSummary(
       sharedInterests,
@@ -629,6 +937,10 @@ export function compareResidents(
       sharedConnectionStyles,
       finalOverlapSummaries,
       timingLabel,
+      sharedSocialEnergy,
+      sharedPlanningStyle,
+      networkingAlignment,
+      mentoringAlignment,
     ),
     meetupRecommendation,
   }

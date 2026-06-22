@@ -332,6 +332,34 @@ export function ResidentEventSuggestions({
           <MessageCircleHeart className="mt-1 size-5 text-gold" />
         </div>
 
+        <div className="mt-4 rounded-2xl border border-[#e9dece] bg-[#f7f0e5] px-4 py-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+            Private or visible
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[#6f604f]">
+            Keep a suggestion private to management when it is still rough or sensitive. Choose visible for voting when you want the community to add signal and help the idea gain momentum.
+          </p>
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-[#eadfce] bg-white/70 px-4 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+              Best for private notes
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#6f604f]">
+              Early ideas, sensitive vendor suggestions, or something that still needs shaping before the community sees it.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-[#eadfce] bg-white/70 px-4 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+              Best for community voting
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#6f604f]">
+              Stronger ideas that benefit from resident signal, momentum, and a clearer sense of who would actually attend.
+            </p>
+          </div>
+        </div>
+
         {error ? (
           <div className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
             {error}
@@ -476,7 +504,7 @@ export function ResidentEventSuggestions({
           </>
         ) : snapshot.suggestions.length === 0 ? (
           <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5 text-sm text-[#6f604f]">
-            No resident suggestions are visible yet.
+            No resident suggestions are visible yet. Once the first ideas are shared for community voting, they will appear here.
           </div>
         ) : (
           snapshot.suggestions.map((suggestion) => (
@@ -492,13 +520,34 @@ export function ResidentEventSuggestions({
                     {suggestion.submittedByResidentFirstName || "Resident"} · {formatTimestamp(suggestion.createdAt)}
                   </p>
                 </div>
-                <span className="rounded-full bg-gold/10 px-3 py-1 text-[11px] text-foreground">
-                  {suggestion.status.replaceAll("_", " ")}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className="rounded-full bg-gold/10 px-3 py-1 text-[11px] text-foreground">
+                    {suggestion.status.replaceAll("_", " ")}
+                  </span>
+                  <span className="rounded-full border border-[#e3d8c7] bg-white px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-[#7a6b5b]">
+                    {suggestion.residentVisibility === "visible_for_voting"
+                      ? "Visible to residents"
+                      : "Private to management"}
+                  </span>
+                </div>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[#6f604f]">
                 {suggestion.description || suggestion.whyResidentsWouldLikeIt || "No extra detail yet."}
               </p>
+              {suggestion.suggestedForEventType || suggestion.location ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {suggestion.suggestedForEventType ? (
+                    <span className="rounded-full border border-[#e3d8c7] bg-white px-3 py-1 text-[11px] text-[#756656]">
+                      Best for {suggestion.suggestedForEventType}
+                    </span>
+                  ) : null}
+                  {suggestion.location ? (
+                    <span className="rounded-full border border-[#e3d8c7] bg-white px-3 py-1 text-[11px] text-[#756656]">
+                      {suggestion.location}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-foreground">
                 <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
                   Interested {suggestion.supportSummary.interested}

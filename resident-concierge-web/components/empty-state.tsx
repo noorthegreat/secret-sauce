@@ -16,12 +16,12 @@ export function EmptyState({
   onAction?: () => void
 }) {
   return (
-    <div className="rounded-3xl border border-dashed border-[#ddcfba] bg-[#fbf6ee] px-5 py-8 text-center">
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-gold/25 bg-gold/10">
+    <div className="rounded-[1.9rem] border border-dashed border-[#ddcfba] bg-[linear-gradient(180deg,#fbf6ee_0%,#f7efe2_100%)] px-5 py-8 text-center shadow-[0_18px_48px_-42px_rgba(70,56,35,0.22)]">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-gold/25 bg-gold/10 shadow-[0_10px_24px_-18px_rgba(193,154,77,0.45)]">
         <Icon className="size-5 text-gold" strokeWidth={1.5} />
       </div>
-      <h3 className="mt-4 font-serif text-2xl text-foreground">{title}</h3>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#756656]">
+      <h3 className="mt-4 font-serif text-[1.85rem] leading-tight text-foreground">{title}</h3>
+      <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#756656]">
         {description}
       </p>
       {actionLabel && onAction ? (

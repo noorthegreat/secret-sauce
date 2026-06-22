@@ -2,15 +2,25 @@
 
 import { useMemo, useState } from "react"
 import {
+  ArrowUpRight,
+  BadgeCheck,
   Bell,
   ChevronRight,
+  CirclePause,
+  Compass,
   LayoutDashboard,
   LifeBuoy,
   Loader2,
+  LockKeyhole,
   LogIn,
   LogOut,
+  Mail,
+  Play,
+  Shield,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
+  UserRoundCog,
 } from "lucide-react"
 
 import { ResidentAccessCard } from "@/components/resident-access-card"
@@ -19,14 +29,13 @@ import type { Resident } from "@/lib/concierge-data"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
-const myInterests = ["Wellness", "Coffee", "Travel", "Design", "Books"]
 const supportCategories = [
-  { value: "harassment", label: "Harassment" },
-  { value: "inappropriate_behavior", label: "Inappropriate behavior" },
-  { value: "bug", label: "Bug report" },
+  { value: "harassment", label: "Harassment or boundary concern" },
+  { value: "inappropriate_behavior", label: "Inappropriate resident behavior" },
+  { value: "bug", label: "Something in the app is not working" },
   { value: "safety_concern", label: "Safety concern" },
-  { value: "support_request", label: "Support request" },
-  { value: "other", label: "Other" },
+  { value: "support_request", label: "Help from the concierge team" },
+  { value: "other", label: "Something else" },
 ] as const
 
 export function ProfileScreen({
@@ -70,6 +79,7 @@ export function ProfileScreen({
   const [supportSuccess, setSupportSuccess] = useState<string | null>(null)
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false)
   const [isUpdatingPause, setIsUpdatingPause] = useState(false)
+
   const canSubmitSupport = Boolean(
     isSignedIn &&
       accessToken &&
@@ -78,6 +88,23 @@ export function ProfileScreen({
   )
   const conductCategorySelected =
     supportCategory === "harassment" || supportCategory === "inappropriate_behavior"
+  const hasReportableResidents = reportableResidents.length > 0
+
+  const firstName = useMemo(() => {
+    const email = residentEmail?.trim()
+    if (!email) {
+      return "Resident"
+    }
+
+    const [localPart] = email.split("@")
+    const cleaned = localPart
+      .split(/[.\-_]/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+
+    return cleaned[0] || "Resident"
+  }, [residentEmail])
+
   const initials = useMemo(() => {
     const email = residentEmail?.trim()
     if (!email) {
@@ -92,7 +119,46 @@ export function ProfileScreen({
       .map((part) => part.charAt(0).toUpperCase())
       .join("")
   }, [residentEmail])
+
+  const buildingLabel = accountSnapshot?.buildingName || "Fifth Circle Community"
+  const membershipLabel = getMembershipLabel(accountSnapshot)
+  const profileStateLabel = accountSnapshot?.needsSurveyCompletion
+    ? "Profile still warming up"
+    : "Profile ready"
   const pauseLabel = accountSnapshot?.isPaused ? "Resume introductions" : "Pause introductions"
+  const conciergeReadiness = accountSnapshot?.needsSurveyCompletion
+    ? "Complete onboarding so the concierge can make stronger introductions, circles, and gathering recommendations."
+    : "Your profile is complete enough for thoughtful introductions, concierge notes, and community guidance."
+  const privacyPromises = [
+    "Only residents in your building community can view your profile preview.",
+    "Contact details stay hidden until an introduction is mutually confirmed or concierge-delivered.",
+    "Support, safety, and reporting notes remain private to the Fifth Circle team and building staff when relevant.",
+  ]
+  const introductionFlow = [
+    "You appear through a private profile preview shaped by your onboarding and community preferences.",
+    "Introductions stay quiet until there is a genuine fit and mutual interest is clear.",
+    "Contact details remain protected until a real introduction is ready to be delivered.",
+  ]
+  const communityGuidelines = [
+    "Introductions are consent-led and building-scoped.",
+    "You can pause introductions at any time without leaving the community.",
+    "Gatherings and recommendations stay intentionally quiet, not feed-like.",
+  ]
+  const supportExpectations = [
+    "Concierge and safety notes are reviewed privately, not shown to other residents.",
+    "You can report a concern, ask for help, or flag a resident interaction that felt off.",
+    "Pausing participation never removes your building membership or gathering access.",
+  ]
+  const supportCategoryHelper =
+    supportCategory === "harassment" || supportCategory === "inappropriate_behavior"
+      ? "Use this for a resident interaction that crossed a line or felt uncomfortable. If you know who was involved, you can quietly identify them below."
+      : supportCategory === "bug"
+        ? "Tell us what broke, where it happened, and what you expected instead."
+        : supportCategory === "safety_concern"
+          ? "Use this when something feels unsafe, urgent, or important for the building team to know."
+          : supportCategory === "support_request"
+            ? "Ask for help with introductions, access, gatherings, or anything that needs concierge follow-through."
+            : "Share anything else the Fifth Circle team should know."
 
   async function handleSupportSubmit() {
     if (!accessToken) {
@@ -201,59 +267,95 @@ export function ProfileScreen({
   return (
     <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Resident profile" title="You belong" accent="here." />
+        <ScreenHeader eyebrow="Resident profile" title="Your private place" accent="here." />
         <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
-          A private profile for thoughtful introductions, concierge support, and a calmer community experience.
+          Manage how you appear in the community, what the concierge knows about you, and how Fifth Circle supports you behind the scenes.
         </p>
       </div>
 
       <div className="mt-6 px-6">
-        <div className="rounded-[2rem] border border-[#e0d4c3] bg-[#fbf6ee] p-5 shadow-[0_28px_60px_-46px_rgba(70,56,35,0.34)]">
-          <div className="flex items-start gap-4">
-            <div className="flex size-20 items-center justify-center rounded-full border border-gold/35 bg-[#f4ece1] font-serif text-3xl text-gold">
-              {initials || "FC"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-serif text-[1.8rem] leading-none text-foreground">
-                {residentEmail ? residentEmail.split("@")[0].replace(/[._-]/g, " ") : "Guest preview"}
-              </p>
-              <p className="mt-2 text-[11px] uppercase tracking-[0.22em] text-gold">
-                {(accountSnapshot?.buildingName || "Fifth Circle Community").toUpperCase()}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#6e5f4f]">
-                {sessionLoading
-                  ? "Checking your access..."
-                  : isSignedIn
-                    ? "Signed in to your private resident account."
-                    : "Sign in to RSVP, view introductions, and access your live building profile."}
-              </p>
-            </div>
+        <div className="overflow-hidden rounded-[2rem] border border-[#e0d4c3] bg-[#fbf6ee] shadow-[0_28px_60px_-46px_rgba(70,56,35,0.34)]">
+          <div className="border-b border-[#e8dccd] px-5 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
+              {buildingLabel}
+            </p>
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[#8e7d68]">
+              Powered by Fifth Circle
+            </p>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            {isSignedIn ? (
-              <button
-                type="button"
-                onClick={() => void handleSignOut()}
-                disabled={isSigningOut}
-                className="flex items-center justify-center gap-2 rounded-full border border-[#d6cab9] bg-[#f7f0e5] px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 disabled:opacity-70"
-              >
-                <LogOut className="size-4" />
-                {isSigningOut ? "Signing out..." : "Sign out"}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onSignIn}
-                className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-              >
-                <LogIn className="size-4" />
-                Sign in or create account
-              </button>
-            )}
-            <span className="inline-flex items-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-[#7d6e5e]">
-              {accountSnapshot?.isPaused ? "Introductions paused" : "Introductions available"}
-            </span>
+          <div className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="flex size-20 items-center justify-center rounded-full border border-gold/35 bg-[#f4ece1] font-serif text-3xl text-gold">
+                {initials || "FC"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-serif text-[1.95rem] leading-none text-foreground">{firstName}</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#6e5f4f]">
+                  {sessionLoading
+                    ? "Checking your private access..."
+                    : isSignedIn
+                      ? "Signed in to your resident account. This is where you refine your presence, control your introduction pace, and reach the concierge privately."
+                      : "Sign in to manage your profile, RSVP to gatherings, and unlock your live building experience."}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <StatusPill icon={BadgeCheck} label={membershipLabel} />
+                  <StatusPill icon={Sparkles} label={profileStateLabel} />
+                  <StatusPill
+                    icon={accountSnapshot?.isPaused ? CirclePause : Play}
+                    label={accountSnapshot?.isPaused ? "Introductions paused" : "Introductions live"}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[1.5rem] border border-[#e6dacb] bg-[#f7f0e5] p-4">
+              <p className="font-serif text-lg text-foreground">Concierge note</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#6f604f]">{conciergeReadiness}</p>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              {isSignedIn ? (
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={isSigningOut}
+                  className="flex items-center justify-center gap-2 rounded-full border border-[#d6cab9] bg-[#f7f0e5] px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40 disabled:opacity-70"
+                >
+                  <LogOut className="size-4" />
+                  {isSigningOut ? "Signing out..." : "Sign out"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+                >
+                  <LogIn className="size-4" />
+                  Sign in or create account
+                </button>
+              )}
+
+              {accountSnapshot?.needsSurveyCompletion ? (
+                <button
+                  type="button"
+                  onClick={onCompleteProfile}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#d6cab9] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                >
+                  Complete profile
+                  <ArrowUpRight className="size-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onViewCommunity}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#d6cab9] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                >
+                  View community
+                  <ArrowUpRight className="size-4" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -269,51 +371,123 @@ export function ProfileScreen({
           onReturnToJoin={onReturnToJoin}
           onViewCommunity={onViewCommunity}
         />
-        {accountErrorMessage ? (
-          <p className="mt-3 text-sm text-destructive">{accountErrorMessage}</p>
-        ) : null}
+        {accountErrorMessage ? <p className="mt-3 text-sm text-destructive">{accountErrorMessage}</p> : null}
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>How neighbors may know you</SectionLabel>
-        <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
-          <p className="text-sm leading-relaxed text-[#6f604f]">
-            Keep this lightweight. These cues help the concierge surface introductions that feel natural, not random.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {myInterests.map((interest) => (
-              <span
-                key={interest}
-                className="rounded-full border border-[#e2d6c3] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[#866f54]"
-              >
-                {interest}
-              </span>
-            ))}
-            <button
-              type="button"
-              className="rounded-full border border-dashed border-[#d9cdbb] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[#9b8c79]"
-            >
-              Update later
-            </button>
-          </div>
+        <SectionLabel>Profile and privacy</SectionLabel>
+        <div className="grid gap-4">
+          <InfoCard
+            icon={Compass}
+            title="How you appear in the community"
+            description="Your profile is designed to be enough for a warm introduction, never an overexposed resident directory."
+            items={[
+              "First name, profile cues, and onboarding signals help shape thoughtful introductions.",
+              "Compatibility notes focus on shared interests, rhythm, and community goals.",
+              "You can refine your profile any time as your preferences evolve.",
+            ]}
+            actionLabel={accountSnapshot?.needsSurveyCompletion ? "Complete profile" : "Refine profile"}
+            onAction={onCompleteProfile}
+          />
+
+          <InfoCard
+            icon={Sparkles}
+            title="How introductions work"
+            description="Fifth Circle is designed to feel thoughtful, not transactional. Residents should always understand the pace and privacy of an introduction."
+            items={introductionFlow}
+          />
+
+          <InfoCard
+            icon={LockKeyhole}
+            title="What stays private"
+            description="Fifth Circle is intentionally conservative about what gets revealed and when."
+            items={privacyPromises}
+          />
         </div>
       </div>
 
       <div className="mt-8 px-6">
         <SectionLabel>Resident settings</SectionLabel>
         <div className="overflow-hidden rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee]">
-          <Row icon={Bell} label="Introduction cadence" value="Considered" />
-          <Row icon={ShieldCheck} label="Visibility" value="Neighbors only" />
-          <Row
-            icon={LifeBuoy}
-            label="Concierge support"
-            value={accountSnapshot?.isPaused ? "Paused" : "Available"}
+          <SettingRow
+            icon={Bell}
+            label="Introduction cadence"
+            value={accountSnapshot?.isPaused ? "Paused for now" : "Thoughtful and active"}
+            detail="Keep your pace calm. Pause new introductions any time without leaving the community."
+            actionLabel={pauseLabel}
+            onAction={() => void handlePauseToggle()}
+            disabled={!canSubmitSupport || isUpdatingPause}
+            isLoading={isUpdatingPause}
+          />
+          <SettingRow
+            icon={UserRoundCog}
+            label="Profile readiness"
+            value={accountSnapshot?.needsSurveyCompletion ? "Needs completion" : "Ready"}
+            detail="Richer profile signals lead to better introductions, circles, and concierge guidance."
+            actionLabel={accountSnapshot?.needsSurveyCompletion ? "Complete now" : "Refine"}
+            onAction={onCompleteProfile}
+          />
+          <SettingRow
+            icon={ShieldCheck}
+            label="Visibility"
+            value="Building residents only"
+            detail="Your live profile preview stays inside your approved building community."
+          />
+          <SettingRow
+            icon={Mail}
+            label="Notifications"
+            value="Essential only"
+            detail="During pilot, Fifth Circle keeps outreach light: key introduction updates, gathering activity, and important support follow-up."
           />
         </div>
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Safety and support</SectionLabel>
+        <SectionLabel>Trust and safety</SectionLabel>
+        <div className="mb-4 rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+              <Shield className="size-5" strokeWidth={1.5} />
+            </span>
+            <div>
+              <p className="font-serif text-xl leading-tight text-foreground">A calmer community depends on trust.</p>
+              <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
+                We keep introductions consent-led, building-scoped, and easy to pause. If anything feels off, you have a direct private line to the team.
+              </p>
+            </div>
+          </div>
+          <ul className="mt-4 space-y-2">
+            {communityGuidelines.map((guideline) => (
+              <li key={guideline} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
+                <span className="mt-1 text-gold">•</span>
+                <span>{guideline}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mb-4 rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+              <ShieldCheck className="size-5" strokeWidth={1.5} />
+            </span>
+            <div>
+              <p className="font-serif text-xl leading-tight text-foreground">What happens when you reach out</p>
+              <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
+                Support should feel responsive and private. We keep the process clear so you know what Fifth Circle does with a note once it is sent.
+              </p>
+            </div>
+          </div>
+          <ul className="mt-4 space-y-2">
+            {supportExpectations.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
+                <span className="mt-1 text-gold">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
           <div className="flex items-start gap-3">
             <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
@@ -333,6 +507,11 @@ export function ProfileScreen({
             </div>
           ) : (
             <>
+              <div className="mt-5 rounded-[1.4rem] border border-[#e6dacb] bg-[#f7f0e5] px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-gold">Private concierge channel</p>
+                <p className="mt-2 text-sm leading-7 text-[#6f604f]">{supportCategoryHelper}</p>
+              </div>
+
               <div className="mt-5 grid gap-3">
                 <select
                   value={supportCategory}
@@ -353,18 +532,24 @@ export function ProfileScreen({
                 </select>
 
                 {conductCategorySelected ? (
-                  <select
-                    value={reportedResidentUserId}
-                    onChange={(event) => setReportedResidentUserId(event.target.value)}
-                    className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
-                  >
-                    <option value="">Resident involved (optional)</option>
-                    {reportableResidents.map((resident) => (
-                      <option key={resident.id} value={resident.id}>
-                        {resident.name}
-                      </option>
-                    ))}
-                  </select>
+                  hasReportableResidents ? (
+                    <select
+                      value={reportedResidentUserId}
+                      onChange={(event) => setReportedResidentUserId(event.target.value)}
+                      className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-foreground outline-none"
+                    >
+                      <option value="">Resident involved (optional)</option>
+                      {reportableResidents.map((resident) => (
+                        <option key={resident.id} value={resident.id}>
+                          {resident.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="rounded-[1.2rem] border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-[#7d6e5e]">
+                      No other active residents are available to select yet. You can still send the report without naming someone.
+                    </div>
+                  )
                 ) : null}
 
                 <input
@@ -408,64 +593,228 @@ export function ProfileScreen({
       </div>
 
       <div className="mt-8 px-6">
-        <SectionLabel>Introduction controls</SectionLabel>
-        <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
-          <p className="font-serif text-xl leading-tight text-foreground">Control when you are available.</p>
-          <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
-            Pause new introductions if you want a quieter stretch. Your membership stays active and you can resume anytime.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => void handlePauseToggle()}
-              disabled={!canSubmitSupport || isUpdatingPause}
-              className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isUpdatingPause ? <Loader2 className="size-4 animate-spin" /> : null}
-              {pauseLabel}
-            </button>
-            <span className="inline-flex items-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-4 py-3 text-sm text-[#7d6e5e]">
-              {accountSnapshot?.isPaused ? "Currently paused" : "Currently available"}
-            </span>
-          </div>
-        </div>
-      </div>
+        <SectionLabel>Account management</SectionLabel>
+        <div className="grid gap-4">
+          <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+            <div className="flex items-start gap-3">
+              <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+                <Mail className="size-5" strokeWidth={1.5} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-serif text-xl leading-tight text-foreground">Account and building access</p>
+                <p className="mt-1 break-all text-sm leading-relaxed text-[#6f604f]">
+                  {residentEmail || "Not signed in"}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[#6f604f]">
+                  Use the same email you used in your resident request so Fifth Circle can attach you to the correct building membership.
+                </p>
+              </div>
+            </div>
 
-      <div className="mt-8 px-6">
-        <SectionLabel>Building team</SectionLabel>
-        <button
-          type="button"
-          onClick={onOpenManager}
-          className="flex w-full items-center gap-4 rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5 text-left transition-colors hover:border-gold/40"
-        >
-          <span className="flex size-11 items-center justify-center rounded-full bg-foreground text-background">
-            <LayoutDashboard className="size-5" strokeWidth={1.5} />
-          </span>
-          <span className="flex-1">
-            <span className="block font-serif text-lg leading-tight text-foreground">Community Pulse</span>
-            <span className="text-xs text-[#7d6e5e]">Manager-side operating view</span>
-          </span>
-          <ChevronRight className="size-5 text-[#8d7d6b]" />
-        </button>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {isSignedIn ? (
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={isSigningOut}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-70"
+                >
+                  <LogOut className="size-4" />
+                  {isSigningOut ? "Signing out..." : "Sign out"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+                >
+                  <LogIn className="size-4" />
+                  Sign in
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={onReturnToJoin}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+              >
+                Return to join flow
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+            <div className="flex items-start gap-3">
+              <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+                <LifeBuoy className="size-5" strokeWidth={1.5} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-serif text-xl leading-tight text-foreground">Need help with access or account changes?</p>
+                <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
+                  If your building access looks wrong, your invite details changed, or you need help as part of pilot testing, the concierge team can sort that out privately.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href="mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Account%20Help"
+                    className="inline-flex items-center justify-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+                  >
+                    Contact concierge support
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenManager}
+            className="flex w-full items-center gap-4 rounded-[1.9rem] border border-dashed border-[#ddcfbb] bg-[#f7f0e5] p-5 text-left transition-colors hover:border-gold/40"
+          >
+            <span className="flex size-11 items-center justify-center rounded-full bg-foreground text-background">
+              <LayoutDashboard className="size-5" strokeWidth={1.5} />
+            </span>
+            <span className="flex-1">
+              <span className="block font-serif text-lg leading-tight text-foreground">Building team access</span>
+              <span className="mt-1 block text-xs leading-relaxed text-[#7d6e5e]">
+                This opens the Community Pulse operating view and is mainly useful for pilot setup, demos, or manager access checks.
+              </span>
+            </span>
+            <ChevronRight className="size-5 text-[#8d7d6b]" />
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-function Row({
+function StatusPill({
+  icon: Icon,
+  label,
+}: {
+  icon: typeof Sparkles
+  label: string
+}) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-[#dfd2bf] bg-[#f7f0e5] px-3 py-2 text-xs text-[#6b5b49]">
+      <Icon className="size-3.5 text-gold" strokeWidth={1.7} />
+      {label}
+    </span>
+  )
+}
+
+function InfoCard({
+  icon: Icon,
+  title,
+  description,
+  items,
+  actionLabel,
+  onAction,
+}: {
+  icon: typeof Compass
+  title: string
+  description: string
+  items: string[]
+  actionLabel?: string
+  onAction?: () => void
+}) {
+  return (
+    <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
+      <div className="flex items-start gap-3">
+        <span className="flex size-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+          <Icon className="size-5" strokeWidth={1.5} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-serif text-xl leading-tight text-foreground">{title}</p>
+          <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">{description}</p>
+        </div>
+      </div>
+
+      <ul className="mt-4 space-y-2">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
+            <span className="mt-1 text-gold">•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+
+      {actionLabel && onAction ? (
+        <button
+          type="button"
+          onClick={onAction}
+          className="mt-5 inline-flex items-center justify-center gap-2 rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
+        >
+          {actionLabel}
+          <ArrowUpRight className="size-4" />
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+function SettingRow({
   icon: Icon,
   label,
   value,
+  detail,
+  actionLabel,
+  onAction,
+  disabled,
+  isLoading,
 }: {
   icon: typeof Bell
   label: string
   value: string
+  detail: string
+  actionLabel?: string
+  onAction?: () => void
+  disabled?: boolean
+  isLoading?: boolean
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-[#ece2d4] px-5 py-4 last:border-0">
-      <Icon className="size-[18px] text-gold" strokeWidth={1.5} />
-      <span className="flex-1 text-sm text-foreground">{label}</span>
-      <span className="text-sm text-[#7d6e5e]">{value}</span>
+    <div className="border-b border-[#ece2d4] px-5 py-4 last:border-0">
+      <div className="flex items-start gap-3">
+        <Icon className="mt-0.5 size-[18px] text-gold" strokeWidth={1.5} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-foreground">{label}</span>
+            <span className="text-xs uppercase tracking-[0.14em] text-[#8a7a68]">{value}</span>
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-[#7d6e5e]">{detail}</p>
+
+          {actionLabel && onAction ? (
+            <button
+              type="button"
+              onClick={onAction}
+              disabled={disabled}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/40 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLoading ? <Loader2 className="size-4 animate-spin" /> : null}
+              {actionLabel}
+            </button>
+          ) : null}
+        </div>
+      </div>
     </div>
   )
+}
+
+function getMembershipLabel(snapshot: ResidentAccountSnapshot | null) {
+  if (!snapshot) {
+    return "Access checking"
+  }
+
+  if (snapshot.status === "active") {
+    return "Active resident"
+  }
+
+  if (snapshot.status === "pending_review") {
+    return "Pending approval"
+  }
+
+  if (snapshot.status === "rejected") {
+    return "Access not approved"
+  }
+
+  return "Membership not connected"
 }

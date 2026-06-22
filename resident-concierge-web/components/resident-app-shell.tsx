@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { CalendarDays, DoorOpen, House, UserRound, Users } from "lucide-react"
+import { CalendarDays, DoorOpen, House, Sparkles, UserRound, Users } from "lucide-react"
 
 import { BottomNav, type ResidentTab } from "@/components/bottom-nav"
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
@@ -10,6 +10,7 @@ import { MeetupFlow } from "@/components/meetup-flow"
 import { PhoneFrame, StatusBar } from "@/components/phone-frame"
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { CommunityScreen } from "@/components/screens/community-screen"
+import { ConciergeScreen } from "@/components/screens/concierge-screen"
 import { HomeScreen } from "@/components/screens/home-screen"
 import { PeopleScreen } from "@/components/screens/people-screen"
 import { ProfileScreen } from "@/components/screens/profile-screen"
@@ -32,6 +33,8 @@ function getTabPath(tab: ResidentTab) {
       return "/app"
     case "people":
       return "/app/people"
+    case "concierge":
+      return "/app/concierge"
     case "community":
       return "/app/community"
     case "profile":
@@ -42,6 +45,7 @@ function getTabPath(tab: ResidentTab) {
 const desktopNav = [
   { id: "home", label: "Home", icon: House },
   { id: "people", label: "Neighbors", icon: Users },
+  { id: "concierge", label: "Concierge", icon: Sparkles },
   { id: "community", label: "Gatherings", icon: CalendarDays },
   { id: "profile", label: "My profile", icon: UserRound },
 ] as const
@@ -428,10 +432,12 @@ export function ResidentAppShell({
                               onRequestIntro={requestIntroduction}
                               onGoPeople={() => router.push("/app/people")}
                               onGoCommunity={() => router.push("/app/community")}
+                              onGoConcierge={() => router.push("/app/concierge")}
                               onSignIn={() => router.push("/auth?next=%2Fapp")}
                               onCompleteProfile={() => router.push("/app/onboarding")}
                               onReturnToJoin={() => router.push("/join-community")}
                               welcomeName={previewData.welcomeName}
+                              buildingName={previewData.buildingName}
                               introCount={liveIntroCount}
                               introductionCards={introductionCards}
                               events={previewData.events}
@@ -502,8 +508,46 @@ export function ResidentAppShell({
                             />
                           ))}
 
+                        {activeTab === "concierge" &&
+                          (previewData && !residentPreviewUnavailable ? (
+                            <ConciergeScreen
+                              buildingName={buildingName}
+                              welcomeName={previewData.welcomeName}
+                              introductions={introductionCards}
+                              events={previewData.events}
+                              onOpenPeople={() => router.push("/app/people")}
+                              onOpenCommunity={() => router.push("/app/community")}
+                              onRefineProfile={() => router.push("/app/onboarding")}
+                            />
+                          ) : (
+                            <ResidentCommunityState
+                              isSignedIn={Boolean(user)}
+                              accountSnapshot={accountSnapshot}
+                              sessionLoading={sessionLoading}
+                              accountLoading={accountLoading}
+                              title={
+                                hasActiveAccess
+                                  ? "Concierge recommendations are warming up."
+                                  : "Concierge opens after approval."
+                              }
+                              message={
+                                previewError ||
+                                (hasActiveAccess
+                                  ? "Once more approved residents complete their profile, your concierge view will begin surfacing introductions, meetup ideas, and community guidance here."
+                                  : "Your concierge view appears after we confirm your building membership and unlock your private resident access.")
+                              }
+                              actionLabel={hasActiveAccess ? "Browse gatherings" : undefined}
+                              onAction={hasActiveAccess ? () => router.push("/app/community") : undefined}
+                              onSignIn={() => router.push("/auth?next=%2Fapp%2Fconcierge")}
+                              onCompleteProfile={() => router.push("/app/onboarding")}
+                              onReturnToJoin={() => router.push("/join-community")}
+                            />
+                          ))}
+
                         {activeTab === "community" && (
                           <CommunityScreen
+                            buildingName={buildingName}
+                            residents={previewData?.residents ?? []}
                             events={previewData?.events ?? []}
                             eventPolls={previewData?.polls ?? []}
                             isSignedIn={Boolean(user)}
@@ -514,6 +558,7 @@ export function ResidentAppShell({
                             onCompleteProfile={() => router.push("/app/onboarding")}
                             onReturnToJoin={() => router.push("/join-community")}
                             onViewCommunity={() => router.push("/app/community")}
+                            onOpenPeople={() => router.push("/app/people")}
                           />
                         )}
 
