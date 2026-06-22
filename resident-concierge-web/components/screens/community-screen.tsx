@@ -308,9 +308,9 @@ export function CommunityScreen({
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null
   const featuredEvent = events[0] ?? null
   const tabDescriptions: Record<CommunityTab, string> = {
-    gatherings: "A quieter calendar of events worth leaving your apartment for.",
-    circles: "Smaller group moments beginning to form around shared rhythm and interests.",
-    suggestions: "Resident ideas, gentle voting signal, and community programming taking shape.",
+    gatherings: "Published gatherings worth stepping out for, shaped around the building's real rhythm.",
+    circles: "Smaller group moments beginning to form around shared timing, interests, and social style.",
+    suggestions: "Resident ideas the concierge and building team can turn into something genuinely worth attending.",
   }
 
   useEffect(() => {
@@ -646,9 +646,9 @@ export function CommunityScreen({
   return (
     <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
       <div className="pt-3">
-        <ScreenHeader eyebrow="Private community" title="Gatherings." />
+        <ScreenHeader eyebrow="Private community" title="Community" accent="life." />
         <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
-          A quieter view of building life: gatherings worth stepping out for, smaller circles forming around shared rhythm, and ideas the concierge can shape into something real.
+          A quieter view of building life: published gatherings, emerging circles, and resident ideas the concierge can shape into something real.
         </p>
       </div>
 
@@ -688,17 +688,17 @@ export function CommunityScreen({
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <CommunityMetric
-              label="Gatherings"
+              label="Building events"
               value={`${events.length}`}
               detail="Published moments currently on the calendar."
             />
             <CommunityMetric
-              label="Circles"
+              label="Curated circles"
               value={`${circles.length}`}
               detail="Smaller group rhythms beginning to take shape."
             />
             <CommunityMetric
-              label="Interest signals"
+              label="Resident ideas"
               value={`${eventPolls.length}`}
               detail="Ideas residents are already helping the concierge prioritize."
             />
@@ -857,8 +857,8 @@ function GatheringsView({
       <div className="mt-6 px-6">
         <EmptyState
           icon={CalendarDays}
-          title="No gatherings scheduled yet"
-          description="The first private calendar for this building is still taking shape. As soon as the next gathering is published, it will appear here."
+          title="The calendar is still warming up."
+          description="The first published gatherings for this building are still being shaped. As soon as something worth stepping out for is confirmed, it will appear here."
         />
       </div>
     )
@@ -1702,7 +1702,7 @@ function SuggestionsView({
         <SectionLabel>Your proposed gatherings</SectionLabel>
         {proposals.length === 0 ? (
           <p className="text-sm leading-7 text-[#6f604f]">
-            Nothing proposed yet. A good suggestion can be as simple as a recurring coffee hour,
+            Nothing proposed yet. A strong resident idea can be as simple as a recurring coffee hour,
             a tennis meetup, or a quieter conversation night in the lounge.
           </p>
         ) : (

@@ -126,6 +126,8 @@ export function ProfileScreen({
     ? "Profile still warming up"
     : "Profile ready"
   const pauseLabel = accountSnapshot?.isPaused ? "Resume introductions" : "Pause introductions"
+  const visibleCommunityCount = reportableResidents.length + (accountSnapshot?.hasActiveMembership ? 1 : 0)
+  const connectionPreview = reportableResidents.slice(0, 4)
   const conciergeReadiness = accountSnapshot?.needsSurveyCompletion
     ? "Complete onboarding so the concierge can make stronger introductions, circles, and gathering recommendations."
     : "Your profile is complete enough for thoughtful introductions, concierge notes, and community guidance."
@@ -375,6 +377,81 @@ export function ProfileScreen({
       </div>
 
       <div className="mt-8 px-6">
+        <SectionLabel>Your community</SectionLabel>
+        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5 shadow-[0_22px_48px_-42px_rgba(70,56,35,0.26)]">
+            <p className="font-serif text-[1.55rem] leading-tight text-foreground">
+              Your profile should feel like a warm introduction, not a public listing.
+            </p>
+            <p className="mt-3 text-sm leading-7 text-[#6f604f]">
+              Fifth Circle uses only the signals that make introductions stronger: your onboarding, how you prefer to connect, and whether you want your pace kept quieter for now.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <CommunityStatusCard
+                label="Community"
+                value={visibleCommunityCount > 1 ? `${visibleCommunityCount} residents` : "Early pilot"}
+                detail="Residents currently visible inside your private building experience."
+              />
+              <CommunityStatusCard
+                label="Profile"
+                value={accountSnapshot?.needsSurveyCompletion ? "In progress" : "Ready"}
+                detail="A complete profile gives the concierge better context for introductions and circles."
+              />
+              <CommunityStatusCard
+                label="Introduction pace"
+                value={accountSnapshot?.isPaused ? "Paused" : "Active"}
+                detail="You stay in control of whether new introductions can be surfaced right now."
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5 shadow-[0_22px_48px_-42px_rgba(70,56,35,0.26)]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-gold">
+                Your connections
+              </p>
+              <p className="mt-2 font-serif text-[1.45rem] leading-tight text-foreground">
+                The people around you should feel recognizable, not overexposed.
+              </p>
+              <p className="mt-3 text-sm leading-7 text-[#6f604f]">
+                Residents see enough to understand why an introduction fits. Sensitive details stay protected until the right moment.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {connectionPreview.length > 0 ? (
+                  connectionPreview.map((resident) => (
+                    <span
+                      key={resident.id}
+                      className="rounded-full border border-[#e3d8c7] bg-[#f7f0e5] px-3 py-1 text-[11px] text-[#756656]"
+                    >
+                      {resident.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="rounded-full border border-[#e3d8c7] bg-[#f7f0e5] px-3 py-1 text-[11px] text-[#756656]">
+                    Your community is still growing
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5 shadow-[0_22px_48px_-42px_rgba(70,56,35,0.26)]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-gold">
+                Privacy promises
+              </p>
+              <div className="mt-3 space-y-3">
+                {privacyPromises.map((promise) => (
+                  <div key={promise} className="flex items-start gap-3 text-sm leading-7 text-[#6f604f]">
+                    <span className="mt-2 inline-block size-1.5 rounded-full bg-gold" />
+                    <span>{promise}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 px-6">
         <SectionLabel>Profile and privacy</SectionLabel>
         <div className="grid gap-4">
           <InfoCard
@@ -459,7 +536,7 @@ export function ProfileScreen({
           <ul className="mt-4 space-y-2">
             {communityGuidelines.map((guideline) => (
               <li key={guideline} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
-                <span className="mt-1 text-gold">•</span>
+                <span className="mt-2 inline-block size-1.5 rounded-full bg-gold" />
                 <span>{guideline}</span>
               </li>
             ))}
@@ -481,7 +558,7 @@ export function ProfileScreen({
           <ul className="mt-4 space-y-2">
             {supportExpectations.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
-                <span className="mt-1 text-gold">•</span>
+                <span className="mt-2 inline-block size-1.5 rounded-full bg-gold" />
                 <span>{item}</span>
               </li>
             ))}
@@ -584,7 +661,7 @@ export function ProfileScreen({
                   href="mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Support"
                   className="inline-flex items-center justify-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
                 >
-                  Email support instead
+                  Email the concierge team
                 </a>
               </div>
             </>
@@ -658,7 +735,7 @@ export function ProfileScreen({
                     href="mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Account%20Help"
                     className="inline-flex items-center justify-center rounded-full border border-[#ded1bf] bg-[#f7f0e5] px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/40"
                   >
-                    Contact concierge support
+                    Contact the concierge team
                   </a>
                 </div>
               </div>
@@ -732,7 +809,7 @@ function InfoCard({
       <ul className="mt-4 space-y-2">
         {items.map((item) => (
           <li key={item} className="flex items-start gap-2 text-sm leading-relaxed text-[#6f604f]">
-            <span className="mt-1 text-gold">•</span>
+            <span className="mt-2 inline-block size-1.5 rounded-full bg-gold" />
             <span>{item}</span>
           </li>
         ))}
@@ -748,6 +825,24 @@ function InfoCard({
           <ArrowUpRight className="size-4" />
         </button>
       ) : null}
+    </div>
+  )
+}
+
+function CommunityStatusCard({
+  label,
+  value,
+  detail,
+}: {
+  label: string
+  value: string
+  detail: string
+}) {
+  return (
+    <div className="rounded-[1.35rem] border border-[#e7dccd] bg-[#f7f0e5] px-4 py-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">{label}</p>
+      <p className="mt-2 font-serif text-[1.5rem] leading-none text-foreground">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-[#6f604f]">{detail}</p>
     </div>
   )
 }

@@ -1,14 +1,23 @@
 "use client"
 
-import { ArrowUpRight, CalendarCheck, Sparkles, UserPlus } from "lucide-react"
+import { ArrowRight, CalendarCheck, Sparkles, UserPlus } from "lucide-react"
 
 import { EmptyState } from "@/components/empty-state"
 import { ResidentAccessCard } from "@/components/resident-access-card"
-import { ScreenHeader, SectionLabel } from "@/components/screen-header"
+import { SectionLabel } from "@/components/screen-header"
 import type { CommunityEvent } from "@/lib/community-live"
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 import type { ResidentIntroductionCard } from "@/lib/resident-introduction-ui"
 import { canScheduleIntroduction } from "@/lib/resident-introduction-ui"
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+}
 
 export function HomeScreen({
   onRequestIntro,
@@ -45,316 +54,283 @@ export function HomeScreen({
   accountSnapshot: ResidentAccountSnapshot | null
   accountLoading: boolean
 }) {
-  const featuredIntroduction = introductionCards[0] ?? null
-  const secondaryIntroduction = introductionCards[1] ?? null
-  const nextGathering = events[0] ?? null
-  const supportingGatherings = events.slice(1, 3)
+  const featuredIntroductions = introductionCards.slice(0, 2)
+  const featuredEvents = events.slice(0, 3)
+  const topIntroduction = featuredIntroductions[0] ?? null
 
   return (
-    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
-      <div className="pt-3">
-        <ScreenHeader eyebrow={`${buildingName} Community`} title="Good evening," accent={welcomeName} />
-        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
-          Your community is beginning to take shape. We’re prioritizing thoughtful introductions
-          first, with gatherings and concierge guidance close behind.
-        </p>
-      </div>
-
-      <div className="mt-6 px-6">
-        <ResidentAccessCard
-          snapshot={accountSnapshot}
-          isLoading={sessionLoading || accountLoading}
-          isSignedIn={isSignedIn}
-          onSignIn={onSignIn}
-          onCompleteProfile={onCompleteProfile}
-          onReturnToJoin={onReturnToJoin}
-          onViewCommunity={onGoCommunity}
-        />
-      </div>
-
-      <div className="mt-6 px-6">
-        <div className="overflow-hidden rounded-[2rem] border border-[#2b241d] bg-[#231d17] text-[#f3ebdc] shadow-[0_34px_90px_-56px_rgba(43,36,29,0.82)]">
-          <div className="border-b border-white/10 px-5 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-[#d5bb84]">
-              Suggested introduction
+    <div className="space-y-8 lg:space-y-10">
+      <section className="rounded-[2.25rem] border border-[#e0d5c6] bg-[#fbf6ee] px-6 py-8 shadow-[0_24px_70px_-54px_rgba(50,39,25,0.28)] sm:px-8 lg:px-10 lg:py-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-gold">
+              {buildingName} Community
             </p>
-            <h2 className="mt-3 font-serif text-[1.9rem] leading-[1.02]">
-              {featuredIntroduction
-                ? `${featuredIntroduction.resident.name} feels worth meeting.`
-                : "We’re preparing your first thoughtful introduction."}
-            </h2>
+            <h1 className="mt-3 font-serif text-[2.7rem] leading-[0.94] text-foreground sm:text-[3.15rem]">
+              Good evening, <em className="text-gold not-italic">{welcomeName}.</em>
+            </h1>
+            <p className="mt-3 text-sm uppercase tracking-[0.2em] text-[#8f7d68]">
+              Private community · {buildingName}
+            </p>
           </div>
 
-          <div className="px-5 py-5">
-            {featuredIntroduction ? (
-              <>
-                <div className="flex items-center gap-3">
-                  <img
-                    src={featuredIntroduction.resident.photo || "/placeholder.svg"}
-                    alt={featuredIntroduction.resident.name}
-                    className="size-14 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-serif text-xl leading-tight">
-                      {featuredIntroduction.resident.name}
-                    </p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#d5bb84]">
-                      {featuredIntroduction.resident.goal}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-7 text-[#ddd2c1]">
-                  {featuredIntroduction.compatibilitySummary || featuredIntroduction.resident.tagline}
-                </p>
-
-                {featuredIntroduction.resident.compatibilityDetails?.length ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {featuredIntroduction.resident.compatibilityDetails.slice(0, 3).map((detail) => (
-                      <span
-                        key={detail}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-[#e8dcc9]"
-                      >
-                        {detail}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {featuredIntroduction.meetupRecommendation ? (
-                  <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#d5bb84]">
-                      Concierge recommendation
-                    </p>
-                    <p className="mt-2 font-serif text-xl">
-                      {featuredIntroduction.meetupRecommendation.title}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-[#d7ccb9]">
-                      {featuredIntroduction.meetupRecommendation.amenityLabel}
-                      {featuredIntroduction.meetupRecommendation.timingLabel
-                        ? ` around ${featuredIntroduction.meetupRecommendation.timingLabel.toLowerCase()}`
-                        : ""}
-                      . {featuredIntroduction.meetupRecommendation.reason}
-                    </p>
-                  </div>
-                ) : null}
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {featuredIntroduction.status === "suggested" && !featuredIntroduction.introductionId ? (
-                    <button
-                      type="button"
-                      onClick={() => onRequestIntro(featuredIntroduction.resident.id)}
-                      className="inline-flex items-center justify-center rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
-                    >
-                      Request introduction
-                    </button>
-                  ) : canScheduleIntroduction(featuredIntroduction) ? (
-                    <button
-                      type="button"
-                      onClick={onGoPeople}
-                      className="inline-flex items-center justify-center rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
-                    >
-                      Coordinate meetup
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onGoPeople}
-                      className="inline-flex items-center justify-center rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
-                    >
-                      Review introduction
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={onGoConcierge}
-                    className="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium text-[#f3ebdc]"
-                  >
-                    Open concierge
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm leading-7 text-[#ddd2c1]">
-                  As more approved residents complete onboarding, we’ll begin recommending neighbors
-                  who share your goals, timing, and social rhythm.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={onCompleteProfile}
-                    className="inline-flex items-center justify-center rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
-                  >
-                    Complete profile
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onGoCommunity}
-                    className="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium text-[#f3ebdc]"
-                  >
-                    Browse gatherings
-                  </button>
-                </div>
-              </>
-            )}
+          <div className="grid max-w-[430px] grid-cols-3 gap-3">
+            <CommunityStat value={introCount} label="Introductions" />
+            <CommunityStat value={events.length} label="Gatherings" />
+            <CommunityStat
+              value={featuredIntroductions.filter((card) => card.status !== "declined").length}
+              label="Active fits"
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-8 grid gap-4 px-6 md:grid-cols-2">
-        <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5 shadow-[0_24px_60px_-52px_rgba(70,56,35,0.3)]">
-          <SectionLabel>Concierge note</SectionLabel>
-          <h3 className="font-serif text-[1.6rem] leading-tight text-foreground">
-            What happens next is always clear.
-          </h3>
-          <p className="mt-3 text-sm leading-7 text-[#675847]">
-            Before mutual interest, introductions stay private and low-pressure. Once both residents
-            say yes, we move into timing, setting, and a recommended first meetup.
-          </p>
-          <button
-            type="button"
-            onClick={onGoConcierge}
-            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#876f4c]"
-          >
-            View concierge guidance
-            <ArrowUpRight className="size-4" />
-          </button>
-        </div>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="space-y-8">
+          <section>
+            <SectionLabel>We&apos;d love to introduce you to a few neighbors</SectionLabel>
 
-        <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5 shadow-[0_24px_60px_-52px_rgba(70,56,35,0.3)]">
-          <SectionLabel>Community snapshot</SectionLabel>
-          <div className="grid grid-cols-3 gap-3">
-            <SnapshotMetric value={introCount} label="Introductions" />
-            <SnapshotMetric value={events.length} label="Gatherings" />
-            <SnapshotMetric value={introductionCards.length} label="Active fits" />
-          </div>
-        </div>
-      </div>
+            {featuredIntroductions.length > 0 ? (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {featuredIntroductions.map((introduction, index) => {
+                  const resident = introduction.resident
+                  const actionLabel =
+                    introduction.status === "suggested" && !introduction.introductionId
+                      ? "Accept introduction"
+                      : canScheduleIntroduction(introduction)
+                        ? "Review meetup"
+                        : "Review introduction"
 
-      {secondaryIntroduction ? (
-        <div className="mt-8 px-6">
-          <SectionLabel>Also worth a look</SectionLabel>
-          <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5 shadow-[0_24px_60px_-52px_rgba(70,56,35,0.3)]">
-            <div className="flex items-center gap-3">
-              <img
-                src={secondaryIntroduction.resident.photo || "/placeholder.svg"}
-                alt={secondaryIntroduction.resident.name}
-                className="size-12 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-serif text-[1.45rem] leading-tight text-foreground">
-                  {secondaryIntroduction.resident.name}
-                </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#9b8162]">
-                  {secondaryIntroduction.resident.goal}
-                </p>
+                  const action =
+                    introduction.status === "suggested" && !introduction.introductionId
+                      ? () => onRequestIntro(resident.id)
+                      : onGoPeople
+
+                  return (
+                    <article
+                      key={`${resident.id}-${introduction.status}-${introduction.introductionId ?? "suggested"}`}
+                      className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.24)]"
+                    >
+                      <div className="flex gap-4">
+                        <div className="relative shrink-0">
+                          {resident.photo ? (
+                            <img
+                              src={resident.photo}
+                              alt={resident.name}
+                              className="size-14 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-14 items-center justify-center rounded-full border border-gold/30 bg-[#f3eadb] font-serif text-lg text-gold">
+                              {getInitials(resident.name)}
+                            </div>
+                          )}
+                          <div className="pointer-events-none absolute -inset-1 rounded-full border border-gold/25" />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="font-serif text-[1.45rem] leading-none text-foreground">
+                            {resident.name}
+                          </p>
+                          <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-[#9b8770]">
+                            {resident.recognitionCue || resident.unit}
+                            {resident.occupation ? ` · ${resident.occupation}` : ""}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {resident.interests.slice(0, 3).map((interest) => (
+                              <span
+                                key={interest}
+                                className="rounded-full border border-gold/25 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-gold"
+                              >
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 border-l border-gold/30 pl-4">
+                        <p className="font-serif text-base italic leading-7 text-[#6d5b47]">
+                          &quot;
+                          {introduction.compatibilitySummary ||
+                            resident.conciergeSnippet ||
+                            resident.tagline}
+                          &quot;
+                        </p>
+                      </div>
+
+                      {introduction.meetupRecommendation ? (
+                        <div className="mt-4 rounded-[1.35rem] border border-[#ece1d2] bg-[#f8f0e4] px-4 py-4">
+                          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-gold">
+                            Suggested first setting
+                          </p>
+                          <p className="mt-2 font-serif text-[1.2rem] text-foreground">
+                            {introduction.meetupRecommendation.title}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-[#70604f]">
+                            {introduction.meetupRecommendation.amenityLabel}
+                            {introduction.meetupRecommendation.timingLabel
+                              ? ` · ${introduction.meetupRecommendation.timingLabel}`
+                              : ""}
+                          </p>
+                        </div>
+                      ) : null}
+
+                      <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#eee4d6] pt-4">
+                        <button
+                          type="button"
+                          onClick={action}
+                          className="text-[10px] uppercase tracking-[0.26em] text-foreground underline decoration-[#2b241d] underline-offset-4"
+                        >
+                          {actionLabel}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={index === 0 ? onGoConcierge : onGoPeople}
+                          className="text-[10px] uppercase tracking-[0.22em] text-[#93806b]"
+                        >
+                          {index === 0 ? "Concierge note" : "Not now"}
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
-            </div>
-            <p className="mt-3 text-sm leading-7 text-[#675847]">
-              {secondaryIntroduction.compatibilitySummary || secondaryIntroduction.resident.tagline}
-            </p>
-            <button
-              type="button"
-              onClick={onGoPeople}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#876f4c]"
-            >
-              Open all introductions
-              <ArrowUpRight className="size-4" />
-            </button>
-          </div>
-        </div>
-      ) : null}
+            ) : (
+              <EmptyState
+                icon={UserPlus}
+                title="We’re preparing your first thoughtful introductions."
+                description="As more residents complete their profile, Fifth Circle will recommend a short list of neighbors who share your interests, timing, and social pace."
+                actionLabel="Complete profile"
+                onAction={onCompleteProfile}
+              />
+            )}
+          </section>
 
-      <div className="mt-8 px-6">
-        <SectionLabel>Upcoming gatherings</SectionLabel>
-        {nextGathering ? (
-          <div className="grid gap-3">
-            <button
-              type="button"
-              onClick={onGoCommunity}
-              className="rounded-[1.8rem] border border-[#2b241d] bg-[#231d17] px-5 py-5 text-left text-[#f3ebdc] shadow-[0_28px_80px_-60px_rgba(43,36,29,0.8)]"
-            >
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#d5bb84]">
-                Next gathering
-              </p>
-              <h3 className="mt-3 font-serif text-[1.65rem] leading-tight">{nextGathering.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-[#ddd2c1]">
-                {nextGathering.date} · {nextGathering.time} · {nextGathering.location}
-              </p>
-              <p className="mt-3 text-sm leading-7 text-[#ddd2c1]">{nextGathering.description}</p>
-            </button>
+          <section>
+            <SectionLabel>A few gatherings we think you&apos;ll enjoy</SectionLabel>
 
-            {supportingGatherings.length ? (
-              <div className="grid grid-cols-2 gap-3">
-                {supportingGatherings.map((event) => (
+            {featuredEvents.length > 0 ? (
+              <div className="grid gap-4 xl:grid-cols-3">
+                {featuredEvents.map((event, index) => (
                   <button
                     key={event.id}
                     type="button"
                     onClick={onGoCommunity}
-                    className="rounded-[1.6rem] border border-[#e1d5c3] bg-[#fbf6ee] px-4 py-4 text-left"
+                    className={
+                      index === 0
+                        ? "rounded-[1.9rem] bg-[#231d17] px-5 py-6 text-left text-[#f3ebdc] shadow-[0_26px_70px_-52px_rgba(43,36,29,0.82)]"
+                        : "rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-6 text-left shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]"
+                    }
                   >
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#a28363]">
-                      {event.date.split(",")[0]}
+                    <p
+                      className={
+                        index === 0
+                          ? "font-mono text-[10px] uppercase tracking-[0.26em] text-[#d5bb84]"
+                          : "font-mono text-[10px] uppercase tracking-[0.26em] text-gold"
+                      }
+                    >
+                      {event.date} · {event.time}
                     </p>
-                    <h4 className="mt-3 font-serif text-xl leading-tight text-foreground">
+                    <h3
+                      className={
+                        index === 0
+                          ? "mt-3 font-serif text-[1.35rem] leading-[1.1]"
+                          : "mt-3 font-serif text-[1.35rem] leading-[1.1] text-foreground"
+                      }
+                    >
                       {event.title}
-                    </h4>
-                    <p className="mt-2 text-sm leading-6 text-[#6f604f]">
-                      {event.time} · {event.location}
+                    </h3>
+                    <p
+                      className={
+                        index === 0
+                          ? "mt-2 text-sm text-[#d6ccb9]"
+                          : "mt-2 text-sm text-[#756555]"
+                      }
+                    >
+                      {event.attendees > 0
+                        ? `${event.attendees} neighbors attending`
+                        : event.enrollmentLabel}
+                    </p>
+                    <p
+                      className={
+                        index === 0
+                          ? "mt-4 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-[#d5bb84]"
+                          : "mt-4 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-foreground"
+                      }
+                    >
+                      Join your neighbors <ArrowRight className="size-3.5" />
                     </p>
                   </button>
                 ))}
               </div>
-            ) : null}
-          </div>
-        ) : (
-          <EmptyState
-            icon={CalendarCheck}
-            title="Gatherings will appear here as soon as they’re announced."
-            description="For now, your concierge will keep focusing on thoughtful introductions and the first few shared moments likely to feel worth joining."
-            actionLabel="Open concierge"
-            onAction={onGoConcierge}
-          />
-        )}
-      </div>
+            ) : (
+              <EmptyState
+                icon={CalendarCheck}
+                title="Gatherings will appear here as they are announced."
+                description="For now, your concierge is focusing on thoughtful introductions and the first shared moments most likely to feel worth saying yes to."
+                actionLabel="Open concierge"
+                onAction={onGoConcierge}
+              />
+            )}
+          </section>
+        </div>
 
-      <div className="mt-8 grid grid-cols-3 gap-2.5 px-6">
-        <QuickAction icon={UserPlus} label="Introductions" onClick={onGoPeople} />
-        <QuickAction icon={Sparkles} label="Concierge" onClick={onGoConcierge} />
-        <QuickAction icon={CalendarCheck} label="Gatherings" onClick={onGoCommunity} />
+        <aside className="space-y-5">
+          <ResidentAccessCard
+            snapshot={accountSnapshot}
+            isLoading={sessionLoading || accountLoading}
+            isSignedIn={isSignedIn}
+            onSignIn={onSignIn}
+            onCompleteProfile={onCompleteProfile}
+            onReturnToJoin={onReturnToJoin}
+            onViewCommunity={onGoCommunity}
+          />
+
+          <div className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]">
+            <SectionLabel>Concierge note</SectionLabel>
+            <h2 className="font-serif text-[1.8rem] leading-[1.02] text-foreground">
+              The next step should always feel easy.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#6c5c49]">
+              Before mutual interest, introductions stay private and low-pressure. Once both residents
+              say yes, we suggest the right first setting and help turn a match into a real moment.
+            </p>
+            <button
+              type="button"
+              onClick={onGoConcierge}
+              className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-gold"
+            >
+              Open concierge
+              <Sparkles className="size-4" />
+            </button>
+          </div>
+
+          {topIntroduction ? (
+            <div className="rounded-[1.9rem] border border-[#e0d5c6] bg-[#f7f0e5] px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.12)]">
+              <SectionLabel>Why this match works</SectionLabel>
+              <p className="font-serif text-[1.45rem] leading-tight text-foreground">
+                {topIntroduction.resident.name} feels like a strong first introduction.
+              </p>
+              <ul className="mt-4 space-y-3 text-sm leading-7 text-[#6c5c49]">
+                {(topIntroduction.resident.compatibilityDetails ?? [])
+                  .slice(0, 3)
+                  .map((detail) => (
+                    <li key={detail}>• {detail}</li>
+                  ))}
+              </ul>
+            </div>
+          ) : null}
+        </aside>
       </div>
     </div>
   )
 }
 
-function QuickAction({
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  icon: typeof UserPlus
-  label: string
-  onClick: () => void
-}) {
+function CommunityStat({ value, label }: { value: number; label: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-[1.4rem] border border-[#e2d6c3] bg-[#fbf6ee] px-2 py-4 transition-colors hover:border-gold/40"
-    >
-      <Icon className="size-5 text-gold" strokeWidth={1.5} />
-      <span className="text-center text-[11px] leading-tight text-foreground/80">{label}</span>
-    </button>
-  )
-}
-
-function SnapshotMetric({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="rounded-[1.5rem] border border-[#e0d4c2] bg-[#f7f0e5] px-4 py-4">
-      <p className="font-serif text-3xl text-foreground">{value}</p>
-      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-[#8b7c6a]">{label}</p>
+    <div className="rounded-[1.55rem] border border-[#e4d9ca] bg-[#f8f1e5] px-4 py-4 text-center">
+      <p className="font-serif text-[2rem] leading-none text-foreground">{value}</p>
+      <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-[#8f7d68]">{label}</p>
     </div>
   )
 }

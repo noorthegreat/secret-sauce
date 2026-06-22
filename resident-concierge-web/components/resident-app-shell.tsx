@@ -7,7 +7,6 @@ import { CalendarDays, DoorOpen, House, Sparkles, UserRound, Users } from "lucid
 import { BottomNav, type ResidentTab } from "@/components/bottom-nav"
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
 import { MeetupFlow } from "@/components/meetup-flow"
-import { PhoneFrame, StatusBar } from "@/components/phone-frame"
 import { ResidentAccessCard } from "@/components/resident-access-card"
 import { CommunityScreen } from "@/components/screens/community-screen"
 import { ConciergeScreen } from "@/components/screens/concierge-screen"
@@ -185,7 +184,7 @@ export function ResidentAppShell({
     return () => {
       isMounted = false
     }
-  }, [accountLoading, hasActiveAccess, session?.access_token, sessionLoading, user, accountSnapshot?.buildingId])
+  }, [accountLoading, accountSnapshot?.buildingId, hasActiveAccess, session?.access_token, sessionLoading, user])
 
   async function requestIntroduction(targetUserId: string) {
     const accessToken = session?.access_token
@@ -313,8 +312,8 @@ export function ResidentAppShell({
 
   if ((sessionLoading || accountLoading || isPreviewLoading) && hasActiveAccess && !previewData) {
     return (
-      <main className="min-h-screen bg-[#201a15] px-6 py-16">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-white/10 bg-[#231d17] px-8 py-16 text-center">
+      <main className="min-h-screen bg-[#1d1813] px-6 py-16">
+        <div className="mx-auto max-w-6xl rounded-[2.25rem] border border-white/10 bg-[#231d17] px-8 py-16 text-center">
           <p className="font-serif text-3xl text-[#f3ebdc]">Loading your building community...</p>
         </div>
       </main>
@@ -322,281 +321,240 @@ export function ResidentAppShell({
   }
 
   return (
-    <main className="min-h-screen bg-[#201a15] text-[#f3ebdc]">
-      <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col px-4 py-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-0 lg:px-0 lg:py-0">
-        <aside className="hidden border-r border-white/8 bg-[#1e1813] lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-8 lg:py-8">
-          <div>
+    <main className="min-h-screen bg-[#1d1813] text-[#f3ebdc]">
+      <div className="mx-auto min-h-screen max-w-[1600px] lg:grid lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="hidden border-r border-white/8 bg-[#1d1813] lg:flex lg:min-h-screen lg:flex-col">
+          <div className="px-7 py-8">
             <FifthCircleBrandMark
               theme="dark"
               align="left"
               caption="The circle closest to home."
-              className="pt-2"
+              className="gap-4"
             />
-
-            <nav className="mt-14 space-y-1">
-              {desktopNav.map((item) => {
-                const Icon = item.icon
-                const isActive = activeTab === item.id
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => router.push(getTabPath(item.id))}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-full px-4 py-3 text-left text-sm transition-colors",
-                      isActive
-                        ? "bg-[#f3ebdc] text-[#241e18]"
-                        : "text-[#cbbca6] hover:bg-white/6 hover:text-[#f3ebdc]",
-                    )}
-                  >
-                    <Icon className="size-4" strokeWidth={1.6} />
-                    <span>{item.label}</span>
-                  </button>
-                )
-              })}
-            </nav>
           </div>
 
-          <div className="rounded-[1.8rem] border border-white/8 bg-white/4 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-gold">
-              {buildingName} Community
-            </p>
-            <p className="mt-3 font-serif text-2xl leading-tight text-[#f3ebdc]">
-              Private introductions, gatherings, and calmer community life.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-[#c8baa6]">
-              Powered by Fifth Circle.
+          <nav className="flex flex-1 flex-col gap-1 px-4 py-4">
+            {desktopNav.map((item) => {
+              const Icon = item.icon
+              const isActive = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => router.push(getTabPath(item.id))}
+                  className={cn(
+                    "flex items-center gap-3 border-l px-4 py-3 text-left text-[11px] uppercase tracking-[0.22em] transition-colors",
+                    isActive
+                      ? "border-[#c19951] bg-white/5 text-[#f3ebdc]"
+                      : "border-transparent text-[#a89a87] hover:bg-white/4 hover:text-[#f3ebdc]",
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={1.5} />
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
+          </nav>
+
+          <div className="border-t border-white/8 px-7 py-6">
+            <p className="text-sm text-[#d4c8b6]">{buildingName}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-[#8e816f]">
+              Private Community
             </p>
           </div>
         </aside>
 
-        <section className="relative overflow-hidden bg-[#efe6d8] lg:min-h-screen">
+        <div className="relative min-h-screen overflow-hidden bg-[#f3ede2]">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <img
               src="/building.png"
               alt=""
               aria-hidden="true"
-              className="h-full w-full object-cover opacity-[0.12] blur-[2px]"
+              className="h-full w-full object-cover opacity-[0.09] blur-[2px]"
             />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(239,230,216,0.88),rgba(246,238,225,0.96))]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(243,237,226,0.9),rgba(243,237,226,0.97))]" />
           </div>
 
-          <div className="relative z-10 flex min-h-screen flex-col">
-            <div className="border-b border-[#ded1bf] px-5 py-5 lg:hidden">
+          <div className="relative z-10 min-h-screen pb-24 lg:pb-0">
+            <div className="border-b border-[#e2d5c2] px-5 py-5 lg:hidden">
               <FifthCircleBrandMark
-                caption={`${buildingName} Community`}
                 theme="light"
                 align="left"
+                caption={`${buildingName} Community`}
                 className="gap-2"
               />
             </div>
 
-            <div className="flex flex-1 items-start justify-center px-4 py-8 sm:px-8 lg:px-14 lg:py-10">
-              <div className="grid w-full max-w-[1080px] gap-8 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
-                <div className="hidden xl:block">
-                  <div className="rounded-[2.4rem] border border-[#dbcdb9] bg-[#f7f0e5]/95 p-8 shadow-[0_35px_80px_-52px_rgba(70,56,35,0.35)]">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-gold">
-                      {buildingName} Community
-                    </p>
-                    <h1 className="mt-5 font-serif text-[3.4rem] leading-[0.92] text-foreground">
-                      Private communities,
-                      <br />
-                      thoughtfully connected.
-                    </h1>
-                    <p className="mt-5 max-w-xl text-base leading-8 text-[#655646]">
-                      Fifth Circle keeps introductions, gatherings, and shared spaces feeling warm,
-                      private, and genuinely useful.
-                    </p>
-                    <div className="mt-10 grid grid-cols-3 gap-4">
-                      <PreviewMetric value={liveIntroCount} label="Introductions in motion" />
-                      <PreviewMetric
-                        value={previewData?.events.length ?? 0}
-                        label="Gatherings this month"
-                      />
-                      <PreviewMetric
-                        value={previewData?.residents.length ?? 0}
-                        label="Approved residents"
-                      />
-                    </div>
-                  </div>
-                </div>
+            <div className="mx-auto max-w-[1240px] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+              {activeTab === "home" &&
+                (previewData && !residentPreviewUnavailable ? (
+                  <HomeScreen
+                    onRequestIntro={requestIntroduction}
+                    onGoPeople={() => router.push("/app/people")}
+                    onGoCommunity={() => router.push("/app/community")}
+                    onGoConcierge={() => router.push("/app/concierge")}
+                    onSignIn={() => router.push("/auth?next=%2Fapp")}
+                    onCompleteProfile={() => router.push("/app/onboarding")}
+                    onReturnToJoin={() => router.push("/join-community")}
+                    welcomeName={previewData.welcomeName}
+                    buildingName={previewData.buildingName}
+                    introCount={liveIntroCount}
+                    introductionCards={introductionCards}
+                    events={previewData.events}
+                    isSignedIn={Boolean(user)}
+                    sessionLoading={sessionLoading}
+                    accountSnapshot={accountSnapshot}
+                    accountLoading={accountLoading}
+                  />
+                ) : (
+                  <ResidentCommunityState
+                    isSignedIn={Boolean(user)}
+                    accountSnapshot={accountSnapshot}
+                    sessionLoading={sessionLoading}
+                    accountLoading={accountLoading}
+                    message={
+                      previewError ||
+                      (hasActiveAccess
+                        ? "Your membership is active. We just need a little more live community activity before introductions appear here."
+                        : "Sign in with your approved resident email to unlock your private building experience.")
+                    }
+                    title={
+                      hasActiveAccess
+                        ? "Your community is warming up."
+                        : "Private building access only."
+                    }
+                    actionLabel={hasActiveAccess ? "Go to gatherings" : undefined}
+                    onAction={hasActiveAccess ? () => router.push("/app/community") : undefined}
+                    onSignIn={() => router.push("/auth?next=%2Fapp")}
+                    onCompleteProfile={() => router.push("/app/onboarding")}
+                    onReturnToJoin={() => router.push("/join-community")}
+                  />
+                ))}
 
-                <div className="mx-auto w-full max-w-[390px]">
-                  <PhoneFrame>
-                    <div className="flex h-full flex-col bg-background">
-                      <StatusBar />
-                      <div className="flex-1 overflow-hidden">
-                        {activeTab === "home" &&
-                          (previewData && !residentPreviewUnavailable ? (
-                            <HomeScreen
-                              onRequestIntro={requestIntroduction}
-                              onGoPeople={() => router.push("/app/people")}
-                              onGoCommunity={() => router.push("/app/community")}
-                              onGoConcierge={() => router.push("/app/concierge")}
-                              onSignIn={() => router.push("/auth?next=%2Fapp")}
-                              onCompleteProfile={() => router.push("/app/onboarding")}
-                              onReturnToJoin={() => router.push("/join-community")}
-                              welcomeName={previewData.welcomeName}
-                              buildingName={previewData.buildingName}
-                              introCount={liveIntroCount}
-                              introductionCards={introductionCards}
-                              events={previewData.events}
-                              isSignedIn={Boolean(user)}
-                              sessionLoading={sessionLoading}
-                              accountSnapshot={accountSnapshot}
-                              accountLoading={accountLoading}
-                            />
-                          ) : (
-                            <ResidentCommunityState
-                              isSignedIn={Boolean(user)}
-                              accountSnapshot={accountSnapshot}
-                              sessionLoading={sessionLoading}
-                              accountLoading={accountLoading}
-                              message={
-                                previewError ||
-                                (hasActiveAccess
-                                  ? "Your membership is active. We just need a little more live community activity before introductions appear here."
-                                  : "Sign in with your approved resident email to unlock your private building experience.")
-                              }
-                              title={
-                                hasActiveAccess
-                                  ? "Your community is warming up."
-                                  : "Private building access only."
-                              }
-                              actionLabel={hasActiveAccess ? "Go to gatherings" : undefined}
-                              onAction={hasActiveAccess ? () => router.push("/app/community") : undefined}
-                              onSignIn={() => router.push("/auth?next=%2Fapp")}
-                              onCompleteProfile={() => router.push("/app/onboarding")}
-                              onReturnToJoin={() => router.push("/join-community")}
-                            />
-                          ))}
+              {activeTab === "people" &&
+                (previewData && introductionCards.length > 0 ? (
+                  <PeopleScreen
+                    onSchedule={(resident, meetupRecommendation) =>
+                      setMeetupContext({ resident, meetupRecommendation })
+                    }
+                    onRequestIntroduction={requestIntroduction}
+                    onRespondToIntroduction={respondToIntroduction}
+                    introductions={introductionCards}
+                    isLoading={isIntroLoading}
+                    actionResidentId={introActionResidentId}
+                    actionError={introActionError ?? introError}
+                  />
+                ) : (
+                  <ResidentCommunityState
+                    isSignedIn={Boolean(user)}
+                    accountSnapshot={accountSnapshot}
+                    sessionLoading={sessionLoading}
+                    accountLoading={accountLoading}
+                    title={
+                      hasActiveAccess
+                        ? "Introductions will appear here."
+                        : "Introductions unlock after approval."
+                    }
+                    message={
+                      introError ||
+                      previewError ||
+                      (hasActiveAccess
+                        ? "As more active residents join the building community, your concierge will surface a thoughtful set of introductions here."
+                        : "We only show resident matches after your building membership is active.")
+                    }
+                    onSignIn={() => router.push("/auth?next=%2Fapp%2Fpeople")}
+                    onCompleteProfile={() => router.push("/app/onboarding")}
+                    onReturnToJoin={() => router.push("/join-community")}
+                  />
+                ))}
 
-                        {activeTab === "people" &&
-                          (previewData && introductionCards.length > 0 ? (
-                            <PeopleScreen
-                              onSchedule={(resident, meetupRecommendation) =>
-                                setMeetupContext({ resident, meetupRecommendation })
-                              }
-                              onRequestIntroduction={requestIntroduction}
-                              onRespondToIntroduction={respondToIntroduction}
-                              introductions={introductionCards}
-                              isLoading={isIntroLoading}
-                              actionResidentId={introActionResidentId}
-                              actionError={introActionError ?? introError}
-                            />
-                          ) : (
-                            <ResidentCommunityState
-                              isSignedIn={Boolean(user)}
-                              accountSnapshot={accountSnapshot}
-                              sessionLoading={sessionLoading}
-                              accountLoading={accountLoading}
-                              title={
-                                hasActiveAccess
-                                  ? "Introductions will appear here."
-                                  : "Introductions unlock after approval."
-                              }
-                              message={
-                                introError ||
-                                previewError ||
-                                (hasActiveAccess
-                                  ? "As more active residents join the building community, your concierge will surface a thoughtful set of introductions here."
-                                  : "We only show resident matches after your building membership is active.")
-                              }
-                              onSignIn={() => router.push("/auth?next=%2Fapp%2Fpeople")}
-                              onCompleteProfile={() => router.push("/app/onboarding")}
-                              onReturnToJoin={() => router.push("/join-community")}
-                            />
-                          ))}
+              {activeTab === "concierge" &&
+                (previewData && !residentPreviewUnavailable ? (
+                  <ConciergeScreen
+                    buildingName={buildingName}
+                    welcomeName={previewData.welcomeName}
+                    introductions={introductionCards}
+                    events={previewData.events}
+                    onOpenPeople={() => router.push("/app/people")}
+                    onOpenCommunity={() => router.push("/app/community")}
+                    onRefineProfile={() => router.push("/app/onboarding")}
+                  />
+                ) : (
+                  <ResidentCommunityState
+                    isSignedIn={Boolean(user)}
+                    accountSnapshot={accountSnapshot}
+                    sessionLoading={sessionLoading}
+                    accountLoading={accountLoading}
+                    title={
+                      hasActiveAccess
+                        ? "Concierge recommendations are warming up."
+                        : "Concierge opens after approval."
+                    }
+                    message={
+                      previewError ||
+                      (hasActiveAccess
+                        ? "Once more approved residents complete their profile, your concierge view will begin surfacing introductions, meetup ideas, and community guidance here."
+                        : "Your concierge view appears after we confirm your building membership and unlock your private resident access.")
+                    }
+                    actionLabel={hasActiveAccess ? "Browse gatherings" : undefined}
+                    onAction={hasActiveAccess ? () => router.push("/app/community") : undefined}
+                    onSignIn={() => router.push("/auth?next=%2Fapp%2Fconcierge")}
+                    onCompleteProfile={() => router.push("/app/onboarding")}
+                    onReturnToJoin={() => router.push("/join-community")}
+                  />
+                ))}
 
-                        {activeTab === "concierge" &&
-                          (previewData && !residentPreviewUnavailable ? (
-                            <ConciergeScreen
-                              buildingName={buildingName}
-                              welcomeName={previewData.welcomeName}
-                              introductions={introductionCards}
-                              events={previewData.events}
-                              onOpenPeople={() => router.push("/app/people")}
-                              onOpenCommunity={() => router.push("/app/community")}
-                              onRefineProfile={() => router.push("/app/onboarding")}
-                            />
-                          ) : (
-                            <ResidentCommunityState
-                              isSignedIn={Boolean(user)}
-                              accountSnapshot={accountSnapshot}
-                              sessionLoading={sessionLoading}
-                              accountLoading={accountLoading}
-                              title={
-                                hasActiveAccess
-                                  ? "Concierge recommendations are warming up."
-                                  : "Concierge opens after approval."
-                              }
-                              message={
-                                previewError ||
-                                (hasActiveAccess
-                                  ? "Once more approved residents complete their profile, your concierge view will begin surfacing introductions, meetup ideas, and community guidance here."
-                                  : "Your concierge view appears after we confirm your building membership and unlock your private resident access.")
-                              }
-                              actionLabel={hasActiveAccess ? "Browse gatherings" : undefined}
-                              onAction={hasActiveAccess ? () => router.push("/app/community") : undefined}
-                              onSignIn={() => router.push("/auth?next=%2Fapp%2Fconcierge")}
-                              onCompleteProfile={() => router.push("/app/onboarding")}
-                              onReturnToJoin={() => router.push("/join-community")}
-                            />
-                          ))}
+              {activeTab === "community" && (
+                <CommunityScreen
+                  buildingName={buildingName}
+                  residents={previewData?.residents ?? []}
+                  events={previewData?.events ?? []}
+                  eventPolls={previewData?.polls ?? []}
+                  isSignedIn={Boolean(user)}
+                  accountSnapshot={accountSnapshot}
+                  accountLoading={accountLoading}
+                  accountErrorMessage={accountErrorMessage ?? previewError}
+                  onSignIn={() => router.push("/auth?next=%2Fapp%2Fcommunity")}
+                  onCompleteProfile={() => router.push("/app/onboarding")}
+                  onReturnToJoin={() => router.push("/join-community")}
+                  onViewCommunity={() => router.push("/app/community")}
+                  onOpenPeople={() => router.push("/app/people")}
+                />
+              )}
 
-                        {activeTab === "community" && (
-                          <CommunityScreen
-                            buildingName={buildingName}
-                            residents={previewData?.residents ?? []}
-                            events={previewData?.events ?? []}
-                            eventPolls={previewData?.polls ?? []}
-                            isSignedIn={Boolean(user)}
-                            accountSnapshot={accountSnapshot}
-                            accountLoading={accountLoading}
-                            accountErrorMessage={accountErrorMessage ?? previewError}
-                            onSignIn={() => router.push("/auth?next=%2Fapp%2Fcommunity")}
-                            onCompleteProfile={() => router.push("/app/onboarding")}
-                            onReturnToJoin={() => router.push("/join-community")}
-                            onViewCommunity={() => router.push("/app/community")}
-                            onOpenPeople={() => router.push("/app/people")}
-                          />
-                        )}
-
-                        {activeTab === "profile" && (
-                          <ProfileScreen
-                            onOpenManager={() => router.push("/manager/dashboard")}
-                            isSignedIn={Boolean(user)}
-                            residentEmail={user?.email ?? null}
-                            accessToken={session?.access_token ?? null}
-                            sessionLoading={sessionLoading}
-                            accountSnapshot={accountSnapshot}
-                            accountErrorMessage={accountErrorMessage}
-                            accountLoading={accountLoading}
-                            reportableResidents={previewData?.residents ?? []}
-                            onSignIn={() => router.push("/auth?next=%2Fapp%2Fprofile")}
-                            onCompleteProfile={() => router.push("/app/onboarding")}
-                            onReturnToJoin={() => router.push("/join-community")}
-                            onViewCommunity={() => router.push("/app/community")}
-                            onAccountRefresh={refreshResidentAccount}
-                          />
-                        )}
-                      </div>
-                      <BottomNav active={activeTab} onChange={(tab) => router.push(getTabPath(tab))} />
-
-                      {meetupContext ? (
-                        <MeetupFlow
-                          resident={meetupContext.resident}
-                          meetupRecommendation={meetupContext.meetupRecommendation}
-                          onClose={() => setMeetupContext(null)}
-                        />
-                      ) : null}
-                    </div>
-                  </PhoneFrame>
-                </div>
-              </div>
+              {activeTab === "profile" && (
+                <ProfileScreen
+                  onOpenManager={() => router.push("/manager/dashboard")}
+                  isSignedIn={Boolean(user)}
+                  residentEmail={user?.email ?? null}
+                  accessToken={session?.access_token ?? null}
+                  sessionLoading={sessionLoading}
+                  accountSnapshot={accountSnapshot}
+                  accountErrorMessage={accountErrorMessage}
+                  accountLoading={accountLoading}
+                  reportableResidents={previewData?.residents ?? []}
+                  onSignIn={() => router.push("/auth?next=%2Fapp%2Fprofile")}
+                  onCompleteProfile={() => router.push("/app/onboarding")}
+                  onReturnToJoin={() => router.push("/join-community")}
+                  onViewCommunity={() => router.push("/app/community")}
+                  onAccountRefresh={refreshResidentAccount}
+                />
+              )}
             </div>
+
+            <div className="lg:hidden">
+              <BottomNav active={activeTab} onChange={(tab) => router.push(getTabPath(tab))} />
+            </div>
+
+            {meetupContext ? (
+              <MeetupFlow
+                resident={meetupContext.resident}
+                meetupRecommendation={meetupContext.meetupRecommendation}
+                onClose={() => setMeetupContext(null)}
+              />
+            ) : null}
           </div>
-        </section>
+        </div>
       </div>
     </main>
   )
@@ -628,13 +586,46 @@ function ResidentCommunityState({
   onReturnToJoin: () => void
 }) {
   return (
-    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
-      <div className="pt-3">
-        <ScreenHeader eyebrow="Private community" title={title} />
-        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">{message}</p>
-      </div>
+    <div className="space-y-6">
+      <header className="rounded-[2rem] border border-[#dfd1bd] bg-[#fbf6ee] px-8 py-10">
+        <ScreenHeader eyebrow="Private community" title={title} className="px-0 pt-0" />
+        <p className="mt-4 max-w-2xl text-sm leading-8 text-[#726353]">{message}</p>
+      </header>
 
-      <div className="mt-6 px-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="rounded-[2rem] border border-[#dfd1bd] bg-[#fbf6ee] px-8 py-8">
+          <div className="flex items-start gap-4">
+            <span className="flex size-12 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold">
+              {isSignedIn ? (
+                <Users className="size-5" strokeWidth={1.5} />
+              ) : (
+                <DoorOpen className="size-5" strokeWidth={1.5} />
+              )}
+            </span>
+            <div>
+              <h2 className="font-serif text-[2rem] leading-none text-foreground">
+                {isSignedIn
+                  ? "Access stays intentionally building-scoped."
+                  : "Sign in to see your neighbors."}
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-8 text-[#726353]">
+                We only reveal live residents, introductions, and community activity after your
+                approved building membership is confirmed.
+              </p>
+            </div>
+          </div>
+
+          {actionLabel && onAction ? (
+            <button
+              type="button"
+              onClick={onAction}
+              className="mt-8 inline-flex items-center justify-center rounded-full bg-[#231d17] px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-[#f3ebdc] transition-colors hover:bg-[#2d261f]"
+            >
+              {actionLabel}
+            </button>
+          ) : null}
+        </div>
+
         <ResidentAccessCard
           snapshot={accountSnapshot}
           isLoading={sessionLoading || accountLoading}
@@ -645,47 +636,6 @@ function ResidentCommunityState({
           onViewCommunity={onAction ?? onReturnToJoin}
         />
       </div>
-
-      <div className="mt-6 px-6">
-        <div className="rounded-[1.9rem] border border-[#e1d5c3] bg-[#fbf6ee] p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex size-11 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold">
-              {isSignedIn ? (
-                <Users className="size-5" strokeWidth={1.5} />
-              ) : (
-                <DoorOpen className="size-5" strokeWidth={1.5} />
-              )}
-            </span>
-            <div>
-              <p className="font-serif text-xl text-foreground">
-                {isSignedIn ? "Access is intentionally building-scoped." : "Sign in to see your neighbors."}
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-[#6f604f]">
-                We only reveal live residents, introductions, and community activity after we confirm your approved building membership.
-              </p>
-            </div>
-          </div>
-
-          {actionLabel && onAction ? (
-            <button
-              type="button"
-              onClick={onAction}
-              className="mt-5 inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-            >
-              {actionLabel}
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function PreviewMetric({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="rounded-[1.5rem] border border-[#e0d4c2] bg-[#fbf6ee] px-4 py-4">
-      <p className="font-serif text-3xl text-foreground">{value}</p>
-      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-[#8b7c6a]">{label}</p>
     </div>
   )
 }

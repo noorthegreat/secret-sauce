@@ -213,6 +213,10 @@ export function ManagerDashboard({
   const [eventActionId, setEventActionId] = useState<string | null>(null)
   const [eventError, setEventError] = useState<string | null>(null)
   const [editingEventId, setEditingEventId] = useState<string | null>(null)
+  const [eventDraftSource, setEventDraftSource] = useState<{
+    label: string
+    helper: string
+  } | null>(null)
   const [eventForm, setEventForm] = useState({
     name: "",
     description: "",
@@ -298,19 +302,47 @@ export function ManagerDashboard({
   }
 
   function startEventDraft(event?: ManagerEventItem) {
-    setEditingEventId(event?.id / null)
+    setEditingEventId(event?.id ?? null)
     setEventError(null)
+    setEventDraftSource(null)
     setEventForm({
-      name: event?.name / "",
-      description: event?.description / "",
-      venueName: event?.venueName / "",
+      name: event?.name ?? "",
+      description: event?.description ?? "",
+      venueName: event?.venueName ?? "",
       startDate: event?.startDate ? new Date(event.startDate).toISOString().slice(0, 16) : "",
       endDate: event?.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
     })
   }
 
+  function startEventDraftFromRecommendation(recommendation: {
+    title: string
+    description: string | null
+    suggestedLocation: string | null
+    suggestedTiming: string | null
+    reasonRecommended: string | null
+    expectedAttendance: number | null
+  }) {
+    setEditingEventId(null)
+    setEventError(null)
+    setEventDraftSource({
+      label: "Seeded from event planning",
+      helper:
+        recommendation.reasonRecommended ||
+        (recommendation.suggestedTiming
+          ? `Suggested timing: ${recommendation.suggestedTiming}. Add a date and publish when the concept is ready.`
+          : "This draft came from a manager recommendation. Add timing details and publish when the concept is ready."),
+    })
+    setEventForm({
+      name: recommendation.title,
+      description: recommendation.description ?? recommendation.reasonRecommended ?? "",
+      venueName: recommendation.suggestedLocation ?? "",
+      startDate: "",
+      endDate: "",
+    })
+  }
+
   async function saveEvent() {
-    setEventActionId(editingEventId / "new")
+    setEventActionId(editingEventId ?? "new")
     setEventError(null)
 
     try {
@@ -339,6 +371,7 @@ export function ManagerDashboard({
       }
 
       setEditingEventId(null)
+      setEventDraftSource(null)
       setEventForm({
         name: "",
         description: "",
@@ -419,7 +452,7 @@ export function ManagerDashboard({
           </p>
           <h1 className="font-serif text-2xl leading-tight text-foreground">Manager Dashboard</h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            {access.buildingName / snapshot.buildingName}
+            {access.buildingName ?? snapshot.buildingName}
             {!isLoading && !loadError ? ` / Pulse ${snapshot.pulseScore}` : ""}
             {!isLoading && !loadError && snapshot.pulseDelta !== 0
               ? ` / ${snapshot.pulseDelta > 0 ? "+" : ""}${snapshot.pulseDelta} vs last month`
@@ -471,7 +504,7 @@ export function ManagerDashboard({
                   Building team access activated
                 </p>
                 <h2 className="mt-3 font-serif text-2xl leading-tight text-foreground">
-                  Community Pulse is ready for {access.buildingName / snapshot.buildingName}.
+                  Community Pulse is ready for {access.buildingName ?? snapshot.buildingName}.
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
                   Your building-team role is active. Start by reviewing resident demand, shaping the
@@ -829,6 +862,7 @@ export function ManagerDashboard({
                   onSave={saveEvent}
                   onCancel={() => {
                     setEditingEventId(null)
+                    setEventDraftSource(null)
                     setEventForm({
                       name: "",
                       description: "",
@@ -837,8 +871,9 @@ export function ManagerDashboard({
                       endDate: "",
                     })
                   }}
-                  isSaving={eventActionId === (editingEventId / "new")}
+                  isSaving={eventActionId === (editingEventId ?? "new")}
                   isEditing={Boolean(editingEventId)}
+                  sourceContext={eventDraftSource}
                 />
                 <div className="mt-5">
                   <EventQueue
@@ -857,7 +892,10 @@ export function ManagerDashboard({
                 title="Event planning"
                 caption="Pilot budget settings, recommendation drafts, and resident-suggested programming ideas"
               >
-                <ManagerEventPlanningSection accessToken={accessToken} />
+                <ManagerEventPlanningSection
+                  accessToken={accessToken}
+                  onUseRecommendationAsEventDraft={startEventDraftFromRecommendation}
+                />
               </Panel>
             </section>
 
@@ -954,6 +992,28 @@ function formatQueueDate(value: string | null) {
 
 function formatLocalInput(value: string) {
   return value
+}
+
+function getEventStateGuidance(event: ManagerEventItem) {
+  if (event.state === "published") {
+    return event.attendeeCount > 0
+      ? `Live now with ${event.attendeeCount} RSVP${event.attendeeCount === 1 ? "" : "s"}. Keep an eye on demand and close it after the gathering.`
+      : "Live now, but still waiting for resident traction."
+  }
+
+  if (event.state === "closed") {
+    return "Closed out. Keep this as a reference point for what the building has already hosted."
+  }
+
+  const missing: string[] = []
+  if (!event.venueName) missing.push("setting")
+  if (!event.startDate) missing.push("timing")
+
+  if (missing.length === 0) {
+    return "Ready to publish. The concept already has a setting and timing."
+  }
+
+  return `Still a draft. Add ${missing.join(" and ")} before pushing it live.`
 }
 
 function SectionHeading({
@@ -1235,6 +1295,7 @@ function EventEditor({
   onCancel,
   isSaving,
   isEditing,
+  sourceContext,
 }: {
   form: {
     name: string
@@ -1256,6 +1317,10 @@ function EventEditor({
   onCancel: () => void
   isSaving: boolean
   isEditing: boolean
+  sourceContext?: {
+    label: string
+    helper: string
+  } | null
 }) {
   return (
     <div className="rounded-2xl border border-border bg-background p-4">
@@ -1273,6 +1338,13 @@ function EventEditor({
           </button>
         ) : null}
       </div>
+
+      {sourceContext ? (
+        <div className="mt-4 rounded-2xl border border-gold/20 bg-gold/5 px-4 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold">{sourceContext.label}</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{sourceContext.helper}</p>
+        </div>
+      ) : null}
 
       <div className="mt-4 grid gap-3">
         <input
@@ -1358,7 +1430,7 @@ function EventQueue({
           onClick={onCreate}
           className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
         >
-          New draft
+          New gathering draft
         </button>
       </div>
       <div className="flex flex-col gap-3.5">
@@ -1396,6 +1468,10 @@ function EventQueue({
                   {item.description || "No description yet."}
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">{item.attendeeCount} RSVPs</p>
+                <div className="mt-3 rounded-2xl border border-gold/15 bg-gold/5 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
+                  <p className="font-medium text-foreground">Operational guidance</p>
+                  <p className="mt-1">{getEventStateGuidance(item)}</p>
+                </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"

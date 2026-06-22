@@ -156,6 +156,90 @@ function formatEnumLabel(value: string) {
   return value.replaceAll("_", " ")
 }
 
+function getRecommendationStatusGuidance(status: RecommendationStatus) {
+  switch (status) {
+    case "draft":
+      return "Still being shaped. Tighten the concept before moving it toward the calendar."
+    case "proposed":
+      return "Ready for a manager decision. If the concept feels strong, turn it into a gathering draft."
+    case "approved":
+      return "Manager-approved. This is ready to become a scheduled building gathering."
+    case "scheduled":
+      return "Already committed to the calendar. Keep the live gathering details aligned."
+    case "rejected":
+      return "Not moving forward right now. Keep for reference only if the demand picture changes."
+    default:
+      return "Use this recommendation to guide the next building gathering."
+  }
+}
+
+function getBudgetFitGuidance(budgetFitLabel: BudgetFitLabel) {
+  switch (budgetFitLabel) {
+    case "within_budget":
+      return "Fits the current pilot budget."
+    case "stretch":
+      return "Possible, but may need tighter scoping or stronger demand."
+    case "above_budget":
+      return "Likely too expensive for the current pilot unless priorities shift."
+    default:
+      return "Budget fit still needs a manager read."
+  }
+}
+
+function getSuggestionGuidance(suggestion: ManagerResidentSuggestionItem) {
+  if (suggestion.status === "used_for_event") {
+    return "Already used in a gathering. Keep it private unless you want more resident signal for a future version."
+  }
+
+  if (suggestion.status === "approved") {
+    return "Approved concept. Turn it into a recommendation draft or live gathering when timing is right."
+  }
+
+  if (suggestion.status === "shortlisted") {
+    return "Strong candidate. This is a good moment to convert it into a shaped recommendation draft."
+  }
+
+  if (suggestion.residentVisibility === "visible_for_voting" && suggestion.supportSummary.total < 4) {
+    return "Still gathering signal. Leave it visible a bit longer before making a final call."
+  }
+
+  if (suggestion.residentVisibility === "visible_for_voting" && suggestion.supportSummary.total >= 4) {
+    return "Resident demand is building. Review whether this should move into shortlist or recommendation shaping."
+  }
+
+  if (suggestion.status === "under_review") {
+    return "Needs a manager decision on visibility, shortlist, or rejection."
+  }
+
+  return "New suggestion waiting for first review."
+}
+
+function buildSuggestionRecommendationReason(suggestion: ManagerResidentSuggestionItem) {
+  const support = suggestion.supportSummary
+  const signals: string[] = []
+
+  if (support.loveThis > 0) {
+    signals.push(`${support.loveThis} strong resident endorsement${support.loveThis === 1 ? "" : "s"}`)
+  }
+
+  if (support.wouldAttend > 0) {
+    signals.push(`${support.wouldAttend} resident${support.wouldAttend === 1 ? "" : "s"} saying they would attend`)
+  }
+
+  if (support.interested > 0) {
+    signals.push(`${support.interested} additional interest signal${support.interested === 1 ? "" : "s"}`)
+  }
+
+  const base = suggestion.whyResidentsWouldLikeIt?.trim() || suggestion.description?.trim()
+  const supportSummary = signals.length > 0 ? signals.join(", ") : "early resident demand"
+
+  if (base) {
+    return `${base} This concept already has ${supportSummary}.`
+  }
+
+  return `Resident demand suggests this could resonate for ${suggestion.suggestedForEventType || "an upcoming gathering"}. It already has ${supportSummary}.`
+}
+
 function summarizeBudget(settings: ManagerEventBudgetSettings) {
   if (settings.eventBudgetAmount === null || !settings.eventBudgetPeriod) {
     return "Budget not set"
@@ -184,8 +268,17 @@ function PlanningStat({
 
 export function ManagerEventPlanningSection({
   accessToken,
+  onUseRecommendationAsEventDraft,
 }: {
   accessToken: string
+  onUseRecommendationAsEventDraft?: (recommendation: {
+    title: string
+    description: string | null
+    suggestedLocation: string | null
+    suggestedTiming: string | null
+    reasonRecommended: string | null
+    expectedAttendance: number | null
+  }) => void
 }) {
   const [snapshot, setSnapshot] = useState<ManagerEventPlanningSnapshot>(emptySnapshot)
   const [isLoading, setIsLoading] = useState(true)
@@ -318,6 +411,41 @@ export function ManagerEventPlanningSection({
     }
   }, [snapshot])
 
+  const strongestSuggestion = useMemo(() => {
+    return [...snapshot.residentSuggestions].sort((left, right) => {
+      const signalDelta = right.supportSummary.total - left.supportSummary.total
+      if (signalDelta !== 0) {
+        return signalDelta
+      }
+
+      const statusPriority = (value: SuggestionStatus) => {
+        switch (value) {
+          case "shortlisted":
+            return 0
+          case "under_review":
+            return 1
+          case "submitted":
+            return 2
+          case "approved":
+            return 3
+          case "used_for_event":
+            return 4
+          case "rejected":
+            return 5
+          default:
+            return 6
+        }
+      }
+
+      const statusDelta = statusPriority(left.status) - statusPriority(right.status)
+      if (statusDelta !== 0) {
+        return statusDelta
+      }
+
+      return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    })[0] ?? null
+  }, [snapshot.residentSuggestions])
+
   function startRecommendationEdit(recommendation?: EventRecommendationDraft) {
     setEditingRecommendationId(recommendation?.id ?? null)
     setRecommendationError(null)
@@ -346,6 +474,31 @@ export function ManagerEventPlanningSection({
       budgetFitLabel: recommendation?.budgetFitLabel ?? "unknown",
       source: recommendation?.source ?? "manual",
       status: recommendation?.status ?? "draft",
+    })
+  }
+
+  function startRecommendationFromSuggestion(suggestion: ManagerResidentSuggestionItem) {
+    setEditingRecommendationId(null)
+    setRecommendationError(null)
+    setRecommendationForm({
+      title: suggestion.title,
+      description: suggestion.description ?? suggestion.whyResidentsWouldLikeIt ?? "",
+      estimatedMinCost: "",
+      estimatedMaxCost: "",
+      expectedAttendance:
+        suggestion.supportSummary.wouldAttend > 0
+          ? String(Math.max(suggestion.supportSummary.wouldAttend, 8))
+          : "",
+      recommendedCapacity:
+        suggestion.supportSummary.total > 0
+          ? String(Math.max(suggestion.supportSummary.total * 2, 12))
+          : "",
+      suggestedLocation: suggestion.location ?? "",
+      suggestedTiming: "",
+      reasonRecommended: buildSuggestionRecommendationReason(suggestion),
+      budgetFitLabel: "unknown",
+      source: "resident_suggestion",
+      status: suggestion.status === "shortlisted" ? "proposed" : "draft",
     })
   }
 
@@ -540,6 +693,105 @@ export function ManagerEventPlanningSection({
               Once a concept is approved, publish the live gathering and watch RSVP traction inside Community Pulse.
             </p>
           </div>
+        </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-background p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-serif text-lg text-foreground">Top resident demand signals</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                The clearest proof that a gathering idea already has momentum inside the building.
+              </p>
+            </div>
+            <Sparkles className="size-4 text-gold" />
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3">
+            {snapshot.demandSignals.length === 0 ? (
+              <div className="rounded-2xl border border-border bg-card px-4 py-5 text-sm text-muted-foreground">
+                No live demand signals yet. Resident proposals, support, waitlists, RSVPs, and feedback will begin shaping this queue as the pilot fills in.
+              </div>
+            ) : (
+              snapshot.demandSignals.slice(0, 5).map((signal) => (
+                <div
+                  key={`${signal.source}:${signal.label}`}
+                  className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{signal.label}</p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-gold">
+                      {signal.source.replaceAll("_", " ")}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-gold/10 px-3 py-1 text-sm font-medium text-foreground">
+                    {signal.value}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-background p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-serif text-lg text-foreground">Best next concept to shape</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Turn one strong resident idea into a budget-aware recommendation draft instead of starting from a blank page.
+              </p>
+            </div>
+            <Lightbulb className="size-4 text-gold" />
+          </div>
+
+          {strongestSuggestion ? (
+            <div className="mt-4 rounded-2xl border border-border bg-card px-4 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-serif text-lg text-foreground">{strongestSuggestion.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {suggestionCategoryLabels[strongestSuggestion.category]} /{" "}
+                    {strongestSuggestion.submittedByResidentFirstName ?? "Resident"}
+                  </p>
+                </div>
+                <span className="rounded-full bg-gold/10 px-3 py-1 text-[11px] text-foreground">
+                  {strongestSuggestion.supportSummary.total} total signal
+                </span>
+              </div>
+
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {strongestSuggestion.whyResidentsWouldLikeIt ||
+                  strongestSuggestion.description ||
+                  "A resident-submitted idea ready for manager review."}
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-foreground">
+                <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
+                  Love this {strongestSuggestion.supportSummary.loveThis}
+                </span>
+                <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
+                  Would attend {strongestSuggestion.supportSummary.wouldAttend}
+                </span>
+                <span className="rounded-full bg-[#efe6d8] px-2.5 py-1">
+                  Status {formatEnumLabel(strongestSuggestion.status)}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => startRecommendationFromSuggestion(strongestSuggestion)}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background"
+              >
+                <Lightbulb className="size-4" />
+                Use as recommendation draft
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-2xl border border-border bg-card px-4 py-5 text-sm text-muted-foreground">
+              No resident idea is strong enough to shape yet. Once suggestions or support signals begin to accumulate, the strongest concept will appear here.
+            </div>
+          )}
         </div>
       </div>
 
@@ -929,6 +1181,37 @@ export function ManagerEventPlanningSection({
                     <p>Expected attendance: {recommendation.expectedAttendance ?? "TBD"}</p>
                     <p>Budget range: {formatMoney(recommendation.estimatedMinCost)} to {formatMoney(recommendation.estimatedMaxCost)}</p>
                   </div>
+                  <div className="mt-3 rounded-2xl border border-gold/15 bg-gold/5 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
+                    <p className="font-medium text-foreground">Next step</p>
+                    <p className="mt-1">{getRecommendationStatusGuidance(recommendation.status)}</p>
+                    <p className="mt-2">{getBudgetFitGuidance(recommendation.budgetFitLabel)}</p>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onUseRecommendationAsEventDraft?.({
+                          title: recommendation.title,
+                          description: recommendation.description,
+                          suggestedLocation: recommendation.suggestedLocation,
+                          suggestedTiming: recommendation.suggestedTiming,
+                          reasonRecommended: recommendation.reasonRecommended,
+                          expectedAttendance: recommendation.expectedAttendance,
+                        })
+                      }
+                      className="rounded-full bg-foreground px-3 py-2 text-xs font-medium text-background disabled:cursor-not-allowed disabled:opacity-70"
+                      disabled={!onUseRecommendationAsEventDraft}
+                    >
+                      Move to gathering draft
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startRecommendationEdit(recommendation)}
+                      className="rounded-full border border-border px-3 py-2 text-xs font-medium text-foreground"
+                    >
+                      Refine recommendation
+                    </button>
+                  </div>
                   <p className="mt-3 text-xs text-muted-foreground">
                     Updated {formatTimestamp(recommendation.updatedAt)}
                   </p>
@@ -1037,6 +1320,10 @@ export function ManagerEventPlanningSection({
                       Total signal {suggestion.supportSummary.total}
                     </span>
                   </div>
+                  <div className="mt-3 rounded-2xl border border-gold/15 bg-gold/5 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
+                    <p className="font-medium text-foreground">Manager read</p>
+                    <p className="mt-1">{getSuggestionGuidance(suggestion)}</p>
+                  </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
                     <select
                       value={edit.status}
@@ -1082,6 +1369,15 @@ export function ManagerEventPlanningSection({
                     >
                       {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                       Save
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => startRecommendationFromSuggestion(suggestion)}
+                      className="rounded-full border border-border px-3 py-2 text-xs font-medium text-foreground"
+                    >
+                      Use as draft
                     </button>
                   </div>
                   {suggestion.contactInfo || suggestion.websiteOrSocialLink ? (

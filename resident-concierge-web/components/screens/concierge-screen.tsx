@@ -1,11 +1,20 @@
 "use client"
 
-import { ArrowUpRight, CalendarDays, NotebookPen, Sparkles, Users } from "lucide-react"
+import { ArrowRight, CalendarDays, NotebookPen, Sparkles, Users } from "lucide-react"
 
 import { EmptyState } from "@/components/empty-state"
-import { ScreenHeader, SectionLabel } from "@/components/screen-header"
+import { SectionLabel } from "@/components/screen-header"
 import type { CommunityEvent } from "@/lib/community-live"
 import type { ResidentIntroductionCard } from "@/lib/resident-introduction-ui"
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+}
 
 export function ConciergeScreen({
   buildingName,
@@ -29,189 +38,197 @@ export function ConciergeScreen({
   const nextGathering = events[0] ?? null
 
   return (
-    <div className="h-full overflow-y-auto bg-[#f6eee1] pb-28">
-      <div className="pt-3">
-        <ScreenHeader eyebrow="Concierge" title="A calmer way to meet your neighbors." />
-        <p className="mt-2 px-6 text-sm leading-relaxed text-[#726353]">
-          Fifth Circle curates introductions, suggests the right first setting, and keeps your
+    <div className="space-y-8">
+      <section className="rounded-[2.25rem] border border-[#e0d5c6] bg-[#fbf6ee] px-6 py-8 shadow-[0_24px_70px_-54px_rgba(50,39,25,0.28)] sm:px-8 lg:px-10">
+        <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-gold">Concierge</p>
+        <h1 className="mt-3 font-serif text-[2.7rem] leading-[0.94] text-foreground sm:text-[3.15rem]">
+          A calmer way to meet your neighbors.
+        </h1>
+        <p className="mt-4 max-w-3xl text-sm leading-8 text-[#6e5d4a]">
+          Fifth Circle shapes introductions, suggests the right first setting, and keeps your
           building community feeling warm, private, and genuinely useful.
         </p>
-      </div>
+      </section>
 
-      <div className="mt-6 px-6">
-        <div className="overflow-hidden rounded-[2rem] border border-[#2b241d] bg-[#231d17] text-[#f3ebdc] shadow-[0_30px_80px_-56px_rgba(43,36,29,0.85)]">
-          <div className="border-b border-white/10 px-5 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-[#d5bb84]">
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-8">
+          <section className="rounded-[2rem] bg-[#231d17] px-6 py-6 text-[#f3ebdc] shadow-[0_28px_80px_-58px_rgba(43,36,29,0.82)] sm:px-7">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#d5bb84]">
               Concierge note
             </p>
-            <h2 className="mt-3 font-serif text-[1.9rem] leading-[1.02]">
-              Good evening, <span className="italic text-[#d5bb84]">{welcomeName}</span>
+            <h2 className="mt-3 font-serif text-[2.1rem] leading-[0.98]">
+              Good evening, <span className="text-[#d5bb84]">{welcomeName}</span>.
             </h2>
-          </div>
-          <div className="px-5 py-5">
-            <p className="text-sm leading-7 text-[#ddd2c1]">
+            <p className="mt-4 text-sm leading-8 text-[#ddd2c1]">
               {featuredIntroduction
                 ? `${featuredIntroduction.resident.name} stands out because ${
-                    featuredIntroduction.compatibilitySummary?.replace(
-                      /^You('| a)?re /i,
-                      "you’re ",
-                    ) ?? "your interests, rhythm, and goals naturally line up."
+                    featuredIntroduction.compatibilitySummary?.toLowerCase() ||
+                    "the fit across interests, timing, and social style feels naturally strong."
                   }`
-                : `We’re taking a quieter, more thoughtful approach at ${buildingName}. As more residents complete onboarding, we’ll shape introductions around shared goals, timing, and social style.`}
+                : `We’re taking a thoughtful approach at ${buildingName}. As more residents complete onboarding, this view will surface the introductions and settings most likely to feel genuinely worthwhile.`}
             </p>
 
             {featuredIntroduction?.meetupRecommendation ? (
-              <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#d5bb84]">
+              <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#d5bb84]">
                   Suggested first setting
                 </p>
-                <p className="mt-2 font-serif text-xl">
+                <p className="mt-2 font-serif text-[1.25rem]">
                   {featuredIntroduction.meetupRecommendation.title}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-[#d7ccb9]">
+                <p className="mt-2 text-sm leading-7 text-[#ddd2c1]">
                   {featuredIntroduction.meetupRecommendation.amenityLabel}
                   {featuredIntroduction.meetupRecommendation.timingLabel
-                    ? ` around ${featuredIntroduction.meetupRecommendation.timingLabel.toLowerCase()}`
+                    ? ` · ${featuredIntroduction.meetupRecommendation.timingLabel}`
                     : ""}
                   . {featuredIntroduction.meetupRecommendation.reason}
                 </p>
               </div>
             ) : null}
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={onOpenPeople}
-                className="inline-flex items-center justify-center rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#f3ebdc] px-4 py-2.5 text-sm font-medium text-[#231d17]"
               >
                 Open introductions
               </button>
               <button
                 type="button"
                 onClick={onRefineProfile}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium text-[#f3ebdc]"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm font-medium text-[#f3ebdc]"
               >
                 Refine profile
               </button>
             </div>
-          </div>
-        </div>
-      </div>
+          </section>
 
-      <div className="mt-8 px-6">
-        <SectionLabel>Curated for this week</SectionLabel>
-        {featuredIntroduction ? (
-          <div className="space-y-3">
-            {[featuredIntroduction, ...supportingIntroductions].map((introduction) => (
-              <article
-                key={`${introduction.resident.id}-${introduction.status}`}
-                className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-4 py-4 shadow-[0_26px_60px_-48px_rgba(70,56,35,0.26)]"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={introduction.resident.photo || "/placeholder.svg"}
-                    alt={introduction.resident.name}
-                    className="size-12 rounded-full object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-serif text-xl leading-tight text-foreground">
-                      {introduction.resident.name}
+          <section>
+            <SectionLabel>Curated for you</SectionLabel>
+
+            {featuredIntroduction ? (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {[featuredIntroduction, ...supportingIntroductions].map((introduction) => (
+                  <article
+                    key={`${introduction.resident.id}-${introduction.status}`}
+                    className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="relative shrink-0">
+                        {introduction.resident.photo ? (
+                          <img
+                            src={introduction.resident.photo}
+                            alt={introduction.resident.name}
+                            className="size-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex size-12 items-center justify-center rounded-full border border-gold/30 bg-[#f3eadb] font-serif text-lg text-gold">
+                            {getInitials(introduction.resident.name)}
+                          </div>
+                        )}
+                        <div className="pointer-events-none absolute -inset-1 rounded-full border border-gold/25" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="font-serif text-[1.4rem] leading-none text-foreground">
+                          {introduction.resident.name}
+                        </p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-[#97816a]">
+                          {introduction.resident.recognitionCue || introduction.resident.unit}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="mt-4 font-serif text-[1.1rem] leading-8 text-[#5f513f]">
+                      {introduction.compatibilitySummary || introduction.resident.tagline}
                     </p>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#9b8162]">
-                      {introduction.resident.goal}
-                    </p>
-                  </div>
-                </div>
 
-                <p className="mt-3 text-sm leading-7 text-[#655645]">
-                  {introduction.compatibilitySummary || introduction.resident.tagline}
-                </p>
-
-                {introduction.resident.compatibilityDetails?.length ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {introduction.resident.compatibilityDetails.slice(0, 3).map((detail) => (
-                      <span
-                        key={detail}
-                        className="rounded-full border border-[#e3d8c7] bg-[#f7f0e5] px-3 py-1 text-[11px] text-[#766654]"
-                      >
-                        {detail}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={Sparkles}
-            title="We’re preparing thoughtful recommendations."
-            description="As more residents complete their profile and availability, this view will begin surfacing introductions, timing overlap, and first-meet suggestions."
-            actionLabel="Refine your profile"
-            onAction={onRefineProfile}
-          />
-        )}
-      </div>
-
-      <div className="mt-8 grid gap-4 px-6">
-        <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5">
-          <SectionLabel>Profile refinement</SectionLabel>
-          <h3 className="font-serif text-[1.6rem] leading-tight text-foreground">
-            Help us make the next introduction even better.
-          </h3>
-          <p className="mt-3 text-sm leading-7 text-[#6d5d4d]">
-            Small updates to your availability, preferred connection style, or concierge note can
-            sharpen match quality without making the experience feel like a survey.
-          </p>
-          <button
-            type="button"
-            onClick={onRefineProfile}
-            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#876f4c]"
-          >
-            Continue refining profile
-            <NotebookPen className="size-4" />
-          </button>
+                    {introduction.resident.compatibilityDetails?.length ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {introduction.resident.compatibilityDetails.slice(0, 3).map((detail) => (
+                          <span
+                            key={detail}
+                            className="rounded-full border border-[#e4d9ca] bg-[#f8f0e4] px-3 py-1 text-[11px] text-[#756656]"
+                          >
+                            {detail}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Sparkles}
+                title="We’re preparing thoughtful recommendations."
+                description="As more residents complete their profile and availability, this view will begin surfacing introductions, timing overlap, and first-meet suggestions."
+                actionLabel="Refine your profile"
+                onAction={onRefineProfile}
+              />
+            )}
+          </section>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5">
+        <aside className="space-y-5">
+          <div className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]">
+            <SectionLabel>Profile refinement</SectionLabel>
+            <h2 className="font-serif text-[1.75rem] leading-[1.02] text-foreground">
+              Help us make the next introduction even better.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#6c5c49]">
+              Small updates to your availability, preferred connection style, or concierge note can
+              sharpen match quality without making this feel like a survey.
+            </p>
+            <button
+              type="button"
+              onClick={onRefineProfile}
+              className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-gold"
+            >
+              Continue refining profile
+              <NotebookPen className="size-4" />
+            </button>
+          </div>
+
+          <div className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]">
             <SectionLabel>Community guidance</SectionLabel>
-            <h3 className="font-serif text-[1.5rem] leading-tight text-foreground">
-              Introductions work best when the next step feels easy.
-            </h3>
-            <p className="mt-3 text-sm leading-7 text-[#6d5d4d]">
-              We prioritize one-on-one or small-group moments that fit the rhythm residents already
-              said yes to, then suggest a calm in-building setting to make the first meetup feel
-              natural.
+            <h2 className="font-serif text-[1.75rem] leading-[1.02] text-foreground">
+              The best first meetings feel easy, not forced.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#6c5c49]">
+              We prioritize one-on-one or small-group moments that match the rhythm residents
+              already said yes to, then recommend a calm in-building setting to make the first hello
+              feel natural.
             </p>
             <button
               type="button"
               onClick={onOpenPeople}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#876f4c]"
+              className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-gold"
             >
               Review current introductions
-              <ArrowUpRight className="size-4" />
+              <ArrowRight className="size-4" />
             </button>
           </div>
 
-          <div className="rounded-[1.8rem] border border-[#e1d5c3] bg-[#fbf6ee] px-5 py-5">
+          <div className="rounded-[1.9rem] border border-[#e0d5c6] bg-white px-5 py-5 shadow-[0_22px_52px_-46px_rgba(63,50,34,0.18)]">
             <SectionLabel>Gatherings</SectionLabel>
             {nextGathering ? (
               <>
-                <h3 className="font-serif text-[1.5rem] leading-tight text-foreground">
+                <h2 className="font-serif text-[1.75rem] leading-[1.02] text-foreground">
                   {nextGathering.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#6d5d4d]">
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-[#6c5c49]">
                   {nextGathering.date} · {nextGathering.time} · {nextGathering.location}
                 </p>
-                <p className="mt-3 text-sm leading-7 text-[#6d5d4d]">
+                <p className="mt-3 text-sm leading-7 text-[#6c5c49]">
                   A gathering can be the gentlest first entry point for residents who prefer meeting
                   through a shared moment before a one-on-one introduction.
                 </p>
                 <button
                   type="button"
                   onClick={onOpenCommunity}
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#876f4c]"
+                  className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-gold"
                 >
                   Open gatherings
                   <CalendarDays className="size-4" />
@@ -227,7 +244,7 @@ export function ConciergeScreen({
               />
             )}
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   )
