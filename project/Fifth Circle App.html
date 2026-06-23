@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fifth Circle — Resident App</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#F3EDE2;--cream-deep:#EAE2D4;--parchment:#E8DFD0;
+    --charcoal:#1C1915;--charcoal-soft:#302D26;
+    --gold:#B8972A;--gold-light:#D4AE3C;--gold-muted:#9A7E22;
+    --taupe:#8A8070;--taupe-light:#B4A898;--white:#FDFAF5;--green:#6B8C5A;
+  }
+  html,body{background:#1C1915;font-family:'Jost',sans-serif;color:#1C1915}
+  input,textarea{outline:none;caret-color:var(--gold);font-family:'Jost',sans-serif}
+  textarea::placeholder,input::placeholder{color:rgba(140,128,112,0.4)}
+  button{font-family:'Jost',sans-serif}
+  @keyframes fcFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-thumb{background:rgba(184,151,42,0.25)}
+  ::-webkit-scrollbar-track{background:transparent}
+  /* Photographic face slots — droppable hero portraits. Frame stays clean; the
+     portrait src fills it so the empty drop-UI never shows at avatar sizes. */
+  .fc-face image-slot::part(ring){display:none}
+  .fc-face image-slot::part(frame){background:transparent}
+</style>
+<!-- standalone export: images referenced as strings in JS/JSX (not plain HTML attrs) -->
+<meta name="ext-resource-dependency" content="img/chorus-logo.png" data-resource-id="img/chorus-logo.png" />
+<meta name="ext-resource-dependency" content="img/amenity-gameroom.png" data-resource-id="img/amenity-gameroom.png" />
+<meta name="ext-resource-dependency" content="img/amenity-gym.png" data-resource-id="img/amenity-gym.png" />
+<meta name="ext-resource-dependency" content="img/amenity-lobbybar.png" data-resource-id="img/amenity-lobbybar.png" />
+<meta name="ext-resource-dependency" content="img/amenity-outdoor.png" data-resource-id="img/amenity-outdoor.png" />
+<meta name="ext-resource-dependency" content="img/amenity-pool.png" data-resource-id="img/amenity-pool.png" />
+<meta name="ext-resource-dependency" content="img/amenity-skydeck.png" data-resource-id="img/amenity-skydeck.png" />
+<meta name="ext-resource-dependency" content="img/amenity-workspace.png" data-resource-id="img/amenity-workspace.png" />
+<meta name="ext-resource-dependency" content="img/faces/alex.png" data-resource-id="img/faces/alex.png" />
+<meta name="ext-resource-dependency" content="img/faces/david.png" data-resource-id="img/faces/david.png" />
+<meta name="ext-resource-dependency" content="img/faces/ethan.png" data-resource-id="img/faces/ethan.png" />
+<meta name="ext-resource-dependency" content="img/faces/isabella.png" data-resource-id="img/faces/isabella.png" />
+<meta name="ext-resource-dependency" content="img/faces/james.png" data-resource-id="img/faces/james.png" />
+<meta name="ext-resource-dependency" content="img/faces/kevin.png" data-resource-id="img/faces/kevin.png" />
+<meta name="ext-resource-dependency" content="img/faces/margaret.png" data-resource-id="img/faces/margaret.png" />
+<meta name="ext-resource-dependency" content="img/faces/maya.png" data-resource-id="img/faces/maya.png" />
+<meta name="ext-resource-dependency" content="img/faces/noor.png" data-resource-id="img/faces/noor.png" />
+<meta name="ext-resource-dependency" content="img/faces/priya.png" data-resource-id="img/faces/priya.png" />
+<meta name="ext-resource-dependency" content="img/faces/sophie.png" data-resource-id="img/faces/sophie.png" />
+<script>window.RES=function(p){return (window.__resources&&window.__resources[p])||p;};</script>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#1C1915"/>
+    <circle cx="100" cy="100" r="56" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="100" cy="100" r="36" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="100" cy="100" r="14" fill="#B8972A"/>
+  </svg>
+</template>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="app/fc-data.js"></script>
+<script src="image-slot.js"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app/fc-ui.jsx"></script>
+<script type="text/babel" src="app/fc-home-people.jsx"></script>
+<script type="text/babel" src="app/fc-circles-events.jsx"></script>
+<script type="text/babel" src="app/fc-concierge.jsx"></script>
+<script type="text/babel" src="app/fc-onboarding.jsx"></script>
+<script type="text/babel" src="app/fc-settings.jsx"></script>
+<script type="text/babel" src="app/fc-app.jsx"></script>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fifth Circle — Visual Design Review</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap');
+
+  :root{
+    --cream:#F3EDE2; --cream-deep:#EAE2D4; --parchment:#E8DFD0;
+    --charcoal:#1C1915; --charcoal-soft:#302D26;
+    --gold:#B8972A; --gold-light:#D4AE3C; --gold-muted:#9A7E22;
+    --taupe:#8A8070; --taupe-light:#B4A898; --white:#FDFAF5; --green:#6B8C5A; --rose:#7A2E2E;
+    --serif:'Cormorant Garamond', serif;
+    --sans:'Jost', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  body{ background:#100E0B; font-family:var(--sans); color:var(--charcoal); line-height:1.6; padding:48px 20px 96px; }
+  .page{ max-width:860px; margin:0 auto; background:var(--cream); box-shadow:0 40px 120px rgba(0,0,0,0.6); }
+
+  .eyebrow{ font-family:var(--sans); font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--gold-muted); }
+  .label{ font-family:var(--sans); font-size:9.5px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); }
+  em.gold{ font-style:italic; color:var(--gold); font-weight:400; }
+
+  /* COVER */
+  .cover{ background:var(--charcoal); color:var(--cream); padding:88px 64px 70px; position:relative; overflow:hidden; }
+  .cover .mark-bg{ position:absolute; right:-150px; top:50%; transform:translateY(-50%); width:540px; opacity:0.05; }
+  .cover .nav{ display:flex; align-items:center; gap:13px; margin-bottom:78px; position:relative; }
+  .cover .wordmark{ font-family:var(--serif); font-size:14px; letter-spacing:7px; color:rgba(242,237,227,0.6); }
+  .cover .kicker{ font-size:10px; letter-spacing:5px; text-transform:uppercase; color:var(--gold-light); margin-bottom:24px; position:relative; }
+  .cover h1{ font-family:var(--serif); font-weight:300; font-size:58px; line-height:1.05; letter-spacing:-1px; margin-bottom:26px; position:relative; }
+  .cover .sub{ font-size:14.5px; font-weight:300; line-height:1.85; color:rgba(242,237,227,0.6); max-width:500px; position:relative; }
+  .cover .meta{ display:flex; gap:40px; margin-top:52px; position:relative; border-top:0.5px solid rgba(184,151,42,0.28); padding-top:24px; }
+  .cover .meta .k{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(184,151,42,0.7); margin-bottom:7px; }
+  .cover .meta .v{ font-family:var(--serif); font-size:16px; color:var(--cream); }
+
+  section{ padding:62px 64px; border-top:0.5px solid rgba(184,151,42,0.2); position:relative; }
+  .sec-head{ display:flex; align-items:flex-start; gap:26px; margin-bottom:32px; }
+  .sec-num{ font-family:var(--serif); font-weight:300; font-size:50px; line-height:0.85; color:rgba(184,151,42,0.4); flex-shrink:0; }
+  .sec-titles .eyebrow{ margin-bottom:9px; display:block; }
+  .sec-titles h2{ font-family:var(--serif); font-weight:400; font-size:33px; line-height:1.08; color:var(--charcoal); letter-spacing:-0.3px; }
+  .lede{ font-size:14px; font-weight:300; line-height:1.85; color:var(--charcoal-soft); max-width:640px; margin-bottom:30px; }
+  h3{ font-family:var(--serif); font-weight:500; font-size:20px; color:var(--charcoal); margin:30px 0 12px; }
+  p{ font-size:13.5px; font-weight:300; line-height:1.8; color:var(--charcoal-soft); }
+  p + p{ margin-top:12px; }
+  .muted{ color:var(--taupe); }
+  strong{ font-weight:500; color:var(--charcoal); }
+
+  .divider{ display:flex; align-items:center; justify-content:center; gap:14px; margin:42px 0; }
+  .divider .line{ height:0.5px; flex:1; background:rgba(184,151,42,0.3); }
+
+  .callout{ background:var(--white); border:0.5px solid rgba(184,151,42,0.25); border-top:2px solid var(--gold); padding:22px 24px; margin:24px 0 6px; }
+  .callout .label{ margin-bottom:10px; display:block; }
+  .callout p{ font-size:13px; }
+
+  ul.clean{ list-style:none; margin-top:8px; }
+  ul.clean li{ position:relative; padding-left:22px; font-size:13px; font-weight:300; line-height:1.7; color:var(--charcoal-soft); margin-bottom:10px; }
+  ul.clean li::before{ content:''; position:absolute; left:2px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--gold); }
+  ul.clean li b{ font-weight:500; color:var(--charcoal); }
+
+  /* ── findings ── */
+  .finding{ border-left:1px solid var(--gold); padding:2px 0 2px 22px; margin-bottom:24px; }
+  .finding .fh{ display:flex; align-items:baseline; gap:11px; margin-bottom:7px; }
+  .finding .fh .n{ font-family:var(--serif); font-size:17px; color:var(--gold-muted); }
+  .finding .fh .t{ font-family:var(--serif); font-size:19px; color:var(--charcoal); }
+
+  /* ── palette specimens ── */
+  .swatches{ display:flex; gap:0; border:0.5px solid rgba(184,151,42,0.2); margin:6px 0 4px; }
+  .sw{ flex:1; height:84px; display:flex; flex-direction:column; justify-content:flex-end; padding:9px 10px; }
+  .sw .hx{ font-size:8.5px; letter-spacing:1px; font-family:var(--sans); }
+  .cap{ font-size:10px; letter-spacing:1px; color:var(--taupe); font-family:var(--sans); text-transform:uppercase; margin:8px 0 0; }
+
+  /* ── card comparison ── */
+  .compare{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin:14px 0 6px; }
+  .compare .colcap{ font-size:9px; letter-spacing:2.5px; text-transform:uppercase; font-family:var(--sans); margin-bottom:11px; }
+  .compare .now-cap{ color:var(--taupe); }
+  .compare .next-cap{ color:var(--gold-muted); }
+
+  /* "now" card — flat hairline */
+  .card-now{ background:var(--white); border:0.5px solid rgba(184,151,42,0.2); padding:15px; display:flex; gap:13px; align-items:center; }
+  .card-now .av{ width:46px; height:46px; border-radius:50%; background:linear-gradient(145deg,#3a3526,#5a4d2e); border:0.5px solid rgba(184,151,42,0.3); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--serif); color:var(--cream); font-size:15px; }
+  .card-now .nm{ font-family:var(--serif); font-size:17px; color:var(--charcoal); }
+  .card-now .oc{ font-size:11px; color:var(--taupe); font-family:var(--sans); margin-top:2px; }
+  .card-now .tags{ display:flex; gap:5px; margin-top:8px; }
+  .card-now .tg{ font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-muted); border:0.5px solid rgba(184,151,42,0.4); padding:3px 7px; font-family:var(--sans); }
+
+  /* "next" card — image + depth */
+  .card-next{ background:var(--white); border-radius:16px; overflow:hidden; box-shadow:0 1px 2px rgba(28,25,21,0.04), 0 18px 40px -16px rgba(28,25,21,0.32); }
+  .card-next .ph{ height:120px; background-size:cover; background-position:center; position:relative; }
+  .card-next .ph .scrim{ position:absolute; inset:0; background:linear-gradient(to top, rgba(28,25,21,0.5), transparent 60%); }
+  .card-next .bd{ padding:15px 17px 17px; }
+  .card-next .nm{ font-family:var(--serif); font-size:21px; color:var(--charcoal); line-height:1.05; }
+  .card-next .oc{ font-size:11.5px; color:var(--taupe); font-family:var(--sans); margin-top:3px; }
+  .card-next .read{ font-family:var(--serif); font-style:italic; font-size:14.5px; color:var(--gold-muted); margin-top:11px; }
+
+  /* ── type specimen ── */
+  .type-spec{ background:var(--white); border:0.5px solid rgba(184,151,42,0.18); padding:30px 28px; margin:8px 0 4px; }
+  .type-spec .l1{ font-family:var(--serif); font-weight:300; font-size:48px; line-height:1; color:var(--charcoal); letter-spacing:-1px; }
+  .type-spec .l2{ font-family:var(--serif); font-style:italic; font-size:26px; color:var(--gold-muted); margin-top:6px; }
+  .type-spec .l3{ font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--taupe); font-family:var(--sans); margin-top:18px; }
+
+  /* ── imagery strip ── */
+  .strip{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:10px 0 4px; }
+  .strip .im{ height:110px; border-radius:12px; background-size:cover; background-position:center; box-shadow:0 12px 30px -14px rgba(28,25,21,0.4); }
+  .strip .ic{ font-size:9.5px; letter-spacing:1px; color:var(--taupe); font-family:var(--sans); text-transform:uppercase; margin-top:7px; text-align:center; }
+
+  /* ── tables ── */
+  table{ width:100%; border-collapse:collapse; margin:8px 0 4px; }
+  th{ font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-muted); font-family:var(--sans); text-align:left; padding:0 14px 11px 0; font-weight:400; border-bottom:0.5px solid rgba(184,151,42,0.25); }
+  td{ font-size:12.5px; font-weight:300; line-height:1.55; color:var(--charcoal-soft); padding:13px 14px 13px 0; border-bottom:0.5px solid rgba(184,151,42,0.12); vertical-align:top; }
+  td.screen{ font-family:var(--serif); font-size:15px; color:var(--charcoal); white-space:nowrap; }
+  td .now{ color:var(--taupe); }
+  td .should{ font-family:var(--serif); font-style:italic; font-size:14px; color:var(--gold-muted); }
+
+  /* ── ranked outputs ── */
+  .ten{ counter-reset:r; }
+  .ref{ counter-increment:r; display:grid; grid-template-columns:50px 1fr auto; gap:18px; align-items:center; padding:16px 0; border-top:0.5px solid rgba(184,151,42,0.16); }
+  .ref:last-child{ border-bottom:0.5px solid rgba(184,151,42,0.16); }
+  .ref::before{ content:counter(r,decimal-leading-zero); font-family:var(--serif); font-weight:300; font-size:28px; color:rgba(184,151,42,0.5); line-height:1; }
+  .ref .rt{ font-size:13.5px; line-height:1.6; }
+  .ref .rt b{ font-weight:500; color:var(--charcoal); }
+  .ref .eff{ font-size:8px; letter-spacing:1.5px; text-transform:uppercase; font-family:var(--sans); padding:4px 9px; border:0.5px solid; white-space:nowrap; }
+  .eff.lo{ color:var(--green); border-color:rgba(107,140,90,0.4); }
+  .eff.md{ color:var(--gold-muted); border-color:rgba(184,151,42,0.45); }
+
+  .closing{ background:var(--charcoal); color:var(--cream); padding:78px 64px; position:relative; overflow:hidden; }
+  .closing .mark-bg{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:560px; opacity:0.045; }
+  .closing .eyebrow{ color:var(--gold-light); position:relative; }
+  .closing .q{ font-family:var(--serif); font-style:italic; font-weight:300; font-size:29px; line-height:1.45; color:var(--cream); max-width:640px; margin:22px 0 26px; position:relative; }
+  .closing p{ color:rgba(242,237,227,0.6); position:relative; max-width:560px; }
+  .closing .sign{ margin-top:44px; position:relative; display:flex; align-items:center; gap:13px; border-top:0.5px solid rgba(184,151,42,0.28); padding-top:24px; }
+  .closing .sign .nm{ font-family:var(--serif); font-style:italic; font-size:16px; color:rgba(242,237,227,0.75); }
+
+  .footer{ padding:28px 64px; display:flex; align-items:center; justify-content:space-between; border-top:0.5px solid rgba(184,151,42,0.2); background:var(--parchment); }
+  .footer .wm{ font-family:var(--serif); font-size:12px; letter-spacing:5px; color:var(--taupe); }
+  .footer .by{ font-size:9px; letter-spacing:1.5px; color:var(--taupe-light); font-family:var(--sans); }
+
+  @media print{
+    body{ background:#fff; padding:0; } .page{ box-shadow:none; max-width:none; }
+    section,.cover,.closing{ break-inside:avoid; }
+    .cover,.closing,.card-next .ph,.strip .im{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+  @media (max-width:680px){
+    section,.cover,.closing,.footer{ padding-left:26px; padding-right:26px; }
+    .cover h1{ font-size:40px; }
+    .compare,.strip{ grid-template-columns:1fr; }
+    .sec-num{ font-size:40px; } .sec-head{ gap:16px; }
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#1C1915"/>
+    <circle cx="100" cy="100" r="58" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="100" cy="100" r="38" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="100" cy="100" r="14" fill="#B8972A"/>
+  </svg>
+</template>
+
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <svg class="mark-bg" viewBox="0 0 400 400">
+      <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="4"/>
+      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="3"/>
+      <circle cx="200" cy="200" r="112" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="3"/>
+      <circle cx="200" cy="200" r="74" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="2.5"/>
+      <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="2"/>
+      <circle cx="200" cy="200" r="11" fill="#F3EDE2"/>
+    </svg>
+    <div class="nav">
+      <svg viewBox="0 0 400 400" width="30" height="30">
+        <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="6"/>
+        <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="4"/>
+        <circle cx="200" cy="200" r="112" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="4"/>
+        <circle cx="200" cy="200" r="74" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="3.5"/>
+        <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="3"/>
+        <circle cx="200" cy="200" r="13" fill="#F3EDE2"/>
+      </svg>
+      <span class="wordmark">FIFTH CIRCLE</span>
+    </div>
+    <div class="kicker">Visual Design Review</div>
+    <h1>Refined, but not yet <em class="gold">felt.</em></h1>
+    <div class="sub">The product works beautifully — the architecture, the flow, the voice are right. What it lacks is sensory weight: contrast, depth, imagery, and space. This review diagnoses, screen by screen, why it reads as tasteful software rather than hospitality — and where it could become unforgettable. No functionality changes. Surface only.</div>
+    <div class="meta">
+      <div><div class="k">Lens</div><div class="v">Aman · Soho House · Apple</div></div>
+      <div><div class="k">Scope</div><div class="v">Visual sophistication</div></div>
+      <div><div class="k">Verdict</div><div class="v">Strong bones, thin skin</div></div>
+    </div>
+  </div>
+
+  <!-- 00 DIAGNOSIS -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">00</div>
+      <div class="sec-titles"><span class="eyebrow">The diagnosis, in one line</span><h2>It is <em class="gold">monochrome, hairlined, and labelled</em> — refined, but flat.</h2></div>
+    </div>
+    <p class="lede">Three habits, repeated on every screen, hold the product at "tasteful" instead of "luxurious." <strong>One</strong> — nearly everything is the same warm mid-tone, so nothing recedes and nothing sings. <strong>Two</strong> — a 0.5px gold hairline outlines every card, chip, and field; it is the single most "software" tell in the product, and it makes the precious accent colour ordinary. <strong>Three</strong> — small uppercase letter-spaced labels are everywhere, doing the work that scale, space, and imagery should be doing. Luxury is not more decoration. It is <strong>fewer elements, with far more contrast between them.</strong></p>
+    <div class="callout">
+      <span class="label">The core tension</span>
+      <p>The brand voice is Aman. The visual system is a well-mannered dashboard. Closing that gap doesn't require new screens — it requires <strong>depth (light, shadow, layering), photography, a bolder type scale, more negative space, and a rationed use of gold.</strong> Everything below serves those five moves.</p>
+    </div>
+  </section>
+
+  <!-- 01 HIERARCHY -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <div class="sec-titles"><span class="eyebrow">Visual hierarchy &amp; contrast</span><h2>Everything has the <em class="gold">same weight.</em></h2></div>
+    </div>
+    <p class="lede">On most screens the eye has no clear first stop. A card title, its hairline border, an uppercase label, a gold chip, and an icon all read at roughly equal intensity. Hierarchy is currently carried almost entirely by position (what's on top), not by contrast (what's loud vs quiet). The result is calm but undifferentiated — pleasant to glance at, hard to <em>feel</em>.</p>
+    <ul class="clean">
+      <li><b>Establish one focal point per screen.</b> A single large serif headline, image, or number that wins — everything else demonstrably quieter.</li>
+      <li><b>Demote the supporting cast.</b> Labels, metadata, and borders should sit far lower in contrast than they do now, so the focal element has somewhere to rise from.</li>
+      <li><b>Use scale, not lines, to separate.</b> Generous space and size jumps divide content more elegantly than a hairline ever will.</li>
+    </ul>
+  </section>
+
+  <!-- 02 LUXURY FEEL + CARD COMPARISON -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <div class="sec-titles"><span class="eyebrow">Luxury feel</span><h2>The flat hairline card reads as <em class="gold">SaaS.</em></h2></div>
+    </div>
+    <p class="lede">White rectangles with thin gold outlines and zero elevation are the visual grammar of admin tools and forms. Hospitality earns its feeling through material — depth, soft light, photography, and layering. The same content, given an image, a soft shadow, and a softer corner, stops looking like a record in a database and starts looking like an invitation.</p>
+    <div class="compare">
+      <div>
+        <div class="colcap now-cap">Now · a list row</div>
+        <div class="card-now">
+          <div class="av">SL</div>
+          <div>
+            <div class="nm">Sebastian Laurent</div>
+            <div class="oc">Founder · Atelier Studio</div>
+            <div class="tags"><span class="tg">Design</span><span class="tg">Coffee</span></div>
+          </div>
+        </div>
+        <p class="cap">Hairline border · flat · initials · uppercase tags. Reads as address book.</p>
+      </div>
+      <div>
+        <div class="colcap next-cap">Could be · an introduction</div>
+        <div class="card-next">
+          <div class="ph" style="background-image:url('img/event-social.png')"><div class="scrim"></div></div>
+          <div class="bd">
+            <div class="nm">Sebastian Laurent</div>
+            <div class="oc">Founder · Atelier Studio</div>
+            <div class="read">A natural fit — design, coffee, a studio just begun.</div>
+          </div>
+        </div>
+        <p class="cap">Imagery · soft elevation · softer corner · the read in serif. Reads as hospitality.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="label">What still feels like software</span>
+      <p>The universal hairline border · uppercase micro-labels stacked two and three deep · gradient-initial avatars in place of faces · sharp 0° corners on every surface · the affinity figure when shown as a bare percentage. None are wrong individually; together they accumulate into "app," not "atelier."</p>
+    </div>
+  </section>
+
+  <!-- 03 COLOR + SWATCHES -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <div class="sec-titles"><span class="eyebrow">Colour &amp; depth</span><h2>A beautiful palette, used <em class="gold">at one volume.</em></h2></div>
+    </div>
+    <p class="lede">The cream-charcoal-gold world is genuinely lovely. The problem is range: it lives almost entirely in the warm midtones, and gold is asked to be border, label, icon, number, and accent all at once — so it stops feeling precious. Two moves fix it: <strong>extend the range</strong> (a true dark surface for drama, a warm shadow tone for depth, a near-invisible warm neutral for borders) and <strong>ration the gold</strong> to a single focal accent per screen.</p>
+    <p class="cap">Current — warm, narrow, gold doing everything</p>
+    <div class="swatches">
+      <div class="sw" style="background:#F3EDE2"><span class="hx" style="color:#8A8070">#F3EDE2</span></div>
+      <div class="sw" style="background:#E8DFD0"><span class="hx" style="color:#8A8070">#E8DFD0</span></div>
+      <div class="sw" style="background:#B8972A"><span class="hx" style="color:#fff">#B8972A</span></div>
+      <div class="sw" style="background:#8A8070"><span class="hx" style="color:#fff">#8A8070</span></div>
+      <div class="sw" style="background:#1C1915"><span class="hx" style="color:#B8972A">#1C1915</span></div>
+    </div>
+    <p class="cap" style="margin-top:22px">Proposed — same soul, more range. A deeper espresso for drama, a warm shadow for depth, a quiet stone for borders so gold can stay rare.</p>
+    <div class="swatches">
+      <div class="sw" style="background:#F6F1E8"><span class="hx" style="color:#8A8070">Paper #F6F1E8</span></div>
+      <div class="sw" style="background:#E3D6C0"><span class="hx" style="color:#6b5f4a">Stone border</span></div>
+      <div class="sw" style="background:#C9A23A"><span class="hx" style="color:#1C1915">Gold · rare</span></div>
+      <div class="sw" style="background:#5E4A2C"><span class="hx" style="color:#F3EDE2">Warm shadow</span></div>
+      <div class="sw" style="background:#14110C"><span class="hx" style="color:#D4AE3C">Espresso</span></div>
+    </div>
+    <ul class="clean" style="margin-top:24px">
+      <li><b>Borders → warm stone, not gold.</b> Instantly removes the "software" read while keeping definition.</li>
+      <li><b>Add a true dark surface</b> beyond the Concierge hero — use it for emotional peaks (a welcome, an introduction, a milestone) to create rhythm and drama.</li>
+      <li><b>Let surfaces carry light.</b> A subtle warm-to-deep gradient or vignette on large fills reads as crafted; a flat fill reads as default.</li>
+    </ul>
+  </section>
+
+  <!-- 04 TYPOGRAPHY + SPECIMEN -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <div class="sec-titles"><span class="eyebrow">Typography</span><h2>The serif is gorgeous — and <em class="gold">too polite.</em></h2></div>
+    </div>
+    <p class="lede">Cormorant Garamond is the right choice, but it's mostly used at modest sizes (19–27px) while a crowd of 9px uppercase sans labels competes around it. Editorial luxury does the opposite: <strong>one confident display moment, dramatic size jumps, and far fewer labels.</strong> The "Good evening, Noor" hero proves the product can do it — most screens just don't commit.</p>
+    <div class="type-spec">
+      <div class="l1">Good evening, Noor.</div>
+      <div class="l2">Two neighbours worth meeting this week.</div>
+      <div class="l3">From your concierge</div>
+    </div>
+    <ul class="clean" style="margin-top:22px">
+      <li><b>Cut the number of uppercase labels by half.</b> Keep them for true wayfinding; let headlines and space do the rest.</li>
+      <li><b>Push display sizes up</b> on the moment that matters per screen — and pull body/labels down in contrast to match.</li>
+      <li><b>Lean into the italic.</b> The gold italic is the brand's most distinctive type gesture; use it as a deliberate accent, not decoration.</li>
+    </ul>
+  </section>
+
+  <!-- 05 SPACING -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <div class="sec-titles"><span class="eyebrow">Spacing</span><h2>Consistent, but it doesn't yet <em class="gold">breathe.</em></h2></div>
+    </div>
+    <p class="lede">Padding is even (≈22px) and sections are tidy — competent, but uniform. Luxury uses <em>uneven</em> space deliberately: large silences around the one thing that matters, tighter grouping elsewhere. Right now screens stack section after section at the same rhythm, so nothing feels framed or precious.</p>
+    <ul class="clean">
+      <li><b>Give the focal element a clearing.</b> Double the space above and below the single most important thing on each screen.</li>
+      <li><b>Group tighter, separate wider.</b> Related metadata can sit closer; distinct sections can sit much further apart than they do now.</li>
+      <li><b>Wider screen margins on hero moments</b> (welcome, introduction, done) — generous side margins read as confidence.</li>
+    </ul>
+  </section>
+
+  <!-- 06 IMAGERY + STRIP -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">06</div>
+      <div class="sec-titles"><span class="eyebrow">Imagery</span><h2>The missing sense of <em class="gold">place.</em></h2></div>
+    </div>
+    <p class="lede">Until now the product was almost imageless — gradient-initial avatars and icon tiles. Hospitality is <em>sold</em> through photography: light, texture, space, faces. Imagery should be a first-class layer, not an afterthought. The ambient set already added to Home and Events points the way — warm, atmospheric, never stock-y.</p>
+    <div class="strip">
+      <div><div class="im" style="background-image:url('img/moment-rooftop.png')"></div><div class="ic">Environment · golden hour</div></div>
+      <div><div class="im" style="background-image:url('img/event-wine.png')"></div><div class="ic">Moments · candlelit</div></div>
+      <div><div class="im" style="background-image:url('img/event-wellness.png')"></div><div class="ic">Calm · dawn</div></div>
+    </div>
+    <ul class="clean" style="margin-top:24px">
+      <li><b>Real faces for residents.</b> The single biggest warmth upgrade — portrait avatars turn an introduction from a record into a person. (Gradient initials are a graceful fallback only.)</li>
+      <li><b>Image-led cards for Circles &amp; Events.</b> Each circle and gathering deserves a photographic header — the room, the terrace, the table.</li>
+      <li><b>Environmental imagery for place.</b> Amenities, the building, the neighbourhood at the right hour — atmospheric, warm-graded, consistent treatment.</li>
+      <li><b>One consistent grade.</b> Warm, slightly desaturated, soft light. A single look across all imagery is what makes a brand's photography feel owned.</li>
+    </ul>
+  </section>
+
+  <!-- 07 DELIGHT -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">07</div>
+      <div class="sec-titles"><span class="eyebrow">Moments of delight &amp; motion</span><h2>It is beautiful, but <em class="gold">still.</em></h2></div>
+    </div>
+    <p class="lede">The experience is almost entirely static — screens cut from one to the next with no transition, no settling, no life. Luxury digital feels <em>alive</em> in tiny, restrained ways. None of this should become animation for its own sake; it should feel like breath.</p>
+    <ul class="clean">
+      <li><b>Soft transitions between screens</b> — a gentle fade/rise rather than a hard cut, so the product feels considered in motion as well as at rest.</li>
+      <li><b>The bullseye as a living loader.</b> The concentric rings drawing or pulsing while the concierge "considers" is an ownable, on-brand waiting moment.</li>
+      <li><b>Reveal the emotional peaks.</b> The introduction acceptance, the welcome, a milestone — let these arrive with a beat of motion, not instantly.</li>
+      <li><b>Micro-feedback</b> on accept / RSVP / join — a quiet, tactile confirmation rather than an immediate state swap.</li>
+    </ul>
+  </section>
+
+  <!-- 08 BRAND -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">08</div>
+      <div class="sec-titles"><span class="eyebrow">Brand identity</span><h2>The mark is beautiful — and <em class="gold">barely present.</em></h2></div>
+    </div>
+    <p class="lede">The concentric bullseye is a genuinely strong, ownable mark, but it appears in only a few places (the rail, two watermarks). It is not yet a <em>visual language</em>. The concentric-circle idea — circles within circles, the fifth circle closest to home — could quietly organise the entire interface.</p>
+    <ul class="clean">
+      <li><b>The affinity indicator as concentric rings</b> — closeness drawn as the mark itself, replacing both the percentage and the plain word with something unmistakably Fifth Circle.</li>
+      <li><b>The mark as the system's punctuation</b> — section dividers, list bullets, the loader, success states, watermarks behind empty states. Quiet, repeated, recognisable.</li>
+      <li><b>A signature dark "circle" moment</b> per journey (welcome, introduction) where the rings become the hero graphic — the thing a resident screenshots.</li>
+    </ul>
+  </section>
+
+  <!-- 09 EMOTION TABLE -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">09</div>
+      <div class="sec-titles"><span class="eyebrow">Emotional response · by screen</span><h2>What each screen feels — and <em class="gold">should.</em></h2></div>
+    </div>
+    <table>
+      <thead><tr><th style="width:150px">Screen</th><th>Feels now</th><th>Should feel</th></tr></thead>
+      <tbody>
+        <tr><td class="screen">Landing</td><td class="now">Elegant, intriguing — closest to luxury already.</td><td><span class="should">Aspiration. "I want in."</span></td></tr>
+        <tr><td class="screen">Home</td><td class="now">A tidy, informational dashboard.</td><td><span class="should">A warm welcome home; gentle anticipation.</span></td></tr>
+        <tr><td class="screen">People · Intros</td><td class="now">A contact list / CRM.</td><td><span class="should">A handful of people, chosen for you.</span></td></tr>
+        <tr><td class="screen">Circles</td><td class="now">A catalogue of options.</td><td><span class="should">Quiet rooms you'd be lucky to be in.</span></td></tr>
+        <tr><td class="screen">Events</td><td class="now">A listings / calendar app.</td><td><span class="should">Invitations worth clearing an evening for.</span></td></tr>
+        <tr><td class="screen">Concierge</td><td class="now">Personal, considered — already strong.</td><td><span class="should">A trusted relationship.</span></td></tr>
+        <tr><td class="screen">Intro Review</td><td class="now">A profile card with stats.</td><td><span class="should">The emotional peak — a thoughtful introduction.</span></td></tr>
+        <tr><td class="screen">Onboarding</td><td class="now">A careful form / survey.</td><td><span class="should">A conversation; a ritual of arrival.</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 10 COMPETITIVE -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">10</div>
+      <div class="sec-titles"><span class="eyebrow">Competitive review</span><h2>What the houses do that this <em class="gold">doesn't — yet.</em></h2></div>
+    </div>
+    <table>
+      <thead><tr><th style="width:130px">House</th><th>Their visual signature</th><th>What's missing here</th></tr></thead>
+      <tbody>
+        <tr><td class="screen">Aman</td><td class="now">Vast negative space, full-bleed photography, near-zero chrome, muted earth tones.</td><td>Space &amp; photography. The interface is too busy with lines and labels.</td></tr>
+        <tr><td class="screen">Soho House</td><td class="now">Editorial layouts, image-forward cards, member warmth, distinctive type.</td><td>Editorial composition; photographic cards instead of hairline rows.</td></tr>
+        <tr><td class="screen">Apple</td><td class="now">Dramatic type scale, depth through material &amp; blur, confident spacing, motion.</td><td>Type confidence, depth/elevation, transitions.</td></tr>
+        <tr><td class="screen">Airbnb</td><td class="now">Warm photography-led cards, soft shadows, friendly radii, gentle illustration.</td><td>Soft elevation, image cards, a touch of warmth in form.</td></tr>
+        <tr><td class="screen">Edition</td><td class="now">Moody dark luxury, high contrast, cinematic imagery, refined serif/sans pairing.</td><td>Contrast &amp; drama; dark cinematic moments beyond one screen.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- OUTPUT A -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">A</div>
+      <div class="sec-titles"><span class="eyebrow">Final output</span><h2>Top 10 reasons it doesn't yet feel <em class="gold">premium.</em></h2></div>
+    </div>
+    <ul class="clean">
+      <li><b>1. No clear focal point</b> — everything sits at the same visual weight.</li>
+      <li><b>2. The universal 0.5px gold hairline</b> — the strongest "software" tell in the product.</li>
+      <li><b>3. Gold is overused</b> — as border, label, icon and number, it stops feeling precious.</li>
+      <li><b>4. Too many uppercase micro-labels</b> — a dashboard habit doing work that space and scale should do.</li>
+      <li><b>5. Flat, un-elevated cards</b> — no depth, light, or material.</li>
+      <li><b>6. Almost no photography</b> — no sense of place, no faces.</li>
+      <li><b>7. A narrow, single-volume palette</b> — lives in the midtones; no drama, no deep dark for emphasis.</li>
+      <li><b>8. Timid type scale</b> — the serif rarely gets to be the hero.</li>
+      <li><b>9. Uniform spacing</b> — tidy, but nothing is framed or given silence.</li>
+      <li><b>10. The mark is underused</b> — a strong asset that isn't yet a visual language, and zero motion anywhere.</li>
+    </ul>
+  </section>
+
+  <!-- OUTPUT B & C -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">B</div>
+      <div class="sec-titles"><span class="eyebrow">Final output</span><h2>Highest-impact visual moves.</h2></div>
+    </div>
+    <div class="ten">
+      <div class="ref"><div class="rt"><b>Add photography as a primary layer</b> — portrait avatars, image-led Circle &amp; Event cards, environmental imagery, one consistent warm grade.</div><span class="eff md">Med effort</span></div>
+      <div class="ref"><div class="rt"><b>Replace hairlines with depth</b> — warm-stone borders + soft shadows + gentle radii; retire the universal gold outline.</div><span class="eff lo">Low effort</span></div>
+      <div class="ref"><div class="rt"><b>Ration the gold</b> — one focal accent per screen; demote borders and labels to quiet neutrals.</div><span class="eff lo">Low effort</span></div>
+      <div class="ref"><div class="rt"><b>Commit to an editorial type scale</b> — bigger display, fewer labels, deliberate italic.</div><span class="eff lo">Low effort</span></div>
+      <div class="ref"><div class="rt"><b>Turn the bullseye into the visual language</b> — affinity rings, dividers, loader, dark hero moments.</div><span class="eff md">Med effort</span></div>
+    </div>
+
+    <h3 style="margin-top:42px">C · Lowest-effort wins (a single styling pass)</h3>
+    <ul class="clean">
+      <li><b>Recolour borders</b> from gold to warm stone, and add a soft shadow + 12–16px radius to cards — global token change.</li>
+      <li><b>Halve the uppercase labels</b>; lighten and widen the survivors.</li>
+      <li><b>Raise display type</b> a step on each screen's hero element.</li>
+      <li><b>Add a subtle warm gradient/vignette</b> to large cream fills for depth.</li>
+      <li><b>Use the mark as divider, bullet, and loader</b>; widen section spacing.</li>
+    </ul>
+  </section>
+
+  <!-- OUTPUT D & E -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-num">D</div>
+      <div class="sec-titles"><span class="eyebrow">Final output</span><h2>Redesign these visually.</h2></div>
+    </div>
+    <ul class="clean">
+      <li><b>Home</b> — give it a true hero moment and clear hierarchy; it currently reads as a dashboard.</li>
+      <li><b>People · Introductions</b> — from contact-list rows to image-forward, composed introduction cards.</li>
+      <li><b>Circles</b> — photographic, editorial cards; make exclusivity visible.</li>
+      <li><b>Events</b> — invitation-grade cards with imagery, not calendar listings.</li>
+      <li><b>Intro Review</b> — treat it as the emotional peak: portrait, space, the rings, the "why" as the hero.</li>
+      <li><b>Onboarding</b> — soften the form-feel into a warm, conversational ritual.</li>
+    </ul>
+
+    <h3 style="margin-top:38px">E · Already visually strong — protect these</h3>
+    <ul class="clean">
+      <li><b>The Landing page</b> — the most luxurious surface in the product; the closing dark CTA is excellent.</li>
+      <li><b>The Concierge dark hero</b> — depth, restraint, the watermark mark. The template for everything else.</li>
+      <li><b>The "You're part of the circle" welcome</b> — the rings, the dark ground, the serif. Keep it.</li>
+      <li><b>The management "considering" card</b> — dark, contrast, a clear focal point. Proof the system can feel premium.</li>
+      <li><b>The brand mark itself, and the Cormorant/Jost pairing</b> — the raw materials are excellent; they're just under-deployed.</li>
+    </ul>
+  </section>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <svg class="mark-bg" viewBox="0 0 400 400">
+      <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="3"/>
+      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="2.5"/>
+      <circle cx="200" cy="200" r="112" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="2.5"/>
+      <circle cx="200" cy="200" r="74" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="2"/>
+      <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(242,237,227,0.8)" stroke-width="1.5"/>
+      <circle cx="200" cy="200" r="11" fill="#F3EDE2"/>
+    </svg>
+    <div class="eyebrow">The verdict</div>
+    <div class="q">"The product is already refined — it simply isn't yet felt. Give it depth instead of hairlines, photography instead of initials, one bold voice per screen instead of ten equal ones, and let the mark become the language. Nothing about how it works needs to change for it to become beautiful."</div>
+    <p>The bones are excellent and the brand voice is rare. The gap to Aman and Edition is entirely a surface gap — contrast, material, imagery, and space — which means it is closeable without touching a single flow.</p>
+    <div class="sign">
+      <svg viewBox="0 0 400 400" width="26" height="26">
+        <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="6"/>
+        <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="4"/>
+        <circle cx="200" cy="200" r="112" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="4"/>
+        <circle cx="200" cy="200" r="74" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="3.5"/>
+        <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(242,237,227,0.85)" stroke-width="3"/>
+        <circle cx="200" cy="200" r="13" fill="#F3EDE2"/>
+      </svg>
+      <span class="sign nm">Visual Design Review · surface only, no functional change</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="wm">FIFTH CIRCLE</span>
+    <span class="by">Visual Design Review · Confidential</span>
+  </div>
+
+</div>
+</body>
+</html>

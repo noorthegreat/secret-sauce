@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fifth Circle</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#F3EDE2;--cream-deep:#EAE2D4;--parchment:#E8DFD0;
+    --charcoal:#1C1915;--charcoal-soft:#302D26;
+    --gold:#B8972A;--gold-light:#D4AE3C;--gold-muted:#9A7E22;
+    --taupe:#8A8070;--taupe-light:#B4A898;--white:#FDFAF5;--green:#6B8C5A;
+    --greige:#D4C09A;
+  }
+  body{background:#1C1915;font-family:'Jost',sans-serif;color:var(--charcoal)}
+  .screen-label{font-size:10px;font-weight:500;letter-spacing:4px;color:var(--taupe);text-transform:uppercase;text-align:center;padding:40px 0 8px}
+  .screen-sub{font-size:11px;color:var(--taupe);text-align:center;letter-spacing:1px;padding-bottom:20px;opacity:0.5}
+
+  /* ── FULL-SCREEN AUTH LAYOUT ── */
+  .fs{min-height:660px;display:grid;grid-template-columns:1fr 1fr;background:var(--cream)}
+  .fs-left{background:var(--charcoal);padding:80px 72px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+  .fs-left-mark{position:absolute;right:-120px;top:50%;transform:translateY(-50%);width:420px;height:420px;opacity:0.04;pointer-events:none}
+  .fs-right{padding:72px 64px;display:flex;flex-direction:column;justify-content:center;gap:20px;background:var(--cream)}
+  .fs-logo{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:7px;color:rgba(242,237,227,0.35);margin-bottom:52px;font-weight:300}
+  .fs-eyebrow{font-size:9px;letter-spacing:5px;color:var(--gold-muted);text-transform:uppercase;margin-bottom:16px}
+  .fs-headline{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--cream);line-height:1.1;letter-spacing:0.5px;margin-bottom:16px}
+  .fs-headline em{font-style:italic;color:var(--gold-light)}
+  .fs-body{font-size:13px;color:rgba(242,237,227,0.35);line-height:1.9;font-weight:300;max-width:320px}
+  .fs-promise{display:flex;flex-direction:column;gap:12px;margin-top:36px}
+  .fs-promise-item{display:flex;align-items:center;gap:12px;font-size:11px;color:rgba(242,237,227,0.28);letter-spacing:0.3px}
+  .fs-promise-item i{font-size:13px;color:var(--gold-muted)}
+
+  .fs-right-logo{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:6px;color:var(--taupe-light);margin-bottom:40px;font-weight:300}
+  .fs-right-eyebrow{font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+  .fs-right-headline{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--charcoal);margin-bottom:28px}
+  .fs-right-headline em{font-style:italic;color:var(--gold)}
+
+  /* CODE INPUT */
+  .code-wrap{margin-bottom:24px}
+  .code-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase;margin-bottom:12px}
+  .code-input{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;letter-spacing:12px;color:var(--charcoal);border:none;border-bottom:0.5px solid rgba(184,151,42,0.3);background:transparent;outline:none;width:100%;padding:10px 0;text-align:center}
+  .code-input::placeholder{color:rgba(140,128,112,0.3);letter-spacing:8px}
+
+  /* FORM FIELDS (cream background) */
+  .cf{display:flex;flex-direction:column;gap:8px}
+  .cf-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase}
+  .cf-input{background:transparent;border:none;border-bottom:0.5px solid rgba(184,151,42,0.22);padding:11px 0;font-size:15px;color:var(--charcoal);font-family:'Cormorant Garamond',serif;font-weight:300;outline:none;width:100%;letter-spacing:0.3px}
+  .cf-input::placeholder{color:rgba(140,128,112,0.35)}
+  .cf-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+  .btn-primary{background:var(--charcoal);color:var(--cream);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 32px;border:none;cursor:pointer;width:100%;margin-top:8px}
+  .btn-ghost-link{font-size:11px;color:var(--taupe-light);text-align:center;letter-spacing:1px;margin-top:10px}
+  .btn-ghost-link span{color:var(--gold-muted);border-bottom:0.5px solid rgba(184,151,42,0.4);padding-bottom:1px;cursor:pointer}
+
+  /* PROGRESS DOTS */
+  .progress{display:flex;gap:7px;margin-bottom:36px}
+  .p-dot{width:24px;height:1px;background:var(--gold)}
+  .p-dot.off{background:rgba(184,151,42,0.18)}
+
+  /* ── ONBOARDING QUESTION SCREENS ── */
+  .ob-q{min-height:620px;display:grid;grid-template-columns:1fr 1fr;background:var(--cream)}
+  .ob-q-left{background:var(--parchment);padding:72px 60px;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid rgba(184,151,42,0.18)}
+  .ob-q-right{padding:60px 56px;display:flex;flex-direction:column;justify-content:center}
+  .ob-q-eyebrow{font-size:9px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:18px}
+  .ob-q-headline{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:var(--charcoal);line-height:1.1;margin-bottom:16px}
+  .ob-q-headline em{font-style:italic;color:var(--gold)}
+  .ob-q-body{font-size:13px;color:var(--taupe);line-height:1.9;font-weight:300;max-width:320px}
+
+  /* CHOICE CARDS */
+  .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+  .choice-card{border:0.5px solid rgba(184,151,42,0.2);padding:18px 16px;cursor:pointer;background:var(--white);transition:all 0.15s}
+  .choice-card:hover{border-color:rgba(184,151,42,0.45);background:rgba(232,223,208,0.4)}
+  .choice-card.sel{border-color:var(--gold);background:rgba(232,223,208,0.5)}
+  .choice-card.wide{grid-column:1/-1}
+  .choice-icon{width:42px;height:42px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.35);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .choice-icon i{font-size:20px;color:var(--gold-muted)}
+  .choice-card.sel .choice-icon{border-color:var(--gold);background:rgba(184,151,42,0.1)}
+  .choice-title{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);margin-bottom:4px}
+  .choice-card.sel .choice-title{color:var(--gold-muted)}
+  .choice-desc{font-size:11px;color:var(--taupe-light);line-height:1.6;font-weight:300}
+
+  /* ACTIVITY TAGS */
+  .act-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+  .act-tag{border:0.5px solid rgba(184,151,42,0.2);padding:9px 16px;cursor:pointer;font-size:10px;letter-spacing:2px;color:var(--taupe);text-transform:uppercase;background:var(--white)}
+  .act-tag.sel{border-color:var(--gold);color:var(--gold-muted);background:rgba(232,223,208,0.5)}
+
+  /* AVAILABILITY GRID */
+  .avail-grid{margin-bottom:28px}
+  .avail-head{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+  .avail-day{font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;text-align:center;padding:4px 0}
+  .avail-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+  .avail-time{font-size:10px;color:var(--taupe);padding:8px 0;letter-spacing:0.5px}
+  .avail-cell{height:36px;border:0.5px solid rgba(184,151,42,0.14);cursor:pointer;background:var(--white)}
+  .avail-cell.on{background:rgba(184,151,42,0.12);border-color:rgba(184,151,42,0.35)}
+  .avail-cell.strong{background:rgba(184,151,42,0.25);border-color:var(--gold)}
+
+  /* FREQUENCY */
+  .freq-wrap{display:flex;gap:10px;margin-bottom:28px}
+  .freq-opt{flex:1;height:80px;border:0.5px solid rgba(184,151,42,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--white)}
+  .freq-opt.sel{border-color:var(--gold);background:rgba(232,223,208,0.5)}
+  .freq-num{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--charcoal);line-height:1}
+  .freq-opt.sel .freq-num{color:var(--gold-muted)}
+  .freq-lbl{font-size:9px;letter-spacing:1.5px;color:var(--taupe-light);text-transform:uppercase;margin-top:4px}
+
+  /* PHOTO UPLOAD */
+  .photo-area{border:0.5px dashed rgba(184,151,42,0.28);padding:40px;display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;margin-bottom:28px;background:var(--white)}
+  .photo-circle{width:88px;height:88px;border-radius:50%;background:var(--parchment);border:0.5px dashed rgba(184,151,42,0.28);display:flex;align-items:center;justify-content:center}
+  .photo-circle i{font-size:26px;color:rgba(184,151,42,0.4)}
+  .photo-text{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--taupe);font-style:italic}
+  .photo-sub{font-size:9px;letter-spacing:2.5px;color:var(--taupe-light);text-transform:uppercase}
+
+  .ob-btn{background:var(--charcoal);color:var(--cream);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 32px;border:none;cursor:pointer;align-self:flex-start;margin-top:4px}
+  .ob-btn.full{width:100%}
+  .ob-skip{font-size:10px;color:var(--taupe-light);letter-spacing:1.5px;margin-top:12px;cursor:pointer}
+
+  /* ITERATIVE FOLLOW-UP */
+  .followup{background:var(--white);border:0.5px solid rgba(184,151,42,0.18);padding:20px;margin-bottom:20px}
+  .followup-label{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+  .followup-opts{display:flex;flex-wrap:wrap;gap:8px}
+  .followup-opt{border:0.5px solid rgba(184,151,42,0.2);padding:8px 14px;cursor:pointer;font-size:11px;letter-spacing:1px;color:var(--taupe);background:transparent}
+  .followup-opt.sel{border-color:var(--gold);color:var(--gold-muted);background:rgba(232,223,208,0.3)}
+
+  /* MEETING SPACES PREFERENCE */
+  .space-pref-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+  .space-pref-card{border:0.5px solid rgba(184,151,42,0.18);padding:16px;cursor:pointer;background:var(--white);display:flex;gap:12px;align-items:center}
+  .space-pref-card.sel{border-color:var(--gold);background:rgba(232,223,208,0.35)}
+  .space-pref-card i{font-size:18px;color:rgba(184,151,42,0.4)}
+  .space-pref-card.sel i{color:var(--gold-muted)}
+  .space-pref-name{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--charcoal)}
+  .space-pref-desc{font-size:10px;color:var(--taupe-light);margin-top:2px}
+
+  /* AMENITY PREFERENCE CARDS (onboarding) */
+  .amen-intro{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:16px}
+  .amen-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+  .amen-card{position:relative;border:0.5px solid rgba(184,151,42,0.2);padding:16px 16px;cursor:pointer;background:var(--white);display:flex;gap:13px;align-items:center;transition:all .15s}
+  .amen-card:hover{border-color:rgba(184,151,42,0.5)}
+  .amen-card.sel{border-color:var(--gold);background:rgba(232,223,208,0.4)}
+  .amen-ic{width:42px;height:42px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--cream);transition:all .15s}
+  .amen-ic i{font-size:19px;color:var(--gold-muted)}
+  .amen-card.sel .amen-ic{background:var(--gold);border-color:var(--gold)}
+  .amen-card.sel .amen-ic i{color:var(--white)}
+  .amen-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal)}
+  .amen-desc{font-size:10.5px;color:var(--taupe-light);margin-top:2px;line-height:1.5}
+  .amen-check{position:absolute;top:11px;right:12px;color:var(--gold);font-size:13px;opacity:0}
+  .amen-card.sel .amen-check{opacity:1}
+
+  /* ── LANDING PAGE ── */
+  .land{background:var(--cream);font-family:'Jost',sans-serif}
+  /* NAV — cream, editorial */
+  .land-nav{display:flex;align-items:center;justify-content:space-between;padding:30px 60px;background:var(--cream)}
+  .land-nav-logo{font-family:'Cormorant Garamond',serif;font-size:21px;letter-spacing:9px;color:var(--charcoal);font-weight:400;line-height:1.25}
+  .land-nav-right{display:flex;align-items:center;gap:56px}
+  .land-nav-link{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--charcoal);cursor:pointer;line-height:1.4;opacity:0.75}
+  .land-nav-link:hover{opacity:1}
+  .land-nav-cta{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--charcoal);border:0.5px solid rgba(184,151,42,0.4);padding:18px 30px;cursor:pointer;line-height:1.4;background:transparent}
+  .land-nav-cta:hover{background:rgba(184,151,42,0.08)}
+
+  /* HERO — cream split with bullseye */
+  .land-hero{display:grid;grid-template-columns:1.05fr 1fr;min-height:600px;position:relative}
+  .land-hero-left{background:var(--cream);padding:0 60px;display:flex;flex-direction:column;justify-content:center}
+  .land-eyebrow{font-size:11px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:30px;line-height:1.6;font-weight:500}
+  .land-hero-h{font-family:'Cormorant Garamond',serif;font-size:84px;font-weight:400;color:var(--charcoal);line-height:1.0;letter-spacing:-0.5px;margin-bottom:34px}
+  .land-hero-h em{font-style:italic;color:var(--gold)}
+  .land-hero-sub{font-size:15px;color:var(--taupe);line-height:1.95;font-weight:300;max-width:400px;margin-bottom:40px}
+  .land-hero-cta{display:flex;gap:14px;align-items:stretch}
+  .land-btn-out{background:transparent;border:0.5px solid rgba(184,151,42,0.4);color:var(--charcoal);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:18px 30px;cursor:pointer;font-family:'Jost',sans-serif;line-height:1.4;text-align:center}
+  .land-btn-out:hover{background:rgba(184,151,42,0.08)}
+  .land-btn-out.fill{background:var(--charcoal);color:var(--cream);border-color:var(--charcoal)}
+  .land-hero-right{background:var(--cream);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .land-bullseye{width:62%;max-width:420px;height:auto}
+  .land-quote{position:absolute;bottom:54px;left:0;right:0;text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--gold-muted);letter-spacing:0.3px}
+  .land-scroll{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;background:var(--charcoal-soft);display:flex;align-items:center;justify-content:center;z-index:4}
+  .land-scroll i{font-size:20px;color:var(--cream)}
+
+  /* HOW IT WORKS — 01/02/03 */
+  .land-hiw{padding:96px 60px 104px;background:var(--cream)}
+  .land-hiw-head{text-align:center;margin-bottom:64px}
+  .land-sec-eyebrow{font-size:11px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:18px;font-weight:500}
+  .land-sec-h{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:400;color:var(--charcoal);line-height:1.1;margin-bottom:16px}
+  .land-sec-h em{font-style:italic;color:var(--gold)}
+  .land-sec-sub{font-size:14px;color:var(--taupe);line-height:1.9;font-weight:300;max-width:500px;margin:0 auto}
+  .land-steps{display:grid;grid-template-columns:repeat(3,1fr);max-width:1080px;margin:0 auto}
+  .land-step{padding:0 44px;border-left:0.5px solid rgba(184,151,42,0.2)}
+  .land-step:first-child{padding-left:0;border-left:none}
+  .land-step-num{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:72px;color:rgba(184,151,42,0.3);line-height:1;margin-bottom:28px}
+  .land-step-h{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--charcoal);margin-bottom:16px;line-height:1.15}
+  .land-step-p{font-size:14px;color:var(--taupe);line-height:1.9;font-weight:300}
+
+  /* AMENITIES — light, airy */
+  .land-amen{padding:96px 60px 104px;background:var(--cream-deep)}
+  .land-amen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;max-width:1080px;margin:0 auto;background:rgba(184,151,42,0.18);border:0.5px solid rgba(184,151,42,0.18)}
+  .land-amen-card{border:none;padding:46px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--cream-deep);transition:all .2s}
+  .land-amen-card:hover{background:var(--cream)}
+  .land-amen-ic{width:64px;height:64px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+  .land-amen-ic i{font-size:26px;color:var(--gold-muted)}
+  .land-amen-name{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--charcoal);margin-bottom:10px}
+  .land-amen-desc{font-size:12.5px;color:var(--taupe);line-height:1.8;font-weight:300}
+  .land-amen-foot{font-size:10px;letter-spacing:3px;color:var(--taupe-light);text-transform:uppercase;margin-top:52px;text-align:center}
+
+  /* CLOSING CTA */
+  .land-cta{padding:104px 56px;background:var(--cream);text-align:center}
+  .land-cta-mark{width:84px;height:84px;margin:0 auto 34px}
+  .land-cta-h{font-family:'Cormorant Garamond',serif;font-size:54px;font-weight:400;color:var(--charcoal);line-height:1.07;margin-bottom:20px}
+  .land-cta-h em{font-style:italic;color:var(--gold)}
+  .land-cta-sub{font-size:14px;color:var(--taupe);line-height:1.9;font-weight:300;max-width:470px;margin:0 auto 38px}
+  .land-cta-btn{background:var(--charcoal);color:var(--cream);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:18px 42px;border:none;cursor:pointer;font-family:'Jost',sans-serif}
+  .land-foot{background:var(--cream);padding:32px 60px;display:flex;align-items:center;justify-content:space-between;border-top:0.5px solid rgba(184,151,42,0.2)}
+  .land-foot-logo{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:6px;color:var(--charcoal);opacity:0.7}
+  .land-foot-note{font-size:10px;letter-spacing:1.5px;color:var(--taupe-light)}
+
+  /* ── COMBINED DARK ONBOARDING ── */
+  .onb{min-height:700px;display:grid;grid-template-columns:1fr 1fr;background:var(--charcoal);position:relative;overflow:hidden}
+  .onb-mark{position:absolute;right:-180px;top:50%;transform:translateY(-50%);width:560px;height:560px;opacity:0.05;pointer-events:none}
+  .onb-left{padding:80px 64px;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid rgba(184,151,42,0.1);position:relative;z-index:1}
+  .onb-prog{display:flex;gap:8px;margin-bottom:42px}
+  .onb-prog span{width:30px;height:2px;background:rgba(184,151,42,0.22)}
+  .onb-prog span.on{background:var(--gold)}
+  .onb-h{font-family:'Cormorant Garamond',serif;font-size:54px;font-weight:400;color:var(--cream);line-height:1.05;margin-bottom:24px}
+  .onb-h em{font-style:italic;color:var(--gold-light)}
+  .onb-body{font-size:14px;color:rgba(242,237,227,0.42);line-height:1.95;font-weight:300;max-width:380px;margin-bottom:42px}
+  .onb-promise{display:flex;flex-direction:column;gap:15px}
+  .onb-promise-item{display:flex;align-items:center;gap:13px;font-size:12.5px;color:rgba(242,237,227,0.55);letter-spacing:0.3px}
+  .onb-promise-item i{font-size:16px;color:var(--gold)}
+  .onb-right{padding:64px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1}
+  .onb-right-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:27px;color:var(--cream);margin-bottom:34px}
+  .onb-photo{display:flex;gap:20px;align-items:center;margin-bottom:36px}
+  .onb-photo-circle{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.035);border:0.5px solid rgba(184,151,42,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+  .onb-photo-circle i{font-size:28px;color:var(--gold)}
+  .onb-photo-text{font-size:13px;color:rgba(242,237,227,0.5);line-height:1.65;margin-bottom:9px}
+  .onb-photo-cap{font-size:9px;letter-spacing:2px;color:var(--gold-muted);text-transform:uppercase;line-height:1.6}
+  .onb-field{margin-bottom:22px}
+  .onb-label{font-size:9px;letter-spacing:3px;color:rgba(242,237,227,0.42);text-transform:uppercase;margin-bottom:9px;display:block}
+  .onb-input{width:100%;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);padding:14px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--cream);outline:none}
+  .onb-input::placeholder{color:rgba(242,237,227,0.26)}
+  .onb-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .onb-btn{background:transparent;border:0.5px solid rgba(242,237,227,0.4);color:var(--cream);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px 32px;cursor:pointer;align-self:flex-start;margin-top:6px}
+  .onb-btn:hover{background:rgba(255,255,255,0.05)}
+
+  /* ── GOAL CARDS ── */
+  .goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+  .goal-card{border:0.5px solid rgba(184,151,42,0.2);padding:26px 22px;cursor:pointer;background:var(--white);transition:all .15s;display:flex;flex-direction:column}
+  .goal-card:hover{border-color:rgba(184,151,42,0.45)}
+  .goal-card.sel{border-color:var(--gold);background:rgba(232,223,208,0.35)}
+  .goal-card-ic{width:44px;height:44px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:all .15s}
+  .goal-card-ic i{font-size:20px;color:var(--gold-muted)}
+  .goal-card.sel .goal-card-ic{background:var(--gold);border-color:var(--gold)}
+  .goal-card.sel .goal-card-ic i{color:#fff}
+  .goal-card-top{display:flex;justify-content:space-between;align-items:flex-start;width:100%;margin-bottom:6px}
+  .goal-card-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--charcoal)}
+  .goal-card.sel .goal-card-title{color:var(--gold-muted)}
+  .goal-card-desc{font-size:11.5px;color:var(--taupe-light);line-height:1.65;font-weight:300}
+  .goal-check-ic{font-size:13px;color:var(--gold);opacity:0}
+  .goal-card.sel .goal-check-ic{opacity:1}
+
+  /* ── INTEREST TAGS ── */
+  .int-wrap{background:var(--white);border:0.5px solid rgba(184,151,42,0.2);padding:18px;margin-bottom:20px}
+  .int-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase;margin-bottom:14px}
+  .int-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+  .int-chip{display:flex;align-items:center;gap:6px;background:rgba(184,151,42,0.1);border:0.5px solid rgba(184,151,42,0.4);padding:6px 12px;cursor:pointer}
+  .int-chip span{font-size:10px;letter-spacing:1.5px;color:var(--gold-muted);text-transform:uppercase}
+  .int-chip i{font-size:10px;color:rgba(184,151,42,0.6)}
+  .int-input-row{border-top:0.5px solid rgba(184,151,42,0.15);padding-top:12px;display:flex;align-items:center;gap:10px}
+  .int-input-row > i{font-size:16px;color:rgba(140,128,112,0.4)}
+  .int-input{flex:1;background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);outline:none}
+  .int-input::placeholder{color:rgba(140,128,112,0.35)}
+  .int-sug{margin-bottom:28px}
+  .int-sug-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase;margin-bottom:12px}
+  .int-sug-list{display:flex;flex-wrap:wrap;gap:7px}
+  .int-sug-chip{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);border:0.5px solid rgba(184,151,42,0.18);padding:7px 13px;cursor:pointer;background:transparent;transition:all .12s}
+  .int-sug-chip:hover,.int-sug-chip.picked{border-color:rgba(184,151,42,0.4);color:var(--gold-muted)}
+
+  /* ── AVAILABILITY CALENDAR ── */
+  .avail-cal{margin-bottom:24px}
+  .avail-cal-head{display:grid;grid-template-columns:68px repeat(7,1fr);margin-bottom:2px}
+  .avail-cal-day-label{font-size:9px;letter-spacing:2.5px;color:var(--taupe-light);text-transform:uppercase;text-align:center;padding-bottom:10px;font-family:'Jost',sans-serif}
+  .avail-cal-day-label.wknd{color:var(--gold-muted)}
+  .avail-cal-body{display:flex;flex-direction:column}
+  .avail-cal-row{display:grid;grid-template-columns:68px repeat(7,1fr)}
+  .avail-time-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--taupe);display:flex;flex-direction:column;justify-content:center;gap:2px;padding-right:8px;border-right:0.5px solid rgba(184,151,42,0.15)}
+  .avail-time-sub{font-size:9px;letter-spacing:0.5px;color:var(--taupe-light);font-style:normal;font-family:'Jost',sans-serif;font-weight:300}
+  .avail-cell{height:50px;border:0.5px solid rgba(184,151,42,0.14);cursor:pointer;background:var(--white);transition:background .12s,border-color .12s;margin:-0.25px 0 0 -0.25px}
+  .avail-cell:hover{background:rgba(184,151,42,0.07)}
+  .avail-cell.on{background:rgba(184,151,42,0.2);border-color:rgba(184,151,42,0.45)}
+  .avail-cell.wknd{background:rgba(242,237,226,0.5)}
+  .avail-cell.wknd.on{background:rgba(184,151,42,0.28);border-color:var(--gold)}
+  .avail-cal-hint{font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;margin-top:14px}
+
+  /* ── AI CONCIERGE FIELD ── */
+  .ai-field{background:var(--white);border:0.5px solid rgba(184,151,42,0.22);padding:20px;margin-bottom:20px}
+  .ai-field-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase;margin-bottom:12px}
+  .ai-textarea{width:100%;background:transparent;border:none;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--charcoal);outline:none;resize:none;line-height:1.75;min-height:90px}
+  .ai-textarea::placeholder{color:rgba(140,128,112,0.38)}
+  .ai-field-hint{font-size:10px;color:var(--taupe-light);margin-top:10px;font-weight:300;font-style:italic;letter-spacing:0.3px}
+  /* ── PER-ACTIVITY DETAIL ── */
+  .act-detail{background:var(--white);border:0.5px solid rgba(184,151,42,0.2);padding:18px;margin-top:12px;margin-bottom:4px}
+  .act-detail-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);margin-bottom:12px;padding-bottom:10px;border-bottom:0.5px solid rgba(184,151,42,0.15);display:flex;justify-content:space-between;align-items:center}
+  .act-detail-name i{font-size:12px;color:var(--taupe-light);cursor:pointer}
+  .act-detail-block{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .act-detail-label{font-size:9px;letter-spacing:2.5px;color:var(--taupe);text-transform:uppercase}
+  .act-input{width:100%;background:transparent;border:none;border-bottom:0.5px solid rgba(184,151,42,0.18);padding:8px 0;font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--charcoal);outline:none}
+  .act-input::placeholder{color:rgba(140,128,112,0.35)}
+  /* ── UPLOAD FIELDS ── */
+  .upload-row{display:flex;gap:10px;margin-bottom:10px}
+  .upload-field{flex:1;border:0.5px dashed rgba(184,151,42,0.3);padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--white);transition:all .12s}
+  .upload-field:hover{border-color:rgba(184,151,42,0.5)}
+  .upload-field i{font-size:17px;color:rgba(184,151,42,0.4)}
+  .upload-field span{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe-light)}
+  /* ── PRIVACY OPTIONS ── */
+  .priv-opts{display:flex;flex-direction:column;gap:0}
+  .priv-opt{display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;border-bottom:0.5px solid rgba(184,151,42,0.08)}
+  .priv-opt:last-child{border-bottom:none}
+  .priv-dot{width:14px;height:14px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.35);flex-shrink:0;transition:all .15s}
+  .priv-opt.sel .priv-dot{background:var(--gold);border-color:var(--gold)}
+  .priv-text{font-size:12px;color:var(--taupe);font-weight:300}
+
+  /* ── INTRODUCTION PREFERENCES ── */
+  .intro-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+  .intro-card{border:0.5px solid rgba(184,151,42,0.2);padding:17px 20px;cursor:pointer;background:var(--white);display:flex;align-items:flex-start;gap:16px;transition:all .15s}
+  .intro-card:hover{border-color:rgba(184,151,42,0.4)}
+  .intro-card.sel{border-color:var(--gold);background:rgba(232,223,208,0.3)}
+  .intro-radio{width:18px;height:18px;border-radius:50%;border:0.5px solid rgba(184,151,42,0.35);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:3px;transition:all .15s}
+  .intro-card.sel .intro-radio{border-color:var(--gold);background:var(--gold)}
+  .intro-radio-dot{width:7px;height:7px;border-radius:50%;background:#fff;opacity:0}
+  .intro-card.sel .intro-radio-dot{opacity:1}
+  .intro-card-text{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);line-height:1.2}
+  .intro-card-sub{font-size:11px;color:var(--taupe-light);margin-top:4px;font-weight:300;line-height:1.5}
+  .intro-card.sel .intro-card-text{color:var(--gold-muted)}
+
+  /* ── GOAL TAB BADGE ── */
+  .goal-tab-badge{display:inline-flex;align-items:center;gap:7px;border:0.5px solid rgba(184,151,42,0.35);padding:5px 13px;margin-bottom:22px}
+  .goal-tab-badge i{font-size:13px;color:var(--gold)}
+  .goal-tab-badge span{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-muted)}
+
+  /* ── MULTI-CHOICE BLOCKS ── */
+  .multi-q{display:flex;flex-direction:column;gap:18px}
+  .multi-q-block{display:flex;flex-direction:column;gap:9px}
+  .multi-q-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase}
+  .multi-q-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .mchip{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);border:0.5px solid rgba(184,151,42,0.2);padding:7px 13px;cursor:pointer;background:var(--white);transition:all .12s}
+  .mchip:hover{border-color:rgba(184,151,42,0.4);color:var(--gold-muted)}
+  .mchip.sel{border-color:var(--gold);color:var(--gold-muted);background:rgba(232,223,208,0.35)}
+
+  /* ── 3-CATEGORY GATHERINGS ── */
+  .gath-cat-section{margin-bottom:36px}
+  .gath-cat-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:11px;border-bottom:0.5px solid rgba(184,151,42,0.18)}
+  .gath-cat-heading{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--charcoal)}
+  .gath-cat-badge{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe-light);padding:3px 9px;border:0.5px solid rgba(184,151,42,0.18)}
+  .gath-card-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .gath-card-row.two{grid-template-columns:1fr 1fr}
+  .gath-mini{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:22px}
+  .gath-mini.dark{background:var(--charcoal);border-color:transparent}
+  .gath-mini-date{font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+  .gath-mini.dark .gath-mini-date{color:var(--gold-light)}
+  .gath-mini-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);margin-bottom:5px;line-height:1.25}
+  .gath-mini.dark .gath-mini-name{color:var(--cream)}
+  .gath-mini-meta{font-size:10px;color:var(--taupe-light);margin-bottom:14px}
+  .gath-mini.dark .gath-mini-meta{color:rgba(242,237,227,0.3)}
+  .gath-mini-action{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--charcoal);border-bottom:0.5px solid rgba(28,25,21,0.4);padding-bottom:1px;cursor:pointer;display:inline-block}
+  .gath-mini.dark .gath-mini-action{color:var(--gold-light);border-color:rgba(212,174,60,0.4)}
+  .gath-circle{background:var(--parchment);border:0.5px solid rgba(184,151,42,0.18);padding:22px;display:flex;flex-direction:column;gap:10px}
+  .gath-circle-name{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--charcoal)}
+  .gath-circle-sub{font-size:12px;color:var(--taupe);line-height:1.7;font-weight:300}
+  .gath-circle-tags{display:flex;flex-wrap:wrap;gap:5px}
+  .gath-circle-avs{display:flex}
+  .gath-circ-av{width:26px;height:26px;border-radius:50%;background:var(--cream-deep);border:1.5px solid var(--parchment);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:9px;color:var(--gold-muted);margin-right:-5px}
+  .gath-circle-count{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe-light)}
+  .gath-circle-join{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-muted);border-bottom:0.5px solid rgba(184,151,42,0.4);padding-bottom:1px;cursor:pointer;display:inline-block;margin-top:4px}
+
+  /* ── POST-EVENT ── */
+  .post-ev{min-height:560px;display:grid;grid-template-columns:1fr 1fr;background:var(--cream)}
+  .post-ev-left{background:var(--parchment);padding:72px 60px;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid rgba(184,151,42,0.18)}
+  .post-ev-right{padding:64px 56px;display:flex;flex-direction:column;justify-content:center;gap:13px}
+  .post-ev-card{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:16px 18px;display:flex;align-items:center;gap:14px}
+  .post-ev-av{width:44px;height:44px;border-radius:50%;background:var(--parchment);border:0.5px solid rgba(184,151,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold-muted);flex-shrink:0}
+  .post-ev-info{flex:1}
+  .post-ev-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal);margin-bottom:2px}
+  .post-ev-meta{font-size:10px;color:var(--taupe-light)}
+  .post-ev-btns{display:flex;gap:6px;flex-shrink:0}
+  .post-ev-yes{background:var(--charcoal);color:var(--cream);font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border:none;cursor:pointer;font-family:'Jost',sans-serif}
+  .post-ev-pass{background:transparent;border:0.5px solid rgba(184,151,42,0.22);color:var(--taupe-light);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 12px;cursor:pointer;font-family:'Jost',sans-serif}
+
+  /* ── SHELL (sidebar + main) ── */
+  .shell{display:grid;grid-template-columns:200px 1fr;min-height:700px}
+  .sidebar{background:var(--charcoal);display:flex;flex-direction:column}
+  .sb-logo{font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:6px;color:var(--cream);padding:32px 26px;border-bottom:0.5px solid rgba(255,255,255,0.07);font-weight:300}
+  .sb-nav{padding:20px 0;flex:1;display:flex;flex-direction:column}
+  .sb-item{display:flex;align-items:center;gap:10px;padding:11px 26px;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,0.3);cursor:pointer}
+  .sb-item.active{color:var(--cream);background:rgba(255,255,255,0.04);border-left:1px solid var(--gold)}
+  .sb-item i{font-size:14px}
+  .sb-footer{padding:18px 26px;border-top:0.5px solid rgba(255,255,255,0.07)}
+  .sb-building{font-size:11px;color:rgba(242,237,227,0.5);letter-spacing:0.5px;margin-bottom:2px}
+  .sb-building-sub{font-size:9px;letter-spacing:2px;color:rgba(242,237,227,0.22);text-transform:uppercase}
+  .app-main{background:var(--cream);padding:48px 52px;overflow:hidden}
+  .greeting{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--charcoal);margin-bottom:5px}
+  .greeting em{font-style:italic;color:var(--gold)}
+  .greeting-sub{font-size:10px;letter-spacing:2.5px;color:var(--taupe-light);text-transform:uppercase;margin-bottom:38px}
+  .section-label{font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+
+  /* ── PROFILE PAGE ── */
+  .profile-layout{display:grid;grid-template-columns:280px 1fr;min-height:720px}
+  .profile-left{background:var(--parchment);padding:48px 36px;display:flex;flex-direction:column;gap:24px;border-right:0.5px solid rgba(184,151,42,0.15)}
+  .profile-photo-wrap{position:relative;width:120px;height:120px;margin:0 auto}
+  .profile-photo{width:120px;height:120px;border-radius:50%;background:var(--cream-deep);border:0.5px solid rgba(184,151,42,0.28);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--gold-muted)}
+  .photo-upload-btn{position:absolute;bottom:2px;right:2px;width:28px;height:28px;border-radius:50%;background:var(--charcoal);border:2px solid var(--parchment);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .photo-upload-btn i{font-size:11px;color:var(--gold)}
+  .profile-name{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--charcoal);text-align:center}
+  .profile-unit{font-size:10px;letter-spacing:3px;color:var(--taupe-light);text-transform:uppercase;text-align:center;margin-top:3px}
+  .profile-divider{height:0.5px;background:rgba(184,151,42,0.15)}
+  .profile-section-label{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+  .profile-bio{font-size:13px;line-height:1.8;color:var(--taupe);font-weight:300;font-family:'Cormorant Garamond',serif;font-style:italic}
+  .profile-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .ptag{font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase}
+  .profile-right{background:var(--cream);padding:44px 48px}
+
+  /* PROFILE STATS */
+  .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
+  .pstat{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:18px;text-align:center}
+  .pstat-val{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--charcoal);line-height:1;margin-bottom:5px}
+  .pstat-label{font-size:9px;letter-spacing:2.5px;color:var(--taupe-light);text-transform:uppercase}
+
+  /* ACTIVITY CARD IN PROFILE */
+  .activity-card{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:20px;margin-bottom:12px}
+  .activity-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .activity-card-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal)}
+  .activity-card-badge{font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:0.5px solid rgba(107,140,90,0.4);color:var(--green)}
+  .activity-card-details{font-size:11px;color:var(--taupe);line-height:1.7}
+  .activity-card-details span{color:var(--gold-muted);letter-spacing:0.5px}
+  .activity-card-footer{border-top:0.5px solid rgba(184,151,42,0.1);padding-top:10px;margin-top:10px;font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase}
+
+  /* CONNECTIONS */
+  .connection-card{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:10px}
+  .conn-av{width:38px;height:38px;border-radius:50%;background:var(--parchment);border:0.5px solid rgba(184,151,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gold-muted);flex-shrink:0}
+  .conn-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--charcoal);margin-bottom:1px}
+  .conn-meta{font-size:10px;letter-spacing:1.5px;color:var(--taupe-light);text-transform:uppercase}
+  .conn-since{font-size:10px;color:var(--taupe-light);letter-spacing:0.5px;margin-left:auto;flex-shrink:0}
+
+  /* ── GATHERINGS ── */
+  .ev-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+  .ev-full{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:18px;display:flex;gap:16px}
+  .ev-full.dark{background:var(--charcoal);border-color:transparent}
+  .ev-date-block{min-width:44px;text-align:center;flex-shrink:0}
+  .ev-big-day{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--gold);line-height:1}
+  .ev-full.dark .ev-big-day{color:var(--gold-light)}
+  .ev-big-month{font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase}
+  .ev-full.dark .ev-big-month{color:rgba(184,151,42,0.4)}
+  .ev-sep{width:0.5px;background:rgba(184,151,42,0.14);align-self:stretch;flex-shrink:0}
+  .ev-full.dark .ev-sep{background:rgba(255,255,255,0.06)}
+  .ev-body{flex:1}
+  .ev-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
+  .ev-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--charcoal)}
+  .ev-full.dark .ev-name{color:var(--cream)}
+  .ev-info{font-size:10px;color:var(--taupe-light);letter-spacing:0.5px;margin-bottom:10px}
+  .ev-full.dark .ev-info{color:rgba(242,237,227,0.28)}
+  .ev-actions{display:flex;align-items:center;gap:10px}
+  .badge{font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:0.5px solid}
+  .badge.approved{color:var(--green);border-color:rgba(107,140,90,0.4)}
+  .badge.pending{color:var(--gold-muted);border-color:rgba(184,151,42,0.35)}
+  .rsvp-btn{background:rgba(184,151,42,0.12);border:0.5px solid rgba(184,151,42,0.35);color:var(--gold-muted);font-family:'Jost',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;padding:7px 14px;cursor:pointer}
+  .vote-btn{background:transparent;border:0.5px solid rgba(184,151,42,0.22);color:var(--taupe);font-family:'Jost',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:7px 13px;cursor:pointer}
+  .vote-count{font-size:11px;color:var(--taupe-light)}
+  .propose-btn{display:flex;align-items:center;gap:8px;border:0.5px solid rgba(184,151,42,0.25);padding:11px 20px;cursor:pointer;color:var(--gold-muted);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;background:transparent;font-family:'Jost',sans-serif}
+
+  /* PROPOSE FORM */
+  .propose-form{background:var(--white);border:0.5px solid rgba(184,151,42,0.14);padding:28px;margin-top:20px}
+  .propose-form-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--charcoal);margin-bottom:6px}
+  .propose-form-sub{font-size:12px;color:var(--taupe);line-height:1.7;font-weight:300;margin-bottom:24px}
+  .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .pf-field{display:flex;flex-direction:column;gap:7px}
+  .pf-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase}
+  .pf-input{background:transparent;border:none;border-bottom:0.5px solid rgba(184,151,42,0.2);padding:10px 0;font-size:14px;color:var(--charcoal);font-family:'Cormorant Garamond',serif;font-weight:300;outline:none;width:100%}
+  .pf-input::placeholder{color:rgba(140,128,112,0.35)}
+  .pf-note{font-size:11px;color:var(--taupe-light);line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;margin-bottom:18px}
+  .pf-submit{background:var(--charcoal);color:var(--cream);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:13px 26px;border:none;cursor:pointer}
+
+  /* ── POST-OUTING REVIEW ── */
+  .review-wrap{min-height:640px;display:grid;grid-template-columns:1fr 1fr;background:var(--cream)}
+  .review-left{background:var(--parchment);padding:72px 60px;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid rgba(184,151,42,0.18)}
+  .review-right{padding:64px 56px;display:flex;flex-direction:column;justify-content:center;gap:20px}
+  .review-headline{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:var(--charcoal);line-height:1.1;margin-bottom:14px}
+  .review-headline em{font-style:italic;color:var(--gold)}
+  .review-sub{font-size:13px;color:var(--taupe);line-height:1.9;font-weight:300}
+  .review-person{display:flex;gap:14px;align-items:center;background:var(--white);border:0.5px solid rgba(184,151,42,0.15);padding:16px;margin-bottom:24px}
+  .review-av{width:42px;height:42px;border-radius:50%;background:var(--parchment);border:0.5px solid rgba(184,151,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold-muted);flex-shrink:0}
+  .review-av-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--charcoal);margin-bottom:2px}
+  .review-av-meta{font-size:10px;color:var(--taupe-light);letter-spacing:0.5px}
+  .rq{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+  .rq-label{font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase}
+  .rq-opts{display:flex;gap:7px;flex-wrap:wrap}
+  .rq-opt{font-size:10px;letter-spacing:1.5px;color:var(--taupe);border:0.5px solid rgba(184,151,42,0.2);padding:8px 14px;text-transform:uppercase;cursor:pointer;background:var(--white)}
+  .rq-opt.sel{color:var(--gold-muted);border-color:var(--gold);background:rgba(232,223,208,0.4)}
+  .review-textarea{background:transparent;border:none;border-bottom:0.5px solid rgba(184,151,42,0.2);padding:10px 0;font-size:14px;color:var(--taupe);font-family:'Cormorant Garamond',serif;font-style:italic;outline:none;width:100%;resize:none;height:64px}
+  .review-textarea::placeholder{color:rgba(140,128,112,0.3)}
+  .review-btn{background:var(--charcoal);color:var(--cream);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:15px;border:none;cursor:pointer;width:100%}
+  .review-skip{font-size:10px;color:var(--taupe-light);text-align:center;margin-top:10px;letter-spacing:1.5px;cursor:pointer}
+
+  /* ITERATIVE FOLLOW-UP IN REVIEW */
+  .review-followup{background:var(--parchment);border:0.5px solid rgba(184,151,42,0.18);padding:18px;margin-bottom:18px}
+  .review-followup-label{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+  .review-followup-text{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--charcoal);margin-bottom:12px;font-style:italic}
+
+  /* STAR RATING */
+  .stars{display:flex;gap:6px;margin-bottom:4px}
+  .star{font-size:20px;color:rgba(184,151,42,0.2);cursor:pointer}
+  .star.lit{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 00 — LANDING PAGE
+════════════════════════════════════════════ -->
+<p class="screen-label">01 — Landing Page</p>
+<p class="screen-sub">Public marketing page — the entry point before sign-up</p>
+
+<div class="land" data-screen-label="01 Landing">
+  <nav class="land-nav">
+    <div class="land-nav-logo">FIFTH<br/>CIRCLE</div>
+    <div class="land-nav-right">
+      <div class="land-nav-link">For<br/>buildings</div>
+      <div class="land-nav-link">How it<br/>works</div>
+      <div class="land-nav-cta">Request a pilot</div>
+    </div>
+  </nav>
+
+  <section class="land-hero">
+    <div class="land-hero-left">
+      <div class="land-eyebrow">Private residential<br/>communities</div>
+      <div class="land-hero-h">Meaningful<br/>connections,<br/><em>close to home.</em></div>
+      <div class="land-hero-sub">Most of us know colleagues across the world and not the neighbour living down the hall. Fifth Circle quietly changes that — one building at a time.</div>
+      <div class="land-hero-cta">
+        <button class="land-btn-out fill">Join your building →</button>
+        <button class="land-btn-out">For property teams</button>
+      </div>
+    </div>
+    <div class="land-hero-right">
+      <svg class="land-bullseye" viewBox="0 0 400 400">
+        <circle cx="200" cy="200" r="186" fill="none" stroke="#A8821F" stroke-width="5"/>
+        <circle cx="200" cy="200" r="150" fill="none" stroke="#1C1915" stroke-width="3.5"/>
+        <circle cx="200" cy="200" r="112" fill="none" stroke="#1C1915" stroke-width="3.5"/>
+        <circle cx="200" cy="200" r="74" fill="none" stroke="#1C1915" stroke-width="3"/>
+        <circle cx="200" cy="200" r="38" fill="none" stroke="#1C1915" stroke-width="2.5"/>
+        <circle cx="200" cy="200" r="11" fill="#1C1915"/>
+      </svg>
+      <div class="land-quote">“The circle closest to home.”</div>
+    </div>
+  </section>
+
+  <section class="land-hiw">
+    <div class="land-hiw-head">
+      <div class="land-sec-eyebrow">How it works</div>
+      <div class="land-sec-h">Connection, <em>by design.</em></div>
+      <div class="land-sec-sub">No endless scrolling. No strangers from across the city. Just considered introductions to the people who live closest to you.</div>
+    </div>
+    <div class="land-steps">
+      <div class="land-step">
+        <div class="land-step-num">01</div>
+        <div class="land-step-h">Private by Design</div>
+        <div class="land-step-p">No public profiles. No social feed. One building, one private community — accessed by invitation only.</div>
+      </div>
+      <div class="land-step">
+        <div class="land-step-num">02</div>
+        <div class="land-step-h">Thoughtful Introductions</div>
+        <div class="land-step-p">We'd love to introduce you to a few neighbours who share your interests. Curated, not algorithmic.</div>
+      </div>
+      <div class="land-step">
+        <div class="land-step-num">03</div>
+        <div class="land-step-h">Community Pulse</div>
+        <div class="land-step-p">Building teams see participation, introductions, and gathering momentum in one quiet, elegant view.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-amen">
+    <div class="land-hiw-head">
+      <div class="land-sec-eyebrow">Your building</div>
+      <div class="land-sec-h">Matched at the spaces<br/><em>you already love.</em></div>
+      <div class="land-sec-sub">Chorus Apartments has six shared spaces. Tell us where you spend your time, and we bring the right neighbours to you.</div>
+    </div>
+    <div class="land-amen-grid">
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-glass-full"></i></div><div class="land-amen-name">Belvedere Room</div><div class="land-amen-desc">The signature lounge — unhurried evening introductions over a glass of something good.</div></div>
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-barbell"></i></div><div class="land-amen-name">The Gym</div><div class="land-amen-desc">Find a training partner who keeps your pace and your schedule.</div></div>
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-swimming"></i></div><div class="land-amen-name">The Pool</div><div class="land-amen-desc">Morning lengths and the easy conversation that follows them.</div></div>
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-device-gamepad-2"></i></div><div class="land-amen-name">Game Room</div><div class="land-amen-desc">Playful, low-pressure first meetings over a game or two.</div></div>
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-door-enter"></i></div><div class="land-amen-name">The Lobby</div><div class="land-amen-desc">An easy hello with no commitment, on the way in or out.</div></div>
+      <div class="land-amen-card"><div class="land-amen-ic"><i class="ti ti-briefcase"></i></div><div class="land-amen-name">The Offices</div><div class="land-amen-desc">Co-work beside professional neighbours who share your world.</div></div>
+    </div>
+    <div class="land-amen-foot">Six amenities · One community</div>
+  </section>
+
+  <section class="land-cta">
+    <svg class="land-cta-mark" viewBox="0 0 200 200">
+      <defs><linearGradient id="gCta" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4AE3C"/><stop offset="100%" stop-color="#8A6E18"/></linearGradient></defs>
+      <circle cx="100" cy="100" r="94" fill="none" stroke="url(#gCta)" stroke-width="2.5"/>
+      <circle cx="100" cy="100" r="70" fill="none" stroke="#B8972A" stroke-width="2" opacity="0.5"/>
+      <circle cx="100" cy="100" r="48" fill="none" stroke="#B8972A" stroke-width="1.6" opacity="0.4"/>
+      <circle cx="100" cy="100" r="28" fill="none" stroke="#B8972A" stroke-width="1.4" opacity="0.3"/>
+      <circle cx="100" cy="100" r="6" fill="#B8972A" opacity="0.6"/>
+    </svg>
+    <div class="land-cta-h">Your building is<br/>already <em>home.</em></div>
+    <div class="land-cta-sub">Let it become a community, too. Join the residents of Chorus Apartments on Fifth Circle.</div>
+    <button class="land-cta-btn">Join your building →</button>
+  </section>
+
+  <footer class="land-foot">
+    <div class="land-foot-logo">FIFTH CIRCLE</div>
+    <div class="land-foot-note">Private residential community · By invitation</div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 02 — CREATE YOUR PROFILE (combined dark onboarding)
+════════════════════════════════════════════ -->
+<p class="screen-label">02 — Create Your Profile</p>
+<p class="screen-sub">Welcome + account, combined — the one dark moment in the flow</p>
+
+<div class="onb" data-screen-label="02 Create Profile">
+  <svg class="onb-mark" viewBox="0 0 400 400">
+    <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="200" cy="200" r="150" fill="none" stroke="#F3EDE2" stroke-width="2"/>
+    <circle cx="200" cy="200" r="112" fill="none" stroke="#F3EDE2" stroke-width="2"/>
+    <circle cx="200" cy="200" r="74" fill="none" stroke="#F3EDE2" stroke-width="1.6"/>
+    <circle cx="200" cy="200" r="38" fill="none" stroke="#F3EDE2" stroke-width="1.4"/>
+    <circle cx="200" cy="200" r="11" fill="#F3EDE2"/>
+  </svg>
+  <div class="onb-left" data-comment-anchor="cbcc0809cc-div">
+    <div class="onb-prog"><span class="on"></span><span></span><span></span><span></span></div>
+    <div class="onb-h">Welcome to<br/>your <em>private</em><br/>community.</div>
+    <div class="onb-body">Help your neighbours get to know you. This takes about two minutes — nothing is posted publicly, and your details are used only for introductions and gatherings.</div>
+    <div class="onb-promise">
+      <div class="onb-promise-item"><i class="ti ti-lock"></i> Reviewed privately by your building team</div>
+      <div class="onb-promise-item"><i class="ti ti-heart"></i> Used only for introductions and gatherings</div>
+      <div class="onb-promise-item"><i class="ti ti-eye-off"></i> Never posted publicly</div>
+    </div>
+  </div>
+  <div class="onb-right">
+    <div class="onb-right-title">Tell us a little about yourself.</div>
+    <div class="onb-photo">
+      <div class="onb-photo-circle"><i class="ti ti-camera"></i></div>
+      <div>
+        <div class="onb-photo-text">Add a photo so your neighbours can recognise you.</div>
+        <div class="onb-photo-cap">Optional · Only visible to building residents</div>
+      </div>
+    </div>
+    <div class="onb-field"><label class="onb-label">Invite Code</label><input class="onb-input" value="CHORUS" readonly/></div>
+    <div class="onb-row">
+      <div class="onb-field"><label class="onb-label">First Name</label><input class="onb-input" placeholder="Noor"/></div>
+      <div class="onb-field"><label class="onb-label">Last Name</label><input class="onb-input" placeholder="Shaaban"/></div>
+    </div>
+    <div class="onb-field"><label class="onb-label">Unit Number</label><input class="onb-input" placeholder="14B"/></div>
+    <div class="onb-field"><label class="onb-label">Email Address</label><input class="onb-input" placeholder="noor@example.com"/></div>
+    <div class="onb-row">
+      <div class="onb-field"><label class="onb-label">Date of Birth</label><input class="onb-input" placeholder="DD / MM / YYYY"/></div>
+      <div class="onb-field"><label class="onb-label">Phone Number</label><input class="onb-input" placeholder="+1 (000) 000 0000"/></div>
+    </div>
+    <button class="onb-btn">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 02b — VERIFICATION
+════════════════════════════════════════════ -->
+<p class="screen-label">02b — Verification</p>
+<p class="screen-sub">Phone + email code verification before entering the flow</p>
+
+<div class="onb" style="min-height:580px" data-screen-label="02b Verification">
+  <svg class="onb-mark" viewBox="0 0 400 400">
+    <circle cx="200" cy="200" r="186" fill="none" stroke="#B8972A" stroke-width="3"/>
+    <circle cx="200" cy="200" r="150" fill="none" stroke="#F3EDE2" stroke-width="2"/>
+    <circle cx="200" cy="200" r="112" fill="none" stroke="#F3EDE2" stroke-width="2"/>
+    <circle cx="200" cy="200" r="74" fill="none" stroke="#F3EDE2" stroke-width="1.6"/>
+    <circle cx="200" cy="200" r="38" fill="none" stroke="#F3EDE2" stroke-width="1.4"/>
+    <circle cx="200" cy="200" r="11" fill="#F3EDE2"/>
+  </svg>
+  <div class="onb-left">
+    <div class="onb-prog"><span class="on"></span><span class="on"></span><span></span><span></span></div>
+    <div class="onb-h">Let’s verify<br/>it’s really<br/><em>you.</em></div>
+    <div class="onb-body">We sent a 6-digit code to your phone and email. This confirms you are a verified resident of Chorus Apartments.</div>
+    <div class="onb-promise" style="margin-top:32px">
+      <div class="onb-promise-item"><i class="ti ti-device-mobile"></i> Sent to +1 (•••) ••• 7834</div>
+      <div class="onb-promise-item"><i class="ti ti-mail"></i> Sent to noor@example.com</div>
+    </div>
+  </div>
+  <div class="onb-right" style="justify-content:center">
+    <div class="onb-right-title">Enter your verification code.</div>
+    <div style="font-size:12px;color:rgba(242,237,227,0.4);margin-bottom:32px;font-weight:300">The 6-digit code expires in 10 minutes.</div>
+    <input style="width:100%;background:rgba(255,255,255,0.03);border:none;border-bottom:0.5px solid rgba(184,151,42,0.4);padding:16px 0;font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--cream);letter-spacing:18px;text-align:center;outline:none;margin-bottom:28px" placeholder="· · · · · ·" maxlength="6"/>
+    <button class="onb-btn" style="width:100%;text-align:center">Verify &amp; Continue →</button>
+    <div style="font-size:10px;color:rgba(242,237,227,0.3);text-align:center;margin-top:16px;letter-spacing:1.5px;cursor:pointer">Didn’t receive it? Resend code</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 04 — WHAT KIND OF CONNECTION?
+════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+     SCREEN 03 — GOALS
+════════════════════════════════════════════ -->
+<p class="screen-label">03 — Goals</p>
+<p class="screen-sub">What are you hoping to find? — multi-select</p>
+
+<div class="ob-q" data-screen-label="03 Goals">
+  <div class="ob-q-left">
+    <div class="progress"><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot off"></div><div class="p-dot off"></div></div>
+    <div class="ob-q-eyebrow">Step 2 of 4</div>
+    <div class="ob-q-headline">What are you<br/>hoping to<br/><em>find?</em></div>
+    <div class="ob-q-body" style="margin-top:20px">Select everything that resonates. Each goal becomes its own experience — with tailored questions and introductions.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="goal-grid">
+      <div class="goal-card sel">
+        <div class="goal-card-ic"><i class="ti ti-users"></i></div>
+        <div class="goal-card-top"><div class="goal-card-title">Group Hangouts</div><i class="ti ti-check goal-check-ic"></i></div>
+        <div class="goal-card-desc">Curated circles and resident gatherings in your building</div>
+      </div>
+      <div class="goal-card sel">
+        <div class="goal-card-ic"><i class="ti ti-heart"></i></div>
+        <div class="goal-card-top"><div class="goal-card-title">Friendships</div><i class="ti ti-check goal-check-ic"></i></div>
+        <div class="goal-card-desc">Meaningful one-on-one connections with neighbours</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-card-ic"><i class="ti ti-run"></i></div>
+        <div class="goal-card-top"><div class="goal-card-title">Activity Partners</div><i class="ti ti-check goal-check-ic"></i></div>
+        <div class="goal-card-desc">Find people who share your interests and keep your pace</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-card-ic"><i class="ti ti-briefcase"></i></div>
+        <div class="goal-card-top"><div class="goal-card-title">Professional</div><i class="ti ti-check goal-check-ic"></i></div>
+        <div class="goal-card-desc">High-quality professional introductions and co-working</div>
+      </div>
+    </div>
+    <button class="ob-btn">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 04 — INTERESTS
+════════════════════════════════════════════ -->
+<p class="screen-label">04 — Interests</p>
+<p class="screen-sub">Searchable tag input — max 10 interests</p>
+
+<div class="ob-q" data-screen-label="04 Interests">
+  <div class="ob-q-left">
+    <div class="progress"><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot off"></div></div>
+    <div class="ob-q-eyebrow">Step 3 of 4</div>
+    <div class="ob-q-headline">What do you<br/><em>love to do?</em></div>
+    <div class="ob-q-body" style="margin-top:20px">Add up to 10 interests. Search for something specific or pick from suggestions. You can always edit these later.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="int-wrap">
+      <div class="int-label">Your interests <span style="color:var(--taupe-light)">(3 / 10)</span></div>
+      <div class="int-chips">
+        <div class="int-chip"><span>Design</span><i class="ti ti-x"></i></div>
+        <div class="int-chip"><span>Coffee</span><i class="ti ti-x"></i></div>
+        <div class="int-chip"><span>Travel</span><i class="ti ti-x"></i></div>
+      </div>
+      <div class="int-input-row">
+        <i class="ti ti-search"></i>
+        <input class="int-input" placeholder="Search interests..." />
+      </div>
+    </div>
+    <div class="int-sug">
+      <div class="int-sug-label">Suggested</div>
+      <div class="int-sug-list">
+        <div class="int-sug-chip picked">Design</div><div class="int-sug-chip picked">Coffee</div><div class="int-sug-chip picked">Travel</div>
+        <div class="int-sug-chip">Running</div><div class="int-sug-chip">Rock Climbing</div><div class="int-sug-chip">Yoga</div>
+        <div class="int-sug-chip">Cooking</div><div class="int-sug-chip">Architecture</div><div class="int-sug-chip">Art</div>
+        <div class="int-sug-chip">Film</div><div class="int-sug-chip">Books</div><div class="int-sug-chip">Photography</div>
+        <div class="int-sug-chip">Cycling</div><div class="int-sug-chip">Hiking</div><div class="int-sug-chip">Wine &amp; Dining</div>
+        <div class="int-sug-chip">Startups</div><div class="int-sug-chip">Music</div><div class="int-sug-chip">Meditation</div>
+      </div>
+    </div>
+    <button class="ob-btn">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 05 — AVAILABILITY
+════════════════════════════════════════════ -->
+<p class="screen-label">05 — Availability</p>
+<p class="screen-sub">Days × time-slot calendar — tap any cell to toggle</p>
+
+<div class="ob-q" style="min-height:500px" data-screen-label="05 Availability">
+  <div class="ob-q-left">
+    <div class="progress"><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div></div>
+    <div class="ob-q-eyebrow">Step 4 of 4</div>
+    <div class="ob-q-headline">When are<br/>you usually<br/><em>free?</em></div>
+    <div class="ob-q-body" style="margin-top:20px">We use this to suggest meetups at the right time. Nothing is scheduled without your confirmation.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="avail-cal">
+      <div class="avail-cal-head">
+        <div></div>
+        <div class="avail-cal-day-label">Mon</div>
+        <div class="avail-cal-day-label">Tue</div>
+        <div class="avail-cal-day-label">Wed</div>
+        <div class="avail-cal-day-label">Thu</div>
+        <div class="avail-cal-day-label">Fri</div>
+        <div class="avail-cal-day-label wknd">Sat</div>
+        <div class="avail-cal-day-label wknd">Sun</div>
+      </div>
+      <div class="avail-cal-body">
+        <div class="avail-cal-row" data-comment-anchor="5c7bdacec3-div">
+          <div class="avail-time-label"><span>Morning</span><span class="avail-time-sub">6am – 12pm</span></div>
+          <div class="avail-cell"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell"></div>
+          <div class="avail-cell wknd on"></div>
+          <div class="avail-cell wknd on"></div>
+        </div>
+        <div class="avail-cal-row">
+          <div class="avail-time-label"><span>Afternoon</span><span class="avail-time-sub">12pm – 6pm</span></div>
+          <div class="avail-cell" data-comment-anchor="93ee8cb817-div"></div>
+          <div class="avail-cell"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell wknd on"></div>
+          <div class="avail-cell wknd on"></div>
+        </div>
+        <div class="avail-cal-row">
+          <div class="avail-time-label"><span>Evening</span><span class="avail-time-sub">6pm – 12am</span></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell on"></div>
+          <div class="avail-cell wknd"></div>
+          <div class="avail-cell wknd"></div>
+        </div>
+      </div>
+      <div class="avail-cal-hint">Tap any cell to toggle</div>
+    </div>
+    <button class="ob-btn">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 06 — FRIENDSHIPS TAB
+════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+     SCREEN 06 — FRIENDSHIPS
+════════════════════════════════════════════ -->
+<p class="screen-label">06 — Friendships</p>
+<p class="screen-sub">Goal-specific — concierge approach, no tag walls</p>
+
+<div class="ob-q" style="min-height:740px" data-screen-label="06 Friendships">
+  <div class="ob-q-left">
+    <div class="goal-tab-badge"><i class="ti ti-heart"></i><span>Friendships</span></div>
+    <div class="ob-q-headline">Help us find<br/>your kind of<br/><em>people.</em></div>
+    <div class="ob-q-body" style="margin-top:18px">A few thoughtful questions — not a form, just a conversation — so we can introduce you to neighbours you'd genuinely enjoy knowing.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="ai-field">
+      <div class="ai-field-label">What kind of friendship are you looking for?</div>
+      <textarea class="ai-textarea" rows="3" placeholder="e.g. A few close friends nearby for dinners, walks, and good conversation..."></textarea>
+      <div class="ai-field-hint">Used only to improve your introductions — never shown publicly.</div>
+    </div>
+    <div class="multi-q">
+      <div class="multi-q-block">
+        <div class="multi-q-label">What type of friendship?</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">Coffee chats</div><div class="mchip sel">Exploring the city</div>
+          <div class="mchip">Regular friendships</div><div class="mchip sel">Shared activities</div>
+          <div class="mchip">Events together</div><div class="mchip">Restaurant adventures</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Social style</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">One-on-one</div><div class="mchip">Small groups</div><div class="mchip">A mix</div><div class="mchip">Larger circles</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">How often?</div>
+        <div class="multi-q-chips">
+          <div class="mchip">Weekly</div><div class="mchip sel">Every few weeks</div><div class="mchip">Monthly</div><div class="mchip">Spontaneous</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Age preference</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">Around my age</div><div class="mchip">Slightly younger</div>
+          <div class="mchip">Slightly older</div><div class="mchip">No preference</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Gender preference <span style="font-size:8px;letter-spacing:1px;color:var(--taupe-light)">optional</span></div>
+        <div class="multi-q-chips">
+          <div class="mchip">Women</div><div class="mchip">Men</div><div class="mchip">Everyone</div><div class="mchip sel">No preference</div>
+        </div>
+      </div>
+    </div>
+    <button class="ob-btn" style="margin-top:14px">Continue &rarr;</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 07 — ACTIVITY PARTNERS
+════════════════════════════════════════════ -->
+<p class="screen-label">07 — Activity Partners</p>
+<p class="screen-sub">Goal-specific — per-activity detail + privacy</p>
+
+<div class="ob-q" style="min-height:760px" data-screen-label="07 Activity Partners">
+  <div class="ob-q-left">
+    <div class="goal-tab-badge"><i class="ti ti-run"></i><span>Activity Partners</span></div>
+    <div class="ob-q-headline">Find people<br/>to do things<br/><em>with.</em></div>
+    <div class="ob-q-body" style="margin-top:18px">Search and select the activities you do. We will match you with neighbours who want a real partner, not just a contact.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="int-wrap" style="margin-bottom:12px">
+      <div class="int-label">Your activities</div>
+      <div class="int-chips">
+        <div class="int-chip"><span>Rock Climbing</span><i class="ti ti-x"></i></div>
+        <div class="int-chip"><span>Running</span><i class="ti ti-x"></i></div>
+      </div>
+      <div class="int-input-row">
+        <i class="ti ti-search"></i>
+        <input class="int-input" placeholder="Search or add an activity..." />
+      </div>
+    </div>
+    <div class="int-sug-list" style="margin-bottom:18px">
+      <div class="int-sug-chip picked">Rock Climbing</div><div class="int-sug-chip picked">Running</div>
+      <div class="int-sug-chip">Pilates</div><div class="int-sug-chip">Tennis</div><div class="int-sug-chip">Pickleball</div>
+      <div class="int-sug-chip">Cycling</div><div class="int-sug-chip">Yoga</div><div class="int-sug-chip">Skiing</div>
+      <div class="int-sug-chip">Swimming</div><div class="int-sug-chip">Photography</div>
+    </div>
+    <div class="act-detail">
+      <div class="act-detail-name">Rock Climbing <i class="ti ti-chevron-up"></i></div>
+      <div class="act-detail-block">
+        <div class="act-detail-label">Skill level</div>
+        <div class="multi-q-chips">
+          <div class="mchip">Beginner</div><div class="mchip sel">Intermediate</div><div class="mchip">Advanced</div><div class="mchip">Expert</div>
+        </div>
+      </div>
+      <div class="act-detail-block">
+        <div class="act-detail-label">Looking for</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">Similar skill level</div><div class="mchip">More experienced</div>
+          <div class="mchip">Someone learning</div><div class="mchip">Doesn't matter</div>
+        </div>
+      </div>
+      <div class="act-detail-block">
+        <div class="act-detail-label">Where do you usually go?</div>
+        <input class="act-input" placeholder="e.g. Movement Climbing Gym, The Arch..." />
+      </div>
+      <div class="act-detail-block">
+        <div class="act-detail-label">When do you usually go?</div>
+        <input class="act-input" placeholder="e.g. Saturday mornings, Tuesday evenings..." />
+      </div>
+    </div>
+    <button class="ob-btn" style="margin-top:14px">Continue &rarr;</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 08 — GROUP HANGOUTS
+════════════════════════════════════════════ -->
+<p class="screen-label">08 — Group Hangouts</p>
+<p class="screen-sub">Goal-specific — concierge text field + size + frequency</p>
+
+<div class="ob-q" style="min-height:580px" data-screen-label="08 Group Hangouts">
+  <div class="ob-q-left">
+    <div class="goal-tab-badge"><i class="ti ti-users"></i><span>Group Hangouts</span></div>
+    <div class="ob-q-headline">Find your<br/><em>circle.</em></div>
+    <div class="ob-q-body" style="margin-top:18px">Tell us what kinds of gatherings you would actually attend. We will place you in circles and suggest events you would genuinely enjoy.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="ai-field">
+      <div class="ai-field-label">What kinds of gatherings would you actually attend?</div>
+      <textarea class="ai-textarea" rows="3" placeholder="e.g. Small dinner parties, wine nights, founder coffees, and interesting conversations..."></textarea>
+      <div class="ai-field-hint">We use this to suggest gatherings that match your actual taste.</div>
+    </div>
+    <div class="multi-q">
+      <div class="multi-q-block">
+        <div class="multi-q-label">Preferred group size</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">4 &ndash; 6</div><div class="mchip">6 &ndash; 10</div><div class="mchip">10 &ndash; 20</div><div class="mchip">No preference</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">How often?</div>
+        <div class="multi-q-chips">
+          <div class="mchip">Weekly</div><div class="mchip sel">Every other week</div><div class="mchip">Monthly</div><div class="mchip">Occasionally</div>
+        </div>
+      </div>
+    </div>
+    <button class="ob-btn" style="margin-top:14px">Continue &rarr;</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 09 — PROFESSIONAL
+════════════════════════════════════════════ -->
+<p class="screen-label">09 — Professional</p>
+<p class="screen-sub">Goal-specific — industry, role, career stage, concierge field</p>
+
+<div class="ob-q" style="min-height:800px" data-screen-label="09 Professional">
+  <div class="ob-q-left">
+    <div class="goal-tab-badge"><i class="ti ti-briefcase"></i><span>Professional</span></div>
+    <div class="ob-q-headline">Build<br/>meaningful<br/><em>connections.</em></div>
+    <div class="ob-q-body" style="margin-top:18px">High-quality professional introductions within your building. Tell us who you are and who you would like to meet.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="multi-q">
+      <div class="multi-q-block">
+        <div class="multi-q-label">Industry</div>
+        <div class="int-sug-list" style="margin-top:6px;margin-bottom:4px">
+          <div class="int-sug-chip picked">Technology</div><div class="int-sug-chip picked">Design</div>
+          <div class="int-sug-chip">Finance</div><div class="int-sug-chip">Law</div><div class="int-sug-chip">Healthcare</div>
+          <div class="int-sug-chip">Real Estate</div><div class="int-sug-chip">Media</div><div class="int-sug-chip">Hospitality</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Your role</div>
+        <input class="act-input" style="margin-top:6px" placeholder="e.g. Product Designer, Tax Attorney, Founder..." />
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Career stage</div>
+        <div class="multi-q-chips">
+          <div class="mchip">Student</div><div class="mchip">Early Career</div><div class="mchip sel">Mid-Career</div>
+          <div class="mchip">Senior</div><div class="mchip">Executive</div><div class="mchip">Founder</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">What are you looking for?</div>
+        <div class="multi-q-chips">
+          <div class="mchip sel">Networking</div><div class="mchip">Mentorship</div><div class="mchip sel">Entrepreneurship</div>
+          <div class="mchip">Hiring</div><div class="mchip">Investing</div><div class="mchip">Career Growth</div><div class="mchip">Industry Knowledge</div>
+        </div>
+      </div>
+      <div class="multi-q-block">
+        <div class="multi-q-label">Who would you like to meet?</div>
+        <div class="multi-q-chips">
+          <div class="mchip">People in my industry</div><div class="mchip sel">Founders</div>
+          <div class="mchip sel">Investors</div><div class="mchip">Executives</div><div class="mchip">Creatives</div><div class="mchip">Anyone interesting</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-field">
+      <div class="ai-field-label">What would make this professionally valuable?</div>
+      <textarea class="ai-textarea" rows="2" placeholder="e.g. I'm a tax attorney interested in startups and would love to meet founders, investors, and operators..."></textarea>
+    </div>
+    <button class="ob-btn">Continue &rarr;</button>
+  </div>
+</div>
+
+<p class="screen-label">10 — Introduction Preferences</p>
+<p class="screen-sub">Final onboarding step — how introductions should happen</p>
+
+<div class="ob-q" style="min-height:520px" data-screen-label="10 Introduction Preferences">
+  <div class="ob-q-left">
+    <div class="ob-q-eyebrow">Almost there</div>
+    <div class="ob-q-headline">How would<br/>you like<br/><em>introductions</em><br/>to happen?</div>
+    <div class="ob-q-body" style="margin-top:20px">We'll use this as your default. You can always change how you're introduced on any individual match.</div>
+  </div>
+  <div class="ob-q-right">
+    <div class="intro-opts">
+      <div class="intro-card sel">
+        <div class="intro-radio"><div class="intro-radio-dot"></div></div>
+        <div><div class="intro-card-text">Introduce me directly</div><div class="intro-card-sub">We share your profile and propose a meeting</div></div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-radio"><div class="intro-radio-dot"></div></div>
+        <div><div class="intro-card-text">Small curated groups first</div><div class="intro-card-sub">Meet people in a gathering before one-on-one</div></div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-radio"><div class="intro-radio-dot"></div></div>
+        <div><div class="intro-card-text">Let me review first</div><div class="intro-card-sub">We send you profiles to approve before any introduction</div></div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-radio"><div class="intro-radio-dot"></div></div>
+        <div><div class="intro-card-text">A mix of both</div><div class="intro-card-sub">We'll vary based on the type of connection</div></div>
+      </div>
+    </div>
+    <button class="ob-btn" style="width:100%;text-align:center">Enter Fifth Circle →</button>
+  </div>
+</div>
+
+<p class="screen-label">11 — Resident Home</p>
+<p class="screen-sub">Exactly as in v3 — preserved</p>
+
+<div class="shell" data-screen-label="11 Resident Home">
+  <div class="sidebar">
+    <div class="sb-logo">FIFTH CIRCLE</div>
+    <nav class="sb-nav">
+      <div class="sb-item active"><i class="ti ti-home"></i> Home</div>
+      <div class="sb-item"><i class="ti ti-bolt"></i> Activity Match</div>
+      <div class="sb-item"><i class="ti ti-users"></i> Neighbors</div>
+      <div class="sb-item"><i class="ti ti-calendar-event"></i> Gatherings</div>
+      <div class="sb-item"><i class="ti ti-user"></i> My Profile</div>
+    </nav>
+    <div class="sb-footer"><div class="sb-building">Chorus Apartments</div><div class="sb-building-sub">Private Community</div></div>
+  </div>
+  <div class="app-main">
+    <div class="greeting">Good evening, <em>Noor.</em></div>
+    <div class="greeting-sub">Wednesday · Chorus Apartments</div>
+    <div class="section-label">We'd love to introduce you to a few neighbors</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:40px">
+      <div style="background:var(--white);border:0.5px solid rgba(184,151,42,0.18);padding:22px">
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px">
+          <div style="position:relative;flex-shrink:0">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--parchment);border:0.5px solid rgba(184,151,42,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold-muted)">SL</div>
+            <div style="position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(184,151,42,0.25);pointer-events:none"></div>
+          </div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--charcoal)">Sophie L.</div>
+            <div style="font-size:10px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;margin-top:2px;margin-bottom:8px">Unit 14B · Architecture</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase">Design</span>
+              <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase">Coffee</span>
+              <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase">Travel</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--taupe);line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;border-left:1.5px solid rgba(184,151,42,0.3);padding-left:12px;margin-bottom:14px">"Sophie recently joined and shares your love of design and independent travel."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid rgba(184,151,42,0.12);padding-top:12px">
+          <span style="font-size:9px;letter-spacing:2.5px;color:var(--charcoal);text-transform:uppercase;border-bottom:0.5px solid var(--charcoal);padding-bottom:1px;cursor:pointer">Accept Introduction</span>
+          <span style="font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;cursor:pointer">Not now</span>
+        </div>
+      </div>
+      <div style="background:var(--white);border:0.5px solid rgba(184,151,42,0.18);padding:22px">
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px">
+          <div style="position:relative;flex-shrink:0">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--parchment);border:0.5px solid rgba(184,151,42,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold-muted)">JK</div>
+            <div style="position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(184,151,42,0.25);pointer-events:none"></div>
+          </div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--charcoal)">James K.</div>
+            <div style="font-size:10px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;margin-top:2px;margin-bottom:8px">Unit 9B · Product</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase">Rock Climbing</span>
+              <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 10px;text-transform:uppercase">Design</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--taupe);line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;border-left:1.5px solid rgba(184,151,42,0.3);padding-left:12px;margin-bottom:14px">"James is a fellow rock climber — he goes to The Arch most Saturday mornings."</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid rgba(184,151,42,0.12);padding-top:12px">
+          <span style="font-size:9px;letter-spacing:2.5px;color:var(--charcoal);text-transform:uppercase;border-bottom:0.5px solid var(--charcoal);padding-bottom:1px;cursor:pointer">Schedule a Meetup</span>
+          <span style="font-size:9px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase;cursor:pointer">Not now</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">A few gatherings we think you'll enjoy</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+      <div style="background:var(--charcoal);padding:26px"><div style="font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Thu 19 · 7PM</div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--cream);line-height:1.3;margin-bottom:8px">Belvedere Wine Evening</div><div style="font-size:11px;color:rgba(242,237,227,0.32)">12 neighbors attending</div><div style="display:inline-block;margin-top:14px;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;border-bottom:0.5px solid var(--gold);padding-bottom:1px;cursor:pointer">Join your neighbors →</div></div>
+      <div style="background:var(--white);border:0.5px solid rgba(184,151,42,0.18);padding:26px"><div style="font-size:9px;letter-spacing:3px;color:var(--gold-muted);text-transform:uppercase;margin-bottom:12px">Sat 21 · 10AM</div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--charcoal);line-height:1.3;margin-bottom:8px">Saturday Morning Coffee</div><div style="font-size:11px;color:var(--taupe-light)">8 neighbors attending</div><div style="display:inline-block;margin-top:14px;font-size:9px;letter-spacing:2px;color:var(--charcoal);text-transform:uppercase;border-bottom:0.5px solid var(--charcoal);padding-bottom:1px;cursor:pointer">Join your neighbors →</div></div>
+      <div style="background:var(--white);border:0.5px solid rgba(184,151,42,0.18);padding:26px"><div style="font-size:9px;letter-spacing:3px;color:var(--gold-muted);text-transform:uppercase;margin-bottom:12px">Wed 26 · 6:30PM</div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--charcoal);line-height:1.3;margin-bottom:8px">Resident Supper Club</div><div style="font-size:11px;color:var(--taupe-light)">6 spots remaining</div><div style="display:inline-block;margin-top:14px;font-size:9px;letter-spacing:2px;color:var(--charcoal);text-transform:uppercase;border-bottom:0.5px solid var(--charcoal);padding-bottom:1px;cursor:pointer">Join your neighbors →</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 11 — MY PROFILE
+════════════════════════════════════════════ -->
+<p class="screen-label">12 — My Profile</p>
+<p class="screen-sub">With activity companions + preferred spaces + connections</p>
+
+<div class="shell" data-screen-label="12 My Profile">
+  <div class="sidebar">
+    <div class="sb-logo">FIFTH CIRCLE</div>
+    <nav class="sb-nav">
+      <div class="sb-item"><i class="ti ti-home"></i> Home</div>
+      <div class="sb-item"><i class="ti ti-bolt"></i> Activity Match</div>
+      <div class="sb-item"><i class="ti ti-users"></i> Neighbors</div>
+      <div class="sb-item"><i class="ti ti-calendar-event"></i> Gatherings</div>
+      <div class="sb-item active"><i class="ti ti-user"></i> My Profile</div>
+    </nav>
+    <div class="sb-footer"><div class="sb-building">Chorus Apartments</div><div class="sb-building-sub">Private Community</div></div>
+  </div>
+  <div class="profile-layout">
+    <div class="profile-left">
+      <div class="profile-photo-wrap">
+        <div class="profile-photo">N</div>
+        <div class="photo-upload-btn"><i class="ti ti-camera"></i></div>
+      </div>
+      <div><div class="profile-name">Noor Shaaban</div><div class="profile-unit">Unit 14B · Since 2024</div></div>
+      <div class="profile-divider"></div>
+      <div>
+        <div class="profile-section-label">About</div>
+        <div class="profile-bio">"I'm a designer who loves good coffee, slow travel, and finding beautiful things in everyday places."</div>
+      </div>
+      <div>
+        <div class="profile-section-label">Interests</div>
+        <div class="profile-tags">
+          <span class="ptag">Design</span><span class="ptag">Coffee</span><span class="ptag">Travel</span><span class="ptag">Architecture</span><span class="ptag">Art</span>
+        </div>
+      </div>
+      <div>
+        <div class="profile-section-label">Here to</div>
+        <div class="profile-tags">
+          <span class="ptag">Meet Neighbors</span><span class="ptag">Find Activities</span><span class="ptag">Attend Events</span>
+        </div>
+      </div>
+      <div>
+        <div class="profile-section-label">Prefers to Meet</div>
+        <div class="profile-tags">
+          <span class="ptag">Belvedere Room</span><span class="ptag">The Pool</span>
+        </div>
+      </div>
+    </div>
+    <div class="profile-right">
+      <div class="section-label" style="margin-bottom:18px">Your Community</div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-val">4</div><div class="pstat-label">Introductions</div></div>
+        <div class="pstat"><div class="pstat-val">3</div><div class="pstat-label">Gatherings</div></div>
+        <div class="pstat"><div class="pstat-val">2</div><div class="pstat-label">Connections</div></div>
+      </div>
+
+      <div class="section-label" style="margin-bottom:14px">Your Activities</div>
+      <div class="activity-card">
+        <div class="activity-card-top">
+          <div class="activity-card-name">Rock Climbing</div>
+          <span class="activity-card-badge">Open to companions</span>
+        </div>
+        <div class="activity-card-details">
+          <span>Where:</span> The Arch Climbing Wall · <span>When:</span> Saturday mornings, 9–11am<br/>
+          <span>Looking for:</span> A climbing buddy at the same level
+        </div>
+        <div class="activity-card-footer">2 neighbors have shown interest · Edit activity</div>
+      </div>
+      <div class="activity-card">
+        <div class="activity-card-top">
+          <div class="activity-card-name">Morning Coffee</div>
+          <span class="activity-card-badge">Open to companions</span>
+        </div>
+        <div class="activity-card-details">
+          <span>Where:</span> The Lobby or Belvedere Room · <span>When:</span> Weekday mornings<br/>
+          <span>Looking for:</span> Good conversation over coffee
+        </div>
+        <div class="activity-card-footer">1 neighbor has shown interest · Edit activity</div>
+      </div>
+      <div style="border:0.5px dashed rgba(184,151,42,0.25);padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:28px">
+        <i class="ti ti-plus" style="font-size:16px;color:rgba(184,151,42,0.45)"></i>
+        <span style="font-size:10px;letter-spacing:2px;color:var(--taupe-light);text-transform:uppercase">Add an activity</span>
+      </div>
+
+      <div class="section-label" style="margin-bottom:14px">Your Connections</div>
+      <div class="connection-card">
+        <div class="conn-av">SL</div>
+        <div><div class="conn-name">Sophie L.</div><div class="conn-meta">Unit 14B · Architecture</div></div>
+        <div class="conn-since">Met June 2025</div>
+      </div>
+      <div class="connection-card">
+        <div class="conn-av">MR</div>
+        <div><div class="conn-name">Marcus R.</div><div class="conn-meta">Unit 7A · Finance</div></div>
+        <div class="conn-since">Met May 2025</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 12 — GATHERINGS (PROPOSE & VOTE)
+════════════════════════════════════════════ -->
+<p class="screen-label">13 — Gatherings</p>
+<p class="screen-sub">Three categories: Building Events / Curated Circles / Resident Gatherings</p>
+
+<div class="shell" data-screen-label="13 Gatherings">
+  <div class="sidebar">
+    <div class="sb-logo">FIFTH CIRCLE</div>
+    <nav class="sb-nav">
+      <div class="sb-item"><i class="ti ti-home"></i> Home</div>
+      <div class="sb-item"><i class="ti ti-bolt"></i> Activity Match</div>
+      <div class="sb-item"><i class="ti ti-users"></i> Neighbours</div>
+      <div class="sb-item active"><i class="ti ti-calendar-event"></i> Gatherings</div>
+      <div class="sb-item"><i class="ti ti-user"></i> My Profile</div>
+    </nav>
+    <div class="sb-footer"><div class="sb-building">Chorus Apartments</div><div class="sb-building-sub">Private Community</div></div>
+  </div>
+  <div class="app-main">
+    <div class="greeting">Gatherings.</div>
+    <div class="greeting-sub" style="margin-bottom:36px">Events, circles and happenings in your building</div>
+
+    <div class="gath-cat-section">
+      <div class="gath-cat-head">
+        <div class="gath-cat-heading">Building Events</div>
+        <div class="gath-cat-badge">Created by management</div>
+      </div>
+      <div class="gath-card-row">
+        <div class="gath-mini dark">
+          <div class="gath-mini-date">Thu 19 Jun · 7PM</div>
+          <div class="gath-mini-name">Belvedere Wine Evening</div>
+          <div class="gath-mini-meta">Belvedere Room · 12 attending</div>
+          <div class="gath-mini-action">RSVP →</div>
+        </div>
+        <div class="gath-mini">
+          <div class="gath-mini-date">Sat 21 Jun · 10AM</div>
+          <div class="gath-mini-name">Saturday Morning Coffee</div>
+          <div class="gath-mini-meta">The Lobby · 8 attending</div>
+          <div class="gath-mini-action">RSVP →</div>
+        </div>
+        <div class="gath-mini">
+          <div class="gath-mini-date">Wed 26 Jun · 6:30PM</div>
+          <div class="gath-mini-name">Resident Supper Club</div>
+          <div class="gath-mini-meta">Belvedere Room · 6 spots left</div>
+          <div class="gath-mini-action">RSVP →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gath-cat-section">
+      <div class="gath-cat-head">
+        <div class="gath-cat-heading">Curated Circles</div>
+        <div class="gath-cat-badge">Matched by algorithm</div>
+      </div>
+      <div class="gath-card-row two">
+        <div class="gath-circle">
+          <div class="gath-circle-name">Travellers &amp; Food Lovers</div>
+          <div class="gath-circle-sub">Neighbours who love exploring new places and sharing great meals.</div>
+          <div class="gath-circle-tags">
+            <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 9px;text-transform:uppercase">Travel</span>
+            <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 9px;text-transform:uppercase">Food</span>
+            <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 9px;text-transform:uppercase">Wine</span>
+          </div>
+          <div class="gath-circle-avs">
+            <div class="gath-circ-av">N</div><div class="gath-circ-av">S</div><div class="gath-circ-av">M</div><div class="gath-circ-av">J</div><div class="gath-circ-av">+2</div>
+          </div>
+          <div class="gath-circle-count">6 neighbours</div>
+          <div class="gath-circle-join">View Circle →</div>
+        </div>
+        <div class="gath-circle">
+          <div class="gath-circle-name">Sunday Morning Runners</div>
+          <div class="gath-circle-sub">Early birds who prefer their conversations between kilometres.</div>
+          <div class="gath-circle-tags">
+            <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 9px;text-transform:uppercase">Running</span>
+            <span style="font-size:9px;letter-spacing:2px;color:var(--gold-muted);border:0.5px solid rgba(184,151,42,0.28);padding:3px 9px;text-transform:uppercase">Fitness</span>
+          </div>
+          <div class="gath-circle-avs">
+            <div class="gath-circ-av">J</div><div class="gath-circ-av">A</div><div class="gath-circ-av">D</div><div class="gath-circ-av">+2</div>
+          </div>
+          <div class="gath-circle-count">5 neighbours</div>
+          <div class="gath-circle-join">View Circle →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gath-cat-section">
+      <div class="gath-cat-head">
+        <div class="gath-cat-heading">Resident Gatherings</div>
+        <div class="gath-cat-badge">Proposed by neighbours</div>
+      </div>
+      <div class="gath-card-row">
+        <div class="gath-mini">
+          <div class="gath-mini-date" style="color:var(--gold-muted)">14 votes · Awaiting approval</div>
+          <div class="gath-mini-name">Poolside Yoga Morning</div>
+          <div class="gath-mini-meta">The Pool · Proposed by Aisha K.</div>
+          <div class="gath-mini-action">&#8593; Support This</div>
+        </div>
+        <div class="gath-mini">
+          <div class="gath-mini-date" style="color:var(--gold-muted)">9 votes · Awaiting approval</div>
+          <div class="gath-mini-name">Neighbours Film Night</div>
+          <div class="gath-mini-meta">Game Room · Proposed by Daniel M.</div>
+          <div class="gath-mini-action">&#8593; Support This</div>
+        </div>
+        <div class="gath-mini" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border-style:dashed;cursor:pointer;min-height:120px;gap:8px">
+          <i class="ti ti-plus" style="font-size:22px;color:rgba(184,151,42,0.35)"></i>
+          <div style="font-size:9px;letter-spacing:2.5px;color:var(--taupe-light);text-transform:uppercase">Propose a gathering</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="screen-label">14 — Post-Event</p>
+<p class="screen-sub">After any gathering — mutual interest unlocks a connection</p>
+
+<div class="post-ev" data-screen-label="14 Post-Event">
+  <div class="post-ev-left">
+    <div style="font-size:9px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:20px">After the gathering</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;color:var(--charcoal);line-height:1.1;margin-bottom:18px">Would you like<br/>to see any of<br/>these <em style="color:var(--gold)">people again?</em></div>
+    <div style="font-size:13px;color:var(--taupe);line-height:1.9;font-weight:300;margin-bottom:28px">Mutual interest unlocks an introduction. No contact details are shared until both parties say yes.</div>
+    <div style="padding:18px;background:rgba(184,151,42,0.05);border:0.5px solid rgba(184,151,42,0.18)">
+      <div style="font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">Your privacy</div>
+      <div style="font-size:12px;color:var(--taupe);line-height:1.7;font-weight:300">Your response is private. Contact details are only exchanged when both people say yes.</div>
+    </div>
+  </div>
+  <div class="post-ev-right">
+    <div style="font-size:9px;letter-spacing:3px;color:var(--taupe);text-transform:uppercase;margin-bottom:20px">Belvedere Wine Evening · Thu 19 Jun</div>
+    <div class="post-ev-card">
+      <div class="post-ev-av">JK</div>
+      <div class="post-ev-info"><div class="post-ev-name">James K.</div><div class="post-ev-meta">Unit 9B · Rock Climbing · Design</div></div>
+      <div class="post-ev-btns"><button class="post-ev-yes">Yes &#8594;</button><button class="post-ev-pass">Pass</button></div>
+    </div>
+    <div class="post-ev-card">
+      <div class="post-ev-av">SL</div>
+      <div class="post-ev-info"><div class="post-ev-name">Sophie L.</div><div class="post-ev-meta">Unit 14B · Architecture · Travel</div></div>
+      <div class="post-ev-btns"><button class="post-ev-yes">Yes &#8594;</button><button class="post-ev-pass">Pass</button></div>
+    </div>
+    <div class="post-ev-card">
+      <div class="post-ev-av">MR</div>
+      <div class="post-ev-info"><div class="post-ev-name">Marcus R.</div><div class="post-ev-meta">Unit 7A · Finance · Wine &amp; Dining</div></div>
+      <div class="post-ev-btns"><button class="post-ev-yes">Yes &#8594;</button><button class="post-ev-pass">Pass</button></div>
+    </div>
+    <div style="font-size:11px;color:var(--taupe-light);text-align:center;margin-top:8px;letter-spacing:1px;cursor:pointer">Skip for now</div>
+  </div>
+</div>
+
+
+<div id="tweak-root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": [
+    "#B8972A",
+    "#D4AE3C",
+    "#9A7E22"
+  ],
+  "heroPanel": "#D4C09A",
+  "cream": [
+    "#F3EDE2",
+    "#EAE2D4"
+  ]
+}/*EDITMODE-END*/;
+
+function FifthCircleTweaks() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  React.useEffect(() => {
+    const r = document.documentElement.style;
+    const [g1, g2, g3] = t.accent;
+    r.setProperty('--gold', g1);
+    r.setProperty('--gold-light', g2);
+    r.setProperty('--gold-muted', g3);
+    r.setProperty('--greige', t.heroPanel);
+    const [c1, c2] = t.cream;
+    r.setProperty('--cream', c1);
+    r.setProperty('--cream-deep', c2);
+  }, [t]);
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Palette" />
+      <TweakColor label="Accent" value={t.accent}
+        options={[["#B8972A","#D4AE3C","#9A7E22"], ["#9C6B3A","#C08A4C","#855A2C"], ["#7E7A52","#9CA06A","#6A6740"], ["#A8534A","#C47A6E","#8A4038"]]}
+        onChange={(v) => setTweak('accent', v)} />
+      <TweakSection label="Landing" />
+      <TweakColor label="Hero panel" value={t.heroPanel}
+        options={["#E4DAC7", "#D4C09A", "#C3AC80", "#3A352B"]}
+        onChange={(v) => setTweak('heroPanel', v)} />
+      <TweakColor label="Cream base" value={t.cream}
+        options={[["#F3EDE2","#EAE2D4"], ["#F7F2E9","#EEE7DA"], ["#EFE6D4","#E3D7C0"]]}
+        onChange={(v) => setTweak('cream', v)} />
+    </TweaksPanel>
+  );
+}
+ReactDOM.createRoot(document.getElementById('tweak-root')).render(<FifthCircleTweaks />);
+</script>
+
+</body>
+</html>
