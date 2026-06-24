@@ -103,7 +103,7 @@ nav{
 .phone-frame.large{width:320px;border-radius:44px;padding:12px}
 .phone-frame-inner{
   border-radius:28px;overflow:hidden;position:relative;
-  background:#1C1915;
+  background:#F3EDE2;
 }
 .phone-frame.large .phone-frame-inner{border-radius:34px}
 .phone-frame-inner iframe{
@@ -299,7 +299,7 @@ section{padding:120px 40px}
 .manager-mock-body{padding:28px}
 
 /* ── PRIVACY SECTION ── */
-#privacy{background:var(--charcoal-soft)}
+#privacy{background:transparent}
 .privacy-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   max-width:1280px;margin:60px auto 0;padding:0 40px;
@@ -372,13 +372,30 @@ footer{
 /* ── SCREEN PILL SWITCHER ── */
 .screen-pill{
   padding:6px 14px;background:transparent;
-  border:0.5px solid rgba(184,151,42,0.2);border-radius:20px;
+  border:0.5px solid rgba(28,25,21,0.18);border-radius:20px;
   font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(242,237,227,0.35);cursor:pointer;font-family:var(--sans);
+  color:rgba(28,25,21,0.4);cursor:pointer;font-family:var(--sans);
   transition:all .2s;
 }
-.screen-pill:hover{border-color:rgba(184,151,42,0.4);color:rgba(242,237,227,0.6)}
-.screen-pill.active{border-color:var(--gold);color:var(--gold);background:rgba(184,151,42,0.07)}
+.screen-pill:hover{border-color:var(--gold);color:rgba(28,25,21,0.65)}
+.screen-pill.active{border-color:var(--gold);color:var(--gold-muted);background:rgba(184,151,42,0.08)}
+
+/* ── CREAM SECTION OVERRIDES ── */
+.on-cream{background:var(--cream)}
+.on-cream .section-eyebrow,.on-cream .feature-number,.on-cream .pilot-col-head{color:var(--gold-muted)}
+.on-cream .section-title,.on-cream .feature-headline{color:var(--charcoal)}
+.on-cream .section-title em,.on-cream .feature-headline em{color:rgba(28,25,21,0.28)}
+.on-cream .section-body,.on-cream .feature-copy{color:rgba(28,25,21,0.5)}
+.on-cream .pill{border-color:rgba(28,25,21,0.14);color:rgba(28,25,21,0.42)}
+.on-cream .resident-header{border-bottom-color:rgba(28,25,21,0.08)}
+.on-cream .privacy-card{background:rgba(255,255,255,0.6);border-color:rgba(28,25,21,0.07)}
+.on-cream .privacy-title{color:var(--charcoal)}
+.on-cream .privacy-body{color:rgba(28,25,21,0.44)}
+.on-cream .privacy-icon{border-color:rgba(28,25,21,0.12);color:var(--charcoal-soft)}
+.on-cream .pilot-list li{color:rgba(28,25,21,0.54)}
+.on-cream .pilot-list li::before{background:var(--gold-muted)}
+/* light divider */
+.divider-light{height:0.5px;background:linear-gradient(90deg,transparent,rgba(28,25,21,0.1),transparent);margin:0 40px}
 
 /* ── ANIMATE ON SCROLL ── */
 .anim-fade{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
@@ -413,6 +430,7 @@ footer{
 .phone-frame-inner-wrap::before{
   content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
   width:70px;height:18px;background:#0a0806;border-radius:9px;z-index:5;
+  pointer-events:none;
 }
 
 /* ── RESPONSIVE ── */
@@ -508,10 +526,11 @@ footer{
   </div>
 </section>
 
-<div class="divider"></div>
+<!-- ════ CREAM BAND: concept + all resident features ════ -->
+<div class="on-cream">
 
 <!-- WHAT IS FIFTH CIRCLE -->
-<section style="padding:100px 40px;background:var(--charcoal)">
+<section style="padding:100px 40px">
   <div class="section-inner" style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start">
     <div class="anim-fade">
       <div class="section-eyebrow">The Concept</div>
@@ -522,15 +541,15 @@ footer{
       <p class="section-body">No public directory. No swiping. No awkward "connect with me" buttons. Only curated, double-opt-in introductions delivered when both residents say yes.</p>
       <div style="display:flex;gap:32px;margin-top:40px">
         <div>
-          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">2×</div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--charcoal)">2×</div>
           <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Renewal lift<br>in pilot cohorts</div>
         </div>
         <div>
-          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">84%</div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--charcoal)">84%</div>
           <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Intro acceptance<br>rate</div>
         </div>
         <div>
-          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">&lt;48h</div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--charcoal)">&lt;48h</div>
           <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Avg. time to<br>first meetup</div>
         </div>
       </div>
@@ -538,7 +557,7 @@ footer{
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- RESIDENT EXPERIENCE -->
 <section id="resident" style="padding:120px 0 0">
@@ -579,7 +598,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- FEATURE 2: Curated Introductions -->
 <div class="feature-row reverse">
@@ -608,7 +627,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- FEATURE 3: People & Home -->
 <div class="feature-row">
@@ -637,7 +656,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- FEATURE 4: Events -->
 <div class="feature-row reverse">
@@ -666,7 +685,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- FEATURE 5: Concierge -->
 <div class="feature-row">
@@ -695,7 +714,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- FEATURE 6: Circles -->
 <div class="feature-row reverse">
@@ -730,7 +749,7 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+</div><!-- end cream band -->
 
 <!-- MANAGER EXPERIENCE -->
 <section id="manager" style="padding:120px 0 0">
@@ -1020,7 +1039,8 @@ footer{
   </div>
 </div>
 
-<div class="divider"></div>
+<!-- ════ CREAM BAND: privacy + pilot ════ -->
+<div class="on-cream">
 
 <!-- PRIVACY & SAFETY -->
 <section id="privacy" style="padding:120px 0">
@@ -1065,7 +1085,7 @@ footer{
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="divider-light"></div>
 
 <!-- PILOT VISION -->
 <section id="pilot" style="padding:120px 0">
@@ -1096,21 +1116,21 @@ footer{
         </ul>
       </div>
     </div>
-    <div style="margin-top:80px;padding:40px;border:0.5px solid rgba(184,151,42,0.15);border-radius:4px;background:rgba(184,151,42,0.03);max-width:700px;display:flex;gap:32px;align-items:start" class="anim-fade">
+    <div style="margin-top:80px;padding:40px;border:0.5px solid rgba(28,25,21,0.1);border-radius:4px;background:rgba(184,151,42,0.04);max-width:700px;display:flex;gap:32px;align-items:start" class="anim-fade">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="flex-shrink:0;margin-top:4px">
         <circle cx="16" cy="16" r="14.5" stroke="#B8972A" stroke-width="0.75"/>
         <circle cx="16" cy="16" r="9" stroke="#B8972A" stroke-width="0.75"/>
         <circle cx="16" cy="16" r="3.5" fill="#B8972A"/>
       </svg>
       <div>
-        <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--cream);margin-bottom:10px">Designed for the pilot — not after it.</div>
-        <p style="font-size:13px;line-height:1.75;color:rgba(242,237,227,0.45)">Fifth Circle was built for Chorus from day one — real resident faces, real amenity photography, real building identity. The pilot is not a proof of concept. It's the product.</p>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--charcoal);margin-bottom:10px">Designed for the pilot — not after it.</div>
+        <p style="font-size:13px;line-height:1.75;color:rgba(28,25,21,0.45)">Fifth Circle was built for Chorus from day one — real resident faces, real amenity photography, real building identity. The pilot is not a proof of concept. It's the product.</p>
       </div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
+</div><!-- end cream band -->
 
 <!-- CTA -->
 <section id="cta">
