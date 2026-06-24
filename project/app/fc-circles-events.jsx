@@ -138,6 +138,9 @@ function CircleDetail({ id, ctx }) {
   const [place, setPlace] = useState('Lobby Coffee Bar');
   const [topic, setTopic] = useState(c.sharedInterests[0]);
   const othersOpen = Math.max(0, c.size - 1);
+  const [fbRating, setFbRating] = useState(0);
+  const [fbDone, setFbDone] = useState(c.feedbackGiven || false);
+  const host = c.host ? FC.residents[c.host] : null;
   return (
     <div style={{ paddingBottom: 30 }}>
       <ScreenHeader back="Circles" onBack={ctx.back} eyebrow={c.type} title={c.name} />
@@ -151,10 +154,49 @@ function CircleDetail({ id, ctx }) {
           <Stat label="Meeting place" value={c.place} />
           <Stat label="Members" value={`${c.size} of ${c.cap}`} />
         </div>
+
+        {host &&
+        <div style={{ marginBottom: 22 }}>
+          <SectionLabel mb={12}>Hosted by</SectionLabel>
+          <div onClick={() => ctx.open('profile', c.host)} style={{ display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer', background: C.white, border: '0.5px solid rgba(184,151,42,0.16)', padding: '13px 14px' }}>
+            <Avatar id={c.host} size={42} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: SERIF, fontSize: 16, color: C.charcoal }}>{host.name}</div>
+              <div style={{ fontSize: 10.5, color: C.taupe, fontFamily: SANS, marginTop: 2 }}>{host.occupation}</div>
+            </div>
+            <span style={{ fontSize: 14, color: C.taupeLight }}>›</span>
+          </div>
+        </div>
+        }
+
         <SectionLabel mb={10}>Shared interests</SectionLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 22 }}>
           {c.sharedInterests.map((s) => <Tag key={s} shared>{s}</Tag>)}
         </div>
+
+        {joined && c.lastGathering && !fbDone &&
+        <div style={{ marginBottom: 22 }}>
+          <SectionLabel mb={12}>How was your last gathering?</SectionLabel>
+          <div style={{ background: C.white, border: '0.5px solid rgba(184,151,42,0.16)', padding: '16px 16px' }}>
+            <div style={{ fontSize: 10.5, color: C.taupe, fontFamily: SANS, marginBottom: 14 }}>{c.lastGathering}</div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+              {[1, 2, 3, 4, 5].map((n) =>
+              <span key={n} onClick={() => setFbRating(n)} style={{ fontFamily: SERIF, fontSize: 28, lineHeight: 1, cursor: 'pointer', color: n <= fbRating ? 'var(--gold)' : 'rgba(184,151,42,0.25)', transition: 'color .15s' }}>★</span>
+              )}
+            </div>
+            <BtnDark onClick={() => { if (fbRating) setFbDone(true); }} style={{ opacity: fbRating ? 1 : 0.45 }}>
+              {fbRating ? 'Submit feedback' : 'Tap a star to rate'}
+            </BtnDark>
+          </div>
+        </div>
+        }
+
+        {joined && fbDone && c.lastGathering &&
+        <div style={{ marginBottom: 22, background: 'rgba(107,140,90,0.07)', border: '0.5px solid rgba(107,140,90,0.35)', padding: '13px 15px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <i className="ti ti-circle-check" style={{ fontSize: 16, color: C.green }} />
+          <span style={{ fontSize: 11.5, color: C.charcoalSoft, fontFamily: SANS }}>Thanks — your feedback helps shape the circle.</span>
+        </div>
+        }
 
         {joined ?
         <>

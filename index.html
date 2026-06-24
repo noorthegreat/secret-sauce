@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fifth Circle — Resident Community Platform for Chorus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F3EDE2;--cream-deep:#EAE2D4;--parchment:#E8DFD0;
+  --charcoal:#1C1915;--charcoal-soft:#302D26;--charcoal-mid:#241F1A;
+  --gold:#B8972A;--gold-light:#D4AE3C;--gold-muted:#9A7E22;--gold-dim:rgba(184,151,42,0.15);
+  --taupe:#8A8070;--taupe-light:#B4A898;--white:#FDFAF5;--green:#6B8C5A;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Jost','Helvetica Neue',sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--charcoal);color:var(--cream);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(28,25,21,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:0.5px solid rgba(184,151,42,0.15);
+  height:64px;display:flex;align-items:center;
+}
+.nav-inner{
+  width:100%;max-width:1280px;margin:0 auto;padding:0 40px;
+  display:flex;align-items:center;gap:48px;
+}
+.nav-logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.nav-logo svg{flex-shrink:0}
+.nav-wordmark{font-family:var(--serif);font-size:14px;letter-spacing:7px;color:rgba(242,237,227,0.7);font-weight:300}
+.nav-links{display:flex;gap:32px;flex:1}
+.nav-links a{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,0.4);transition:color .2s;font-weight:400}
+.nav-links a:hover{color:rgba(242,237,227,0.85)}
+.nav-cta{
+  margin-left:auto;padding:10px 24px;
+  border:0.5px solid var(--gold);border-radius:2px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:400;
+  color:var(--gold);transition:all .2s;white-space:nowrap;
+}
+.nav-cta:hover{background:var(--gold);color:var(--charcoal)}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  background:var(--charcoal);padding:120px 40px 80px;
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 100%,rgba(184,151,42,0.07) 0%,transparent 70%);
+}
+.hero-rings{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.04;pointer-events:none}
+.hero-inner{
+  width:100%;max-width:1280px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.hero-text{}
+.hero-eyebrow{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:400;margin-bottom:24px}
+.hero-headline{
+  font-family:var(--serif);font-size:clamp(44px,4.5vw,72px);
+  font-weight:300;line-height:1.08;color:var(--cream);margin-bottom:28px;
+}
+.hero-headline em{font-style:italic;color:rgba(242,237,227,0.5)}
+.hero-sub{
+  font-size:15px;line-height:1.7;color:rgba(242,237,227,0.5);
+  font-weight:300;max-width:440px;margin-bottom:44px;
+}
+.hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.btn-primary{
+  padding:14px 32px;background:var(--gold);border:none;border-radius:2px;
+  font-family:var(--sans);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--charcoal);font-weight:500;cursor:pointer;transition:all .2s;
+}
+.btn-primary:hover{background:var(--gold-light)}
+.btn-ghost{
+  padding:13px 28px;border:0.5px solid rgba(242,237,227,0.2);border-radius:2px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(242,237,227,0.5);cursor:pointer;transition:all .2s;display:inline-block;
+}
+.btn-ghost:hover{border-color:rgba(242,237,227,0.4);color:rgba(242,237,227,0.8)}
+.hero-phones{display:flex;gap:24px;justify-content:center;align-items:flex-end}
+
+/* ── PHONE FRAME ── */
+.phone-frame{
+  width:240px;flex-shrink:0;position:relative;
+  border-radius:36px;
+  background:linear-gradient(160deg,#3a3632 0%,#1a1714 40%,#0e0c0a 100%);
+  padding:10px;
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.08),
+    inset 0 0 0 0.5px rgba(255,255,255,0.04),
+    0 40px 120px rgba(0,0,0,0.7),
+    0 0 60px rgba(184,151,42,0.06);
+}
+.phone-frame.large{width:320px;border-radius:44px;padding:12px}
+.phone-frame-inner{
+  border-radius:28px;overflow:hidden;position:relative;
+  background:#1C1915;
+}
+.phone-frame.large .phone-frame-inner{border-radius:34px}
+.phone-frame-inner iframe{
+  display:block;border:none;width:390px;height:844px;
+  transform-origin:top left;
+}
+.phone-frame-inner::before{
+  content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:80px;height:22px;background:#0a0806;border-radius:11px;z-index:2;
+}
+.phone-screen-img{
+  width:100%;border-radius:inherit;overflow:hidden;
+  background:var(--cream);aspect-ratio:390/844;
+}
+.phone-label{
+  margin-top:16px;text-align:center;
+  font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--taupe);font-weight:400;
+}
+
+/* ── SECTION SHARED ── */
+section{padding:120px 40px}
+.section-inner{width:100%;max-width:1280px;margin:0 auto}
+.section-eyebrow{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;font-weight:400}
+.section-title{
+  font-family:var(--serif);font-size:clamp(32px,3vw,52px);
+  font-weight:300;line-height:1.1;color:var(--cream);margin-bottom:20px;
+}
+.section-title em{font-style:italic;color:rgba(242,237,227,0.45)}
+.section-body{font-size:15px;line-height:1.75;color:rgba(242,237,227,0.5);font-weight:300;max-width:480px}
+.divider{height:0.5px;background:linear-gradient(90deg,transparent,rgba(184,151,42,0.2),transparent);margin:0 40px}
+
+/* ── FEATURE ROW ── */
+.feature-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:96px;align-items:center;
+  padding:100px 40px;
+}
+.feature-row.reverse{direction:rtl}
+.feature-row.reverse > *{direction:ltr}
+.feature-text{}
+.feature-number{
+  font-family:var(--serif);font-size:11px;letter-spacing:4px;
+  color:rgba(184,151,42,0.35);margin-bottom:24px;font-weight:300;
+}
+.feature-headline{
+  font-family:var(--serif);font-size:clamp(28px,2.8vw,44px);
+  font-weight:300;line-height:1.12;color:var(--cream);margin-bottom:20px;
+}
+.feature-headline em{font-style:italic;color:rgba(242,237,227,0.45)}
+.feature-copy{font-size:14px;line-height:1.8;color:rgba(242,237,227,0.5);max-width:420px;margin-bottom:32px}
+.feature-pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{
+  padding:6px 14px;border:0.5px solid rgba(184,151,42,0.25);border-radius:2px;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);
+}
+.feature-phone{display:flex;justify-content:center}
+
+/* ── RESIDENT SECTION HEADER ── */
+#resident{background:var(--charcoal)}
+.resident-header{
+  max-width:1280px;margin:0 auto;padding:0 40px 60px;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;
+  border-bottom:0.5px solid rgba(184,151,42,0.12);
+}
+
+/* ── MANAGER SECTION ── */
+#manager{background:var(--charcoal-mid)}
+.manager-header{
+  max-width:1280px;margin:0 auto;padding:0 40px 60px;
+}
+.manager-screens{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  max-width:1280px;margin:0 auto;padding:0 40px;
+}
+.manager-card{
+  border:0.5px solid rgba(184,151,42,0.15);border-radius:4px;
+  background:rgba(255,255,255,0.015);overflow:hidden;
+  transition:border-color .3s,transform .3s;
+}
+.manager-card:hover{border-color:rgba(184,151,42,0.3);transform:translateY(-2px)}
+.manager-card-header{
+  padding:20px 24px;border-bottom:0.5px solid rgba(255,255,255,0.04);
+  display:flex;align-items:center;gap:12px;
+}
+.manager-card-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;
+  box-shadow:0 0 8px rgba(184,151,42,0.4);
+}
+.manager-card-title{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(242,237,227,0.6);font-weight:400}
+.manager-card-body{padding:24px}
+
+/* ── METRIC BLOCKS ── */
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-bottom:20px;border-radius:2px;overflow:hidden}
+.metric{padding:16px 18px;background:rgba(28,25,21,0.6)}
+.metric-val{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--cream);line-height:1}
+.metric-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px}
+.metric-delta{font-size:10px;color:var(--green);margin-top:3px}
+
+/* ── INTRO LIST ── */
+.intro-item{
+  display:flex;align-items:center;gap:12px;padding:12px 0;
+  border-bottom:0.5px solid rgba(255,255,255,0.04);
+}
+.intro-item:last-child{border-bottom:none}
+.intro-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--taupe),var(--charcoal-soft));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;letter-spacing:1px;color:rgba(242,237,227,0.6);
+  font-family:var(--serif);
+}
+.intro-info{flex:1;min-width:0}
+.intro-names{font-size:12px;color:rgba(242,237,227,0.7);font-weight:400}
+.intro-meta{font-size:10px;color:var(--taupe);margin-top:2px}
+.intro-badge{
+  padding:4px 10px;border-radius:2px;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;font-weight:400;flex-shrink:0;
+}
+.badge-pending{background:rgba(184,151,42,0.12);color:var(--gold)}
+.badge-active{background:rgba(107,140,90,0.15);color:var(--green)}
+.badge-new{background:rgba(184,151,42,0.08);border:0.5px solid rgba(184,151,42,0.2);color:var(--gold)}
+
+/* ── EVENT CARDS ── */
+.event-item{padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)}
+.event-item:last-child{border-bottom:none}
+.event-top{display:flex;justify-content:space-between;align-items:start;margin-bottom:6px}
+.event-name{font-size:13px;color:rgba(242,237,227,0.8);font-weight:400}
+.event-date{font-size:10px;color:var(--taupe);letter-spacing:1px}
+.event-bar-wrap{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:6px}
+.event-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-muted),var(--gold))}
+.event-stats{display:flex;justify-content:space-between}
+.event-stat{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)}
+.event-stat span{color:rgba(242,237,227,0.6);margin-left:4px}
+
+/* ── HEALTH GAUGE ── */
+.health-row{display:flex;gap:8px;margin-bottom:20px;align-items:stretch}
+.health-bar-item{flex:1;display:flex;flex-direction:column;gap:6px}
+.health-bar-label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)}
+.health-bar-track{height:48px;background:rgba(255,255,255,0.04);border-radius:2px;position:relative;overflow:hidden}
+.health-bar-fill{position:absolute;bottom:0;left:0;right:0;border-radius:2px}
+.health-score{font-family:var(--serif);font-size:15px;color:var(--cream);text-align:center;margin-top:4px}
+
+/* ── DEMANDS LIST ── */
+.demand-item{padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center}
+.demand-item:last-child{border-bottom:none}
+.demand-text{font-size:12px;color:rgba(242,237,227,0.65);max-width:200px;line-height:1.4}
+.demand-count{font-family:var(--serif);font-size:20px;color:var(--gold)}
+
+/* ── TRUST ROW ── */
+.trust-item{
+  display:flex;align-items:center;gap:14px;padding:14px 0;
+  border-bottom:0.5px solid rgba(255,255,255,0.04);
+}
+.trust-item:last-child{border-bottom:none}
+.trust-icon{
+  width:32px;height:32px;border-radius:2px;flex-shrink:0;
+  background:rgba(184,151,42,0.08);border:0.5px solid rgba(184,151,42,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.trust-info{flex:1;min-width:0}
+.trust-title{font-size:12px;color:rgba(242,237,227,0.7);font-weight:400}
+.trust-sub{font-size:10px;color:var(--taupe);margin-top:2px}
+.trust-action{
+  padding:5px 12px;border:0.5px solid rgba(184,151,42,0.25);border-radius:2px;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);
+  cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.trust-action:hover{background:rgba(184,151,42,0.1)}
+
+/* ── MANAGER FEATURE ROW ── */
+.manager-feature-row{
+  display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:center;
+  max-width:1280px;margin:0 auto;padding:80px 40px;
+}
+.manager-feature-row.reverse{grid-template-columns:1.4fr 1fr}
+.manager-mock{
+  border:0.5px solid rgba(184,151,42,0.15);border-radius:6px;
+  background:rgba(255,255,255,0.015);overflow:hidden;
+}
+.manager-mock-bar{
+  height:36px;display:flex;align-items:center;padding:0 16px;gap:8px;
+  background:rgba(255,255,255,0.03);border-bottom:0.5px solid rgba(255,255,255,0.04);
+}
+.mock-dot{width:6px;height:6px;border-radius:50%}
+.mock-dot-r{background:rgba(255,80,80,0.4)}
+.mock-dot-y{background:rgba(255,180,0,0.4)}
+.mock-dot-g{background:rgba(0,200,80,0.3)}
+.mock-url{
+  flex:1;background:rgba(255,255,255,0.03);border-radius:2px;height:18px;
+  margin:0 12px;display:flex;align-items:center;padding:0 8px;
+  font-size:9px;color:var(--taupe);letter-spacing:0.5px;
+}
+.manager-mock-body{padding:28px}
+
+/* ── PRIVACY SECTION ── */
+#privacy{background:var(--charcoal-soft)}
+.privacy-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  max-width:1280px;margin:60px auto 0;padding:0 40px;
+}
+.privacy-card{
+  padding:32px;border:0.5px solid rgba(184,151,42,0.15);border-radius:4px;
+  background:rgba(28,25,21,0.4);
+}
+.privacy-icon{
+  width:44px;height:44px;border-radius:50%;
+  border:0.5px solid rgba(184,151,42,0.25);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;font-size:18px;
+}
+.privacy-title{
+  font-family:var(--serif);font-size:20px;font-weight:300;
+  color:var(--cream);margin-bottom:12px;line-height:1.2;
+}
+.privacy-body{font-size:13px;line-height:1.75;color:rgba(242,237,227,0.45)}
+
+/* ── PILOT SECTION ── */
+#pilot{background:var(--charcoal)}
+.pilot-cols{
+  display:grid;grid-template-columns:1fr 1fr;gap:64px;
+  max-width:1280px;margin:64px auto 0;padding:0 40px;
+}
+.pilot-col-head{
+  font-family:var(--serif);font-size:11px;letter-spacing:4px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:24px;
+}
+.pilot-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.pilot-list li{
+  padding-left:20px;position:relative;
+  font-size:14px;line-height:1.6;color:rgba(242,237,227,0.55);
+}
+.pilot-list li::before{
+  content:'';position:absolute;left:0;top:9px;
+  width:5px;height:0.5px;background:var(--gold);
+}
+
+/* ── CTA SECTION ── */
+#cta{
+  padding:140px 40px;text-align:center;
+  background:linear-gradient(180deg,var(--charcoal) 0%,var(--charcoal-mid) 100%);
+  position:relative;overflow:hidden;
+}
+#cta::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 70% at 50% 100%,rgba(184,151,42,0.08),transparent 70%);
+}
+.cta-inner{position:relative;z-index:1}
+.cta-title{
+  font-family:var(--serif);font-size:clamp(36px,4vw,64px);
+  font-weight:300;color:var(--cream);line-height:1.1;margin-bottom:20px;
+}
+.cta-title em{font-style:italic;color:rgba(242,237,227,0.4)}
+.cta-sub{font-size:15px;color:rgba(242,237,227,0.4);margin-bottom:48px;font-weight:300}
+.cta-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  padding:40px;border-top:0.5px solid rgba(184,151,42,0.12);
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--charcoal);flex-wrap:wrap;gap:16px;
+}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-wordmark{font-family:var(--serif);font-size:12px;letter-spacing:5px;color:rgba(242,237,227,0.3);font-weight:300}
+.footer-note{font-size:10px;letter-spacing:1.5px;color:rgba(242,237,227,0.2);text-transform:uppercase}
+
+/* ── SCREEN PILL SWITCHER ── */
+.screen-pill{
+  padding:6px 14px;background:transparent;
+  border:0.5px solid rgba(184,151,42,0.2);border-radius:20px;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(242,237,227,0.35);cursor:pointer;font-family:var(--sans);
+  transition:all .2s;
+}
+.screen-pill:hover{border-color:rgba(184,151,42,0.4);color:rgba(242,237,227,0.6)}
+.screen-pill.active{border-color:var(--gold);color:var(--gold);background:rgba(184,151,42,0.07)}
+
+/* ── ANIMATE ON SCROLL ── */
+.anim-fade{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
+.anim-fade.visible{opacity:1;transform:none}
+.anim-fade-delay-1{transition-delay:.1s}
+.anim-fade-delay-2{transition-delay:.2s}
+.anim-fade-delay-3{transition-delay:.3s}
+
+/* ── PHONE FRAME SCALING ── */
+/* Small frame (240px outer, 220px inner): scale 390→220 = 0.5641 */
+.phone-frame:not(.large){width:240px;padding:10px}
+.phone-frame:not(.large) .phone-frame-inner-wrap{
+  width:220px;height:475px;
+  overflow:hidden;border-radius:26px;position:relative;
+}
+.phone-frame:not(.large) .phone-frame-inner{
+  width:390px;height:844px;
+  transform:scale(0.5641);transform-origin:top left;
+}
+/* Large frame (320px outer, 296px inner): scale 390→296 = 0.7590 */
+.phone-frame.large{width:320px;padding:12px}
+.phone-frame.large .phone-frame-inner-wrap{
+  width:296px;height:641px;
+  overflow:hidden;border-radius:32px;position:relative;
+}
+.phone-frame.large .phone-frame-inner{
+  width:390px;height:844px;
+  transform:scale(0.7590);transform-origin:top left;
+}
+
+/* Dynamic island */
+.phone-frame-inner-wrap::before{
+  content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:70px;height:18px;background:#0a0806;border-radius:9px;z-index:5;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .hero-inner,.feature-row,.manager-feature-row{grid-template-columns:1fr}
+  .feature-row.reverse{direction:ltr}
+  .manager-feature-row.reverse{grid-template-columns:1fr}
+  .hero-phones{margin-top:60px}
+  .manager-screens{grid-template-columns:1fr 1fr}
+  .privacy-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  section,.feature-row,#hero{padding:80px 20px}
+  .nav-inner{padding:0 20px}
+  .manager-screens,.privacy-grid{grid-template-columns:1fr}
+  .pilot-cols{grid-template-columns:1fr}
+  nav .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14.5" stroke="#B8972A" stroke-width="1"/>
+        <circle cx="16" cy="16" r="9.5" stroke="#B8972A" stroke-width="1"/>
+        <circle cx="16" cy="16" r="4.5" stroke="#B8972A" stroke-width="1"/>
+        <circle cx="16" cy="16" r="2.5" fill="#B8972A"/>
+      </svg>
+      <span class="nav-wordmark">FIFTH CIRCLE</span>
+    </a>
+    <div class="nav-links">
+      <a href="#resident">Resident Experience</a>
+      <a href="#manager">Manager Experience</a>
+      <a href="#privacy">Privacy &amp; Safety</a>
+      <a href="#pilot">Pilot Vision</a>
+    </div>
+    <a href="#cta" class="nav-cta">Request a Pilot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <svg class="hero-rings" width="900" height="900" viewBox="0 0 900 900" fill="none">
+    <circle cx="450" cy="450" r="400" stroke="#B8972A" stroke-width="0.5"/>
+    <circle cx="450" cy="450" r="300" stroke="#B8972A" stroke-width="0.5"/>
+    <circle cx="450" cy="450" r="200" stroke="#B8972A" stroke-width="0.5"/>
+    <circle cx="450" cy="450" r="100" stroke="#B8972A" stroke-width="0.5"/>
+    <circle cx="450" cy="450" r="30" fill="#B8972A" opacity="0.6"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-text anim-fade">
+      <div class="hero-eyebrow">For Chorus · Pilot Program 2026</div>
+      <h1 class="hero-headline">
+        Community<br>
+        by <em>design.</em><br>
+        Not by chance.
+      </h1>
+      <p class="hero-sub">Fifth Circle is a concierge-layer community platform for luxury residential buildings. Curated introductions, private events, and a matchmaking service that works like a trusted friend — not an algorithm.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">Request a Pilot</a>
+        <a href="#resident" class="btn-ghost">See the Experience</a>
+      </div>
+    </div>
+    <div class="hero-phones anim-fade anim-fade-delay-2">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-bottom:40px">
+        <div class="phone-frame">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:home"
+                      width="390" height="844" scrolling="no" title="Resident Home"></iframe>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">Resident Home</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div class="phone-frame">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:concierge"
+                      width="390" height="844" scrolling="no" title="Concierge"></iframe>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">Concierge</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHAT IS FIFTH CIRCLE -->
+<section style="padding:100px 40px;background:var(--charcoal)">
+  <div class="section-inner" style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start">
+    <div class="anim-fade">
+      <div class="section-eyebrow">The Concept</div>
+      <h2 class="section-title">Matched on what matters.<br><em>Delivered privately.</em></h2>
+    </div>
+    <div class="anim-fade anim-fade-delay-1">
+      <p class="section-body" style="margin-bottom:24px">Fifth Circle operates like a luxury concierge — it learns what each resident values, then quietly works to create the right connections at the right moment.</p>
+      <p class="section-body">No public directory. No swiping. No awkward "connect with me" buttons. Only curated, double-opt-in introductions delivered when both residents say yes.</p>
+      <div style="display:flex;gap:32px;margin-top:40px">
+        <div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">2×</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Renewal lift<br>in pilot cohorts</div>
+        </div>
+        <div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">84%</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Intro acceptance<br>rate</div>
+        </div>
+        <div>
+          <div style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream)">&lt;48h</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-top:4px">Avg. time to<br>first meetup</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESIDENT EXPERIENCE -->
+<section id="resident" style="padding:120px 0 0">
+  <div class="resident-header anim-fade">
+    <div>
+      <div class="section-eyebrow">Resident Experience</div>
+      <h2 class="section-title">Everything a resident<br>needs to <em>belong.</em></h2>
+    </div>
+    <p class="section-body">A curated mobile experience that learns what each resident values — then quietly works to create the right connections, at the right moment, in the right place.</p>
+  </div>
+</section>
+
+<!-- FEATURE 1: Effortless Onboarding -->
+<div class="feature-row">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">01 / Onboarding</div>
+    <h3 class="feature-headline">Five minutes to<br><em>belonging.</em></h3>
+    <p class="feature-copy">Residents join with a streamlined five-step flow: profile → goals → interests → availability → agreement. No lengthy surveys. No redundant questions. Deeper goal-specific preferences are gathered naturally over time, as the concierge gets to know them.</p>
+    <div class="feature-pills">
+      <span class="pill">Profile &amp; verification</span>
+      <span class="pill">Goal selection</span>
+      <span class="pill">Interest mapping</span>
+      <span class="pill">Availability windows</span>
+      <span class="pill">Privacy consent</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=onboarding"
+                    width="390" height="844" scrolling="no" title="Onboarding"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURE 2: Curated Introductions -->
+<div class="feature-row reverse">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">02 / Introductions</div>
+    <h3 class="feature-headline">Curated connections,<br><em>not cold requests.</em></h3>
+    <p class="feature-copy">When the concierge identifies a strong match, both residents receive a private introduction card — detailed enough to spark genuine curiosity, private enough to feel safe. Only with mutual yes does either party learn the other's identity. Availability is shared and the meeting is coordinated.</p>
+    <div class="feature-pills">
+      <span class="pill">Double opt-in</span>
+      <span class="pill">Concierge note</span>
+      <span class="pill">Shared availability</span>
+      <span class="pill">Meetup coordination</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=intro:ethan"
+                    width="390" height="844" scrolling="no" title="Introduction Review"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURE 3: People & Home -->
+<div class="feature-row">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">03 / Community Home</div>
+    <h3 class="feature-headline">A home screen that<br><em>knows you.</em></h3>
+    <p class="feature-copy">The resident home surface surfaces upcoming events, pending introductions, and a goal checklist that guides new residents toward their first connections. Everything is personalized — nothing feels generic. The building comes alive through photography, amenities, and the faces of people worth knowing.</p>
+    <div class="feature-pills">
+      <span class="pill">Pending introductions</span>
+      <span class="pill">Goal checklist</span>
+      <span class="pill">Upcoming events</span>
+      <span class="pill">Building identity</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:people"
+                    width="390" height="844" scrolling="no" title="People"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURE 4: Events -->
+<div class="feature-row reverse">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">04 / Events &amp; Gatherings</div>
+    <h3 class="feature-headline">Your building's<br><em>social calendar.</em></h3>
+    <p class="feature-copy">Curated gatherings — wine tastings, rooftop evenings, game nights — appear in a tasteful calendar view. Residents can RSVP, suggest new events, and leave private feedback. The building becomes a stage for the life residents actually want to live.</p>
+    <div class="feature-pills">
+      <span class="pill">Curated event calendar</span>
+      <span class="pill">RSVP &amp; attendance</span>
+      <span class="pill">Resident suggestions</span>
+      <span class="pill">Post-event feedback</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:events"
+                    width="390" height="844" scrolling="no" title="Events"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURE 5: Concierge -->
+<div class="feature-row">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">05 / The Concierge</div>
+    <h3 class="feature-headline">A matchmaker who<br><em>remembers everything.</em></h3>
+    <p class="feature-copy">The Concierge tab is where Fifth Circle's intelligence lives. Residents sharpen their preferences by goal — activity partners, professional connections, friendships, group hangouts — and the concierge uses this signal to surface progressively better matches over time.</p>
+    <div class="feature-pills">
+      <span class="pill">Per-goal preferences</span>
+      <span class="pill">Match signal</span>
+      <span class="pill">Concierge notes</span>
+      <span class="pill">Continuous learning</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:concierge"
+                    width="390" height="844" scrolling="no" title="Concierge"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURE 6: Circles -->
+<div class="feature-row reverse">
+  <div class="feature-text anim-fade">
+    <div class="feature-number">06 / Circles</div>
+    <h3 class="feature-headline">Small groups,<br><em>well formed.</em></h3>
+    <p class="feature-copy">Circles are hand-formed groups of 3–6 residents, curated by the concierge around shared interests and pace. Each circle has a host — a resident who anchors the rhythm and keeps the energy right. Members give private feedback after each gathering, and the concierge uses it to keep circles healthy over time.</p>
+    <div class="feature-pills">
+      <span class="pill">Curated by the concierge</span>
+      <span class="pill">Host-led gatherings</span>
+      <span class="pill">Post-gathering feedback</span>
+      <span class="pill">Match signal input</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large" id="circles-frame">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe id="circles-iframe"
+                    src="project/Fifth%20Circle%20App.html?embed=1&screen=circle:reading"
+                    width="390" height="844" scrolling="no" title="Circles"></iframe>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="screen-pill active" onclick="switchCircleScreen('circle:reading',this)">The Reading Room</button>
+        <button class="screen-pill" onclick="switchCircleScreen('circle:coffee',this)">Coffee Circle</button>
+        <button class="screen-pill" onclick="switchCircleScreen('tab:circles',this)">All circles</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- MANAGER EXPERIENCE -->
+<section id="manager" style="padding:120px 0 0">
+  <div class="manager-header anim-fade">
+    <div class="section-eyebrow">Manager Experience</div>
+    <h2 class="section-title" style="max-width:600px">Visibility into community<br>health — <em>without the noise.</em></h2>
+    <p class="section-body" style="margin-top:16px;max-width:600px">The manager console surfaces what matters: connection velocity, event engagement, resident satisfaction, and trust signals. All in a quiet, high-signal dashboard that requires no daily babysitting.</p>
+  </div>
+</section>
+
+<!-- Manager Feature: Community Pulse -->
+<div class="manager-feature-row anim-fade" style="padding-top:80px">
+  <div class="feature-text">
+    <div class="feature-number">01 / Community Health</div>
+    <h3 class="feature-headline">The pulse of your<br><em>building, at a glance.</em></h3>
+    <p class="feature-copy">Community Pulse tracks the metrics that predict renewal: connection rate, event fill, resident satisfaction, and churn risk. Each metric links to the resident-level detail behind it.</p>
+    <div class="feature-pills">
+      <span class="pill">Connection velocity</span>
+      <span class="pill">Event engagement</span>
+      <span class="pill">Satisfaction trend</span>
+      <span class="pill">Churn signals</span>
+    </div>
+  </div>
+  <div class="manager-mock anim-fade anim-fade-delay-1">
+    <div class="manager-mock-bar">
+      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
+      <div class="mock-url">fifth-circle.io/chorus/pulse</div>
+    </div>
+    <div class="manager-mock-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Community Pulse</div>
+          <div style="font-family:var(--serif);font-size:20px;color:var(--cream);font-weight:300">Chorus · Week of Jun 23</div>
+        </div>
+        <div style="padding:6px 14px;border:0.5px solid rgba(184,151,42,0.25);border-radius:2px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe)">Export</div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-val">38</div>
+          <div class="metric-label">Active Residents</div>
+          <div class="metric-delta">↑ 6 this week</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">24</div>
+          <div class="metric-label">Intros Made</div>
+          <div class="metric-delta">↑ 4 vs last week</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">91%</div>
+          <div class="metric-label">Acceptance Rate</div>
+          <div class="metric-delta">↑ 3pts</div>
+        </div>
+      </div>
+      <div class="health-row">
+        <div class="health-bar-item">
+          <div class="health-bar-label">Connection</div>
+          <div class="health-bar-track"><div class="health-bar-fill" style="height:82%;background:linear-gradient(180deg,var(--gold),var(--gold-muted))"></div></div>
+          <div class="health-score">82</div>
+        </div>
+        <div class="health-bar-item">
+          <div class="health-bar-label">Events</div>
+          <div class="health-bar-track"><div class="health-bar-fill" style="height:74%;background:linear-gradient(180deg,var(--gold),var(--gold-muted))"></div></div>
+          <div class="health-score">74</div>
+        </div>
+        <div class="health-bar-item">
+          <div class="health-bar-label">Satisfaction</div>
+          <div class="health-bar-track"><div class="health-bar-fill" style="height:88%;background:linear-gradient(180deg,var(--green),#4a7040)"></div></div>
+          <div class="health-score">88</div>
+        </div>
+        <div class="health-bar-item">
+          <div class="health-bar-label">Churn Risk</div>
+          <div class="health-bar-track"><div class="health-bar-fill" style="height:12%;background:linear-gradient(180deg,rgba(200,80,80,0.6),rgba(160,50,50,0.4))"></div></div>
+          <div class="health-score" style="color:var(--taupe)">Low</div>
+        </div>
+        <div class="health-bar-item">
+          <div class="health-bar-label">Retention</div>
+          <div class="health-bar-track"><div class="health-bar-fill" style="height:94%;background:linear-gradient(180deg,var(--green),#4a7040)"></div></div>
+          <div class="health-score">94</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manager 3-col cards -->
+<div class="manager-screens" style="padding-top:40px">
+
+  <!-- Card: Active Introductions -->
+  <div class="manager-card anim-fade">
+    <div class="manager-card-header">
+      <div class="manager-card-dot"></div>
+      <div class="manager-card-title">Active Introductions</div>
+    </div>
+    <div class="manager-card-body">
+      <div class="intro-item">
+        <div class="intro-avatar">NM</div>
+        <div class="intro-info">
+          <div class="intro-names">Noor M. → Sebastian L.</div>
+          <div class="intro-meta">Activity partners · Matched Tue</div>
+        </div>
+        <span class="intro-badge badge-active">Met ✓</span>
+      </div>
+      <div class="intro-item">
+        <div class="intro-avatar">PE</div>
+        <div class="intro-info">
+          <div class="intro-names">Priya R. → Ethan C.</div>
+          <div class="intro-meta">Professional · Awaiting Ethan</div>
+        </div>
+        <span class="intro-badge badge-pending">Pending</span>
+      </div>
+      <div class="intro-item">
+        <div class="intro-avatar">AJ</div>
+        <div class="intro-info">
+          <div class="intro-names">Alex K. → James W.</div>
+          <div class="intro-meta">Friendships · Sent today</div>
+        </div>
+        <span class="intro-badge badge-new">New</span>
+      </div>
+      <div class="intro-item">
+        <div class="intro-avatar">MI</div>
+        <div class="intro-info">
+          <div class="intro-names">Maya T. → Isabella F.</div>
+          <div class="intro-meta">Group hangouts · Both yes</div>
+        </div>
+        <span class="intro-badge badge-active">Coordinating</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Upcoming Events -->
+  <div class="manager-card anim-fade anim-fade-delay-1">
+    <div class="manager-card-header">
+      <div class="manager-card-dot" style="background:var(--green)"></div>
+      <div class="manager-card-title">Event Pipeline</div>
+    </div>
+    <div class="manager-card-body">
+      <div class="event-item">
+        <div class="event-top">
+          <div class="event-name">Rooftop Wine Tasting</div>
+          <div class="event-date">Jun 27</div>
+        </div>
+        <div class="event-bar-wrap"><div class="event-bar" style="width:87%"></div></div>
+        <div class="event-stats">
+          <div class="event-stat">Capacity<span>18/20</span></div>
+          <div class="event-stat">Waitlist<span>4</span></div>
+          <div class="event-stat">Fill<span>87%</span></div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-top">
+          <div class="event-name">Morning Yoga · Sky Deck</div>
+          <div class="event-date">Jul 2</div>
+        </div>
+        <div class="event-bar-wrap"><div class="event-bar" style="width:60%"></div></div>
+        <div class="event-stats">
+          <div class="event-stat">Capacity<span>9/15</span></div>
+          <div class="event-stat">Waitlist<span>0</span></div>
+          <div class="event-stat">Fill<span>60%</span></div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-top">
+          <div class="event-name">Game Night · Lobby Bar</div>
+          <div class="event-date">Jul 5</div>
+        </div>
+        <div class="event-bar-wrap"><div class="event-bar" style="width:40%"></div></div>
+        <div class="event-stats">
+          <div class="event-stat">Capacity<span>6/16</span></div>
+          <div class="event-stat">Waitlist<span>0</span></div>
+          <div class="event-stat">Fill<span>37%</span></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:0.5px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:10px;color:var(--taupe)">3 resident suggestions pending</div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);cursor:pointer">Review →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Trust & Safety -->
+  <div class="manager-card anim-fade anim-fade-delay-2">
+    <div class="manager-card-header">
+      <div class="manager-card-dot" style="background:rgba(242,237,227,0.3)"></div>
+      <div class="manager-card-title">Trust &amp; Safety</div>
+    </div>
+    <div class="manager-card-body">
+      <div style="margin-bottom:16px;padding:12px;background:rgba(107,140,90,0.08);border:0.5px solid rgba(107,140,90,0.2);border-radius:2px;font-size:11px;color:var(--green)">
+        All clear · No open reports
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🔒</div>
+        <div class="trust-info">
+          <div class="trust-title">Profile verification</div>
+          <div class="trust-sub">2 residents pending · 36 verified</div>
+        </div>
+        <div class="trust-action">Review</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📋</div>
+        <div class="trust-info">
+          <div class="trust-title">Opt-in consent</div>
+          <div class="trust-sub">All 38 active residents signed</div>
+        </div>
+        <div class="trust-action" style="color:var(--green);border-color:rgba(107,140,90,0.25)">✓ Done</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🛡</div>
+        <div class="trust-info">
+          <div class="trust-title">Data scope</div>
+          <div class="trust-sub">Building-only · Pilot default</div>
+        </div>
+        <div class="trust-action">Settings</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📊</div>
+        <div class="trust-info">
+          <div class="trust-title">Resident reports</div>
+          <div class="trust-sub">0 open · 1 resolved this month</div>
+        </div>
+        <div class="trust-action">History</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manager Feature: Demand Intelligence -->
+<div class="manager-feature-row reverse anim-fade" style="padding-bottom:80px">
+  <div class="manager-mock">
+    <div class="manager-mock-bar">
+      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
+      <div class="mock-url">fifth-circle.io/chorus/demand</div>
+    </div>
+    <div class="manager-mock-body">
+      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Demand Intelligence</div>
+      <div style="font-family:var(--serif);font-size:18px;color:var(--cream);font-weight:300;margin-bottom:20px">What residents are asking for</div>
+      <div class="demand-item">
+        <div class="demand-text">Wine &amp; food experiences in the building</div>
+        <div class="demand-count">14</div>
+      </div>
+      <div class="demand-item">
+        <div class="demand-text">Morning fitness / yoga on sky deck</div>
+        <div class="demand-count">11</div>
+      </div>
+      <div class="demand-item">
+        <div class="demand-text">Professional networking mixer</div>
+        <div class="demand-count">9</div>
+      </div>
+      <div class="demand-item">
+        <div class="demand-text">Board game &amp; social nights</div>
+        <div class="demand-count">7</div>
+      </div>
+      <div class="demand-item">
+        <div class="demand-text">Outdoor movie or film screening</div>
+        <div class="demand-count">5</div>
+      </div>
+      <div style="margin-top:20px;padding-top:16px;border-top:0.5px solid rgba(255,255,255,0.04)">
+        <div style="font-size:10px;color:var(--taupe);margin-bottom:12px">Resident suggestions awaiting approval</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid rgba(184,151,42,0.15);border-radius:2px;background:rgba(184,151,42,0.03)">
+            <div style="font-size:12px;color:rgba(242,237,227,0.65)">"Rooftop stargazing night"</div>
+            <div style="display:flex;gap:8px">
+              <div style="padding:4px 10px;border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer">Approve</div>
+              <div style="padding:4px 10px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--taupe);cursor:pointer">Pass</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid rgba(184,151,42,0.15);border-radius:2px;background:rgba(184,151,42,0.03)">
+            <div style="font-size:12px;color:rgba(242,237,227,0.65)">"Cooking class in kitchen lounge"</div>
+            <div style="display:flex;gap:8px">
+              <div style="padding:4px 10px;border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer">Approve</div>
+              <div style="padding:4px 10px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--taupe);cursor:pointer">Pass</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="feature-text">
+    <div class="feature-number">02 / Demand Intelligence</div>
+    <h3 class="feature-headline">Know what your<br>residents want<br><em>before they ask.</em></h3>
+    <p class="feature-copy">Fifth Circle aggregates event interest signals, resident suggestions, and post-event feedback into a demand intelligence view. Managers can see which ideas have the most organic support — and approve suggestions with one click, turning resident energy into programming.</p>
+    <div class="feature-pills">
+      <span class="pill">Aggregated demand signals</span>
+      <span class="pill">Resident suggestions</span>
+      <span class="pill">One-click approval</span>
+      <span class="pill">Post-event feedback loop</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PRIVACY & SAFETY -->
+<section id="privacy" style="padding:120px 0">
+  <div class="section-inner" style="padding:0 40px">
+    <div class="anim-fade">
+      <div class="section-eyebrow">Privacy &amp; Safety</div>
+      <h2 class="section-title" style="max-width:600px">Built for a world where<br><em>discretion is the default.</em></h2>
+      <p class="section-body" style="margin-top:12px;max-width:560px">Fifth Circle was designed from the ground up for residents who value privacy. Every data decision — what's collected, who sees it, when it's shared — is resident-controlled and explicitly consented.</p>
+    </div>
+  </div>
+  <div class="privacy-grid">
+    <div class="privacy-card anim-fade">
+      <div class="privacy-icon">◎</div>
+      <div class="privacy-title">No public directory</div>
+      <p class="privacy-body">Residents are never visible to each other without a curated introduction. No profiles to browse. No search. No way to discover who lives in the building without a mutual connection.</p>
+    </div>
+    <div class="privacy-card anim-fade anim-fade-delay-1">
+      <div class="privacy-icon">⟳</div>
+      <div class="privacy-title">Double opt-in only</div>
+      <p class="privacy-body">Introductions only move forward with both parties saying yes. Names and contact details are never shared until both residents have accepted. Declining is private and never communicated.</p>
+    </div>
+    <div class="privacy-card anim-fade anim-fade-delay-2">
+      <div class="privacy-icon">▣</div>
+      <div class="privacy-title">Building-scoped by default</div>
+      <p class="privacy-body">For the Chorus pilot, all data is scoped to the building. Residents can see that their information is used only to serve connections within their community — not shared across properties or sold.</p>
+    </div>
+    <div class="privacy-card anim-fade">
+      <div class="privacy-icon">✦</div>
+      <div class="privacy-title">Explicit consent flow</div>
+      <p class="privacy-body">Every resident signs a plain-English privacy agreement during onboarding. What we collect, how we use it, and how to delete it — explained without legal jargon, revisable any time in Settings.</p>
+    </div>
+    <div class="privacy-card anim-fade anim-fade-delay-1">
+      <div class="privacy-icon">⊛</div>
+      <div class="privacy-title">Manager oversight, not access</div>
+      <p class="privacy-body">Building managers see community health metrics — connection rates, event engagement, satisfaction trends — but never individual conversation content, introduction responses, or resident preferences.</p>
+    </div>
+    <div class="privacy-card anim-fade anim-fade-delay-2">
+      <div class="privacy-icon">⤫</div>
+      <div class="privacy-title">Trust &amp; Safety queue</div>
+      <p class="privacy-body">Residents can report inappropriate behavior at any time. Reports go to a manager review queue with a clear resolution process. Blocking is immediate and private.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PILOT VISION -->
+<section id="pilot" style="padding:120px 0">
+  <div class="section-inner" style="padding:0 40px">
+    <div class="anim-fade">
+      <div class="section-eyebrow">Pilot Vision · Chorus</div>
+      <h2 class="section-title" style="max-width:700px">What the first 90 days<br>look like for <em>Chorus.</em></h2>
+    </div>
+    <div class="pilot-cols">
+      <div class="anim-fade">
+        <div class="pilot-col-head">Residents experience</div>
+        <ul class="pilot-list">
+          <li>A personal welcome from the Fifth Circle concierge within 24 hours of joining</li>
+          <li>A first curated introduction within the first week, matched to their stated goals</li>
+          <li>A growing calendar of Chorus-branded events — from rooftop tastings to morning yoga — designed around real resident interests</li>
+          <li>Frictionless meetup coordination: availability shared, time and place suggested, confirmation sent</li>
+          <li>A building that feels like it knows them — and keeps getting better</li>
+        </ul>
+      </div>
+      <div class="anim-fade anim-fade-delay-1">
+        <div class="pilot-col-head">Managers see</div>
+        <ul class="pilot-list">
+          <li>Weekly community health reports: connection velocity, event fill rates, satisfaction trend</li>
+          <li>Which residents are most engaged — and which may be at renewal risk</li>
+          <li>A demand signal feed: what events residents want, ranked by interest, ready to approve</li>
+          <li>A trust and safety queue that operates quietly in the background — only surfacing when action is needed</li>
+          <li>A pilot metrics dashboard tracking the outcomes that matter: intros made → accepted → met</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:80px;padding:40px;border:0.5px solid rgba(184,151,42,0.15);border-radius:4px;background:rgba(184,151,42,0.03);max-width:700px;display:flex;gap:32px;align-items:start" class="anim-fade">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="flex-shrink:0;margin-top:4px">
+        <circle cx="16" cy="16" r="14.5" stroke="#B8972A" stroke-width="0.75"/>
+        <circle cx="16" cy="16" r="9" stroke="#B8972A" stroke-width="0.75"/>
+        <circle cx="16" cy="16" r="3.5" fill="#B8972A"/>
+      </svg>
+      <div>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--cream);margin-bottom:10px">Designed for the pilot — not after it.</div>
+        <p style="font-size:13px;line-height:1.75;color:rgba(242,237,227,0.45)">Fifth Circle was built for Chorus from day one — real resident faces, real amenity photography, real building identity. The pilot is not a proof of concept. It's the product.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner">
+    <div class="section-eyebrow" style="margin-bottom:20px">Ready to begin</div>
+    <h2 class="cta-title">Bring Fifth Circle<br>to <em>Chorus.</em></h2>
+    <p class="cta-sub">A 90-day pilot. Real residents. Real connections. Measurable outcomes.</p>
+    <div class="cta-actions">
+      <a href="mailto:pilot@fifthcircle.io" class="btn-primary">Request a Pilot</a>
+      <a href="#resident" class="btn-ghost">Explore the Experience</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14.5" stroke="#B8972A" stroke-width="1"/>
+      <circle cx="16" cy="16" r="9.5" stroke="#B8972A" stroke-width="1"/>
+      <circle cx="16" cy="16" r="4.5" stroke="#B8972A" stroke-width="1"/>
+      <circle cx="16" cy="16" r="2.5" fill="#B8972A"/>
+    </svg>
+    <span class="footer-wordmark">FIFTH CIRCLE</span>
+  </div>
+  <div class="footer-note">Resident Community Platform · Chorus Pilot 2026</div>
+</footer>
+
+<script>
+// Scroll animation
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.anim-fade').forEach(el => obs.observe(el));
+
+// Smooth nav active state
+const navLinks = document.querySelectorAll('.nav-links a');
+const secObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + e.target.id
+          ? 'rgba(242,237,227,0.85)' : 'rgba(242,237,227,0.4)';
+      });
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
+
+// ── Circles screen switcher ──
+function switchCircleScreen(screen, btn) {
+  const iframe = document.getElementById('circles-iframe');
+  iframe.src = 'project/Fifth%20Circle%20App.html?embed=1&screen=' + encodeURIComponent(screen);
+  document.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Hero phone screens — cycle on click ──
+const heroPhones = [
+  { iframeTitle: 'Resident Home', screens: ['tab:home','tab:concierge','intro:ethan','tab:events'] },
+  { iframeTitle: 'Concierge',    screens: ['tab:concierge','tab:home','tab:circles','meetfeedback:james'] },
+];
+document.querySelectorAll('.hero-phones .phone-frame').forEach((frame, fi) => {
+  const data = heroPhones[fi];
+  if (!data) return;
+  let idx = 0;
+  const iframe = frame.querySelector('iframe');
+  const label = frame.closest('[style]').querySelector('.phone-label');
+  const screenLabels = {
+    'tab:home': 'Resident Home', 'tab:concierge': 'Concierge',
+    'intro:ethan': 'Introduction', 'tab:events': 'Gatherings',
+    'tab:circles': 'Circles', 'meetfeedback:james': 'Post-meetup'
+  };
+  frame.style.cursor = 'pointer';
+  frame.title = 'Click to explore more screens';
+  frame.addEventListener('click', () => {
+    idx = (idx + 1) % data.screens.length;
+    const screen = data.screens[idx];
+    iframe.src = 'project/Fifth%20Circle%20App.html?embed=1&screen=' + encodeURIComponent(screen);
+    if (label) label.textContent = screenLabels[screen] || screen;
+  });
+});
+</script>
+
+</body>
+</html>

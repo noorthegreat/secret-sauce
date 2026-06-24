@@ -1,5 +1,9 @@
 /* Fifth Circle — App shell: router, screen-jump rail, tweaks. */
 
+const _qp = new URLSearchParams(window.location.search);
+const EMBED = _qp.get('embed') === '1';
+const INIT_SCREEN = _qp.get('screen') || null;
+
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accent": ["#B8972A", "#D4AE3C", "#9A7E22"],
   "surface": "refined",
@@ -60,21 +64,12 @@ function App() {
 
   const scrollTop = () => {if (scrollRef.current) scrollRef.current.scrollTop = 0;};
 
-  const ctx = {
-    go: (tb) => {setTab(tb);setStack([]);setMode('app');setRailKey('tab:' + tb);scrollTop();},
-    open: (view, id) => {setStack((s) => [...s, { view, id }]);scrollTop();},
-    back: () => {setStack((s) => s.slice(0, -1));scrollTop();},
-    startOnboarding: () => {setObStart('landing');setMode('onboarding');setRailKey('landing');scrollTop();},
-    refined, newArrival, visual
-  };
-
   const jump = (item) => {
     setRailKey(item.k);
     if (item.k === 'landing') {setObStart('landing');setMode('onboarding');scrollTop();return;}
     if (item.k === 'onboarding') {setObStart('consent');setMode('onboarding');scrollTop();return;}
     setMode('app');
     if (item.k.startsWith('tab:')) {setTab(item.k.slice(4));setStack([]);scrollTop();return;}
-    // detail screen
     const base = item.tab || 'home';
     setTab(base);
     if (item.k.includes(':')) {
@@ -84,6 +79,24 @@ function App() {
       setStack([{ view: item.k, id: null }]);
     }
     scrollTop();
+  };
+
+  // Embed API: postMessage {type:'fc:jump',screen:'key'} or window.fcJump(key)
+  useEffect(() => {
+    const doJump = (key) => { const item = RAIL.find(r => r.k === key); if (item) jump(item); };
+    if (INIT_SCREEN) doJump(INIT_SCREEN);
+    const handler = (e) => { if (e.data && e.data.type === 'fc:jump' && e.data.screen) doJump(e.data.screen); };
+    window.addEventListener('message', handler);
+    window.fcJump = doJump;
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const ctx = {
+    go: (tb) => {setTab(tb);setStack([]);setMode('app');setRailKey('tab:' + tb);scrollTop();},
+    open: (view, id) => {setStack((s) => [...s, { view, id }]);scrollTop();},
+    back: () => {setStack((s) => s.slice(0, -1));scrollTop();},
+    startOnboarding: () => {setObStart('landing');setMode('onboarding');setRailKey('landing');scrollTop();},
+    refined, newArrival, visual
   };
 
   // ── render current screen ──
@@ -98,6 +111,18 @@ function App() {
   }
 
   const showTabBar = mode === 'app';
+
+  // Embed mode: render content bare (no rail, no Phone chrome)
+  if (EMBED) {
+    return (
+      <div style={{ '--gold': accent[0], '--gold-light': accent[1], '--gold-muted': accent[2], width: '100%', minHeight: '100%', background: '#F3EDE2', display: 'flex', flexDirection: 'column' }}>
+        <FCVisual.Provider value={visual}>
+          {content}
+          {showTabBar && <TabBar active={tab} onTab={ctx.go} />}
+        </FCVisual.Provider>
+      </div>
+    );
+  }
 
   return (
     <div style={{ '--gold': accent[0], '--gold-light': accent[1], '--gold-muted': accent[2], display: 'flex', minHeight: '100vh', width: '100%', background: '#1C1915', justifyContent: 'center' }}>
