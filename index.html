@@ -275,10 +275,11 @@ section{padding:120px 40px}
 
 /* ── MANAGER FEATURE ROW ── */
 .manager-feature-row{
-  display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:center;
+  display:grid;grid-template-columns:1fr 1fr;gap:96px;align-items:center;
   max-width:1280px;margin:0 auto;padding:80px 40px;
 }
-.manager-feature-row.reverse{grid-template-columns:1.4fr 1fr}
+.manager-feature-row.reverse{direction:rtl}
+.manager-feature-row.reverse > *{direction:ltr}
 .manager-mock{
   border:0.5px solid rgba(184,151,42,0.15);border-radius:6px;
   background:rgba(255,255,255,0.015);overflow:hidden;
@@ -379,6 +380,10 @@ footer{
 }
 .screen-pill:hover{border-color:var(--gold);color:rgba(28,25,21,0.65)}
 .screen-pill.active{border-color:var(--gold);color:var(--gold-muted);background:rgba(184,151,42,0.08)}
+/* dark background pill variant (manager section) */
+.dark-pills .screen-pill{border-color:rgba(255,255,255,0.12);color:rgba(242,237,227,0.3)}
+.dark-pills .screen-pill:hover{border-color:var(--gold);color:rgba(242,237,227,0.6)}
+.dark-pills .screen-pill.active{border-color:var(--gold);color:var(--gold);background:rgba(184,151,42,0.08)}
 
 /* ── CREAM SECTION OVERRIDES ── */
 .on-cream{background:var(--cream)}
@@ -765,526 +770,117 @@ footer{
   <div class="feature-text">
     <div class="feature-number">01 / Community Health</div>
     <h3 class="feature-headline">The pulse of your<br><em>building, at a glance.</em></h3>
-    <p class="feature-copy">Community Pulse tracks the metrics that predict renewal: connection rate, event fill, resident satisfaction, and churn risk. Each metric links to the resident-level detail behind it.</p>
+    <p class="feature-copy">Community Pulse is the manager's command center. Real-time metrics — active residents, introductions made, gatherings held, community health score — derived live from resident activity. Retention signals flag who's thriving and who may be at risk, before renewal season arrives.</p>
     <div class="feature-pills">
+      <span class="pill">Health score</span>
       <span class="pill">Connection velocity</span>
-      <span class="pill">Event engagement</span>
-      <span class="pill">Satisfaction trend</span>
-      <span class="pill">Churn signals</span>
+      <span class="pill">Retention signals</span>
+      <span class="pill">Engagement trends</span>
     </div>
   </div>
-  <div class="manager-mock anim-fade anim-fade-delay-1">
-    <div class="manager-mock-bar">
-      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
-      <div class="mock-url">fifth-circle.io/chorus/pulse</div>
-    </div>
-    <div class="manager-mock-body">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div>
-          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Community Pulse</div>
-          <div style="font-family:var(--serif);font-size:20px;color:var(--cream);font-weight:300">Chorus · Week of Jun 23</div>
-        </div>
-        <div style="padding:6px 14px;border:0.5px solid rgba(184,151,42,0.25);border-radius:2px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe)">Export</div>
-      </div>
-      <div class="metrics-row">
-        <div class="metric">
-          <div class="metric-val">38</div>
-          <div class="metric-label">Active Residents</div>
-          <div class="metric-delta">↑ 6 this week</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">24</div>
-          <div class="metric-label">Intros Made</div>
-          <div class="metric-delta">↑ 4 vs last week</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">91%</div>
-          <div class="metric-label">Acceptance Rate</div>
-          <div class="metric-delta">↑ 3pts</div>
-        </div>
-      </div>
-      <div class="health-row">
-        <div class="health-bar-item">
-          <div class="health-bar-label">Connection</div>
-          <div class="health-bar-track"><div class="health-bar-fill" style="height:82%;background:linear-gradient(180deg,var(--gold),var(--gold-muted))"></div></div>
-          <div class="health-score">82</div>
-        </div>
-        <div class="health-bar-item">
-          <div class="health-bar-label">Events</div>
-          <div class="health-bar-track"><div class="health-bar-fill" style="height:74%;background:linear-gradient(180deg,var(--gold),var(--gold-muted))"></div></div>
-          <div class="health-score">74</div>
-        </div>
-        <div class="health-bar-item">
-          <div class="health-bar-label">Satisfaction</div>
-          <div class="health-bar-track"><div class="health-bar-fill" style="height:88%;background:linear-gradient(180deg,var(--green),#4a7040)"></div></div>
-          <div class="health-score">88</div>
-        </div>
-        <div class="health-bar-item">
-          <div class="health-bar-label">Churn Risk</div>
-          <div class="health-bar-track"><div class="health-bar-fill" style="height:12%;background:linear-gradient(180deg,rgba(200,80,80,0.6),rgba(160,50,50,0.4))"></div></div>
-          <div class="health-score" style="color:var(--taupe)">Low</div>
-        </div>
-        <div class="health-bar-item">
-          <div class="health-bar-label">Retention</div>
-          <div class="health-bar-track"><div class="health-bar-fill" style="height:94%;background:linear-gradient(180deg,var(--green),#4a7040)"></div></div>
-          <div class="health-score">94</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Manager 3-col cards -->
-<div class="manager-screens" style="padding-top:40px">
-
-  <!-- Card: Active Introductions -->
-  <div class="manager-card anim-fade">
-    <div class="manager-card-header">
-      <div class="manager-card-dot"></div>
-      <div class="manager-card-title">Active Introductions</div>
-    </div>
-    <div class="manager-card-body">
-      <div class="intro-item">
-        <div class="intro-avatar">NM</div>
-        <div class="intro-info">
-          <div class="intro-names">Noor M. → Sebastian L.</div>
-          <div class="intro-meta">Activity partners · Matched Tue</div>
-        </div>
-        <span class="intro-badge badge-active">Met ✓</span>
-      </div>
-      <div class="intro-item">
-        <div class="intro-avatar">PE</div>
-        <div class="intro-info">
-          <div class="intro-names">Priya R. → Ethan C.</div>
-          <div class="intro-meta">Professional · Awaiting Ethan</div>
-        </div>
-        <span class="intro-badge badge-pending">Pending</span>
-      </div>
-      <div class="intro-item">
-        <div class="intro-avatar">AJ</div>
-        <div class="intro-info">
-          <div class="intro-names">Alex K. → James W.</div>
-          <div class="intro-meta">Friendships · Sent today</div>
-        </div>
-        <span class="intro-badge badge-new">New</span>
-      </div>
-      <div class="intro-item">
-        <div class="intro-avatar">MI</div>
-        <div class="intro-info">
-          <div class="intro-names">Maya T. → Isabella F.</div>
-          <div class="intro-meta">Group hangouts · Both yes</div>
-        </div>
-        <span class="intro-badge badge-active">Coordinating</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card: Upcoming Events -->
-  <div class="manager-card anim-fade anim-fade-delay-1">
-    <div class="manager-card-header">
-      <div class="manager-card-dot" style="background:var(--green)"></div>
-      <div class="manager-card-title">Event Pipeline</div>
-    </div>
-    <div class="manager-card-body">
-      <div class="event-item">
-        <div class="event-top">
-          <div class="event-name">Rooftop Wine Tasting</div>
-          <div class="event-date">Jun 27</div>
-        </div>
-        <div class="event-bar-wrap"><div class="event-bar" style="width:87%"></div></div>
-        <div class="event-stats">
-          <div class="event-stat">Capacity<span>18/20</span></div>
-          <div class="event-stat">Waitlist<span>4</span></div>
-          <div class="event-stat">Fill<span>87%</span></div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-top">
-          <div class="event-name">Morning Yoga · Sky Deck</div>
-          <div class="event-date">Jul 2</div>
-        </div>
-        <div class="event-bar-wrap"><div class="event-bar" style="width:60%"></div></div>
-        <div class="event-stats">
-          <div class="event-stat">Capacity<span>9/15</span></div>
-          <div class="event-stat">Waitlist<span>0</span></div>
-          <div class="event-stat">Fill<span>60%</span></div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-top">
-          <div class="event-name">Game Night · Lobby Bar</div>
-          <div class="event-date">Jul 5</div>
-        </div>
-        <div class="event-bar-wrap"><div class="event-bar" style="width:40%"></div></div>
-        <div class="event-stats">
-          <div class="event-stat">Capacity<span>6/16</span></div>
-          <div class="event-stat">Waitlist<span>0</span></div>
-          <div class="event-stat">Fill<span>37%</span></div>
-        </div>
-      </div>
-      <div style="margin-top:16px;padding-top:14px;border-top:0.5px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:10px;color:var(--taupe)">3 resident suggestions pending</div>
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);cursor:pointer">Review →</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card: Trust & Safety -->
-  <div class="manager-card anim-fade anim-fade-delay-2">
-    <div class="manager-card-header">
-      <div class="manager-card-dot" style="background:rgba(242,237,227,0.3)"></div>
-      <div class="manager-card-title">Trust &amp; Safety</div>
-    </div>
-    <div class="manager-card-body">
-      <div style="margin-bottom:16px;padding:12px;background:rgba(107,140,90,0.08);border:0.5px solid rgba(107,140,90,0.2);border-radius:2px;font-size:11px;color:var(--green)">
-        All clear · No open reports
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">🔒</div>
-        <div class="trust-info">
-          <div class="trust-title">Profile verification</div>
-          <div class="trust-sub">2 residents pending · 36 verified</div>
-        </div>
-        <div class="trust-action">Review</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">📋</div>
-        <div class="trust-info">
-          <div class="trust-title">Opt-in consent</div>
-          <div class="trust-sub">All 38 active residents signed</div>
-        </div>
-        <div class="trust-action" style="color:var(--green);border-color:rgba(107,140,90,0.25)">✓ Done</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">🛡</div>
-        <div class="trust-info">
-          <div class="trust-title">Data scope</div>
-          <div class="trust-sub">Building-only · Pilot default</div>
-        </div>
-        <div class="trust-action">Settings</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">📊</div>
-        <div class="trust-info">
-          <div class="trust-title">Resident reports</div>
-          <div class="trust-sub">0 open · 1 resolved this month</div>
-        </div>
-        <div class="trust-action">History</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Manager Feature: Demand Intelligence -->
-<div class="manager-feature-row reverse anim-fade" style="padding-bottom:80px">
-  <div class="manager-mock">
-    <div class="manager-mock-bar">
-      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
-      <div class="mock-url">fifth-circle.io/chorus/demand</div>
-    </div>
-    <div class="manager-mock-body">
-      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Demand Intelligence</div>
-      <div style="font-family:var(--serif);font-size:18px;color:var(--cream);font-weight:300;margin-bottom:20px">What residents are asking for</div>
-      <div class="demand-item">
-        <div class="demand-text">Wine &amp; food experiences in the building</div>
-        <div class="demand-count">14</div>
-      </div>
-      <div class="demand-item">
-        <div class="demand-text">Morning fitness / yoga on sky deck</div>
-        <div class="demand-count">11</div>
-      </div>
-      <div class="demand-item">
-        <div class="demand-text">Professional networking mixer</div>
-        <div class="demand-count">9</div>
-      </div>
-      <div class="demand-item">
-        <div class="demand-text">Board game &amp; social nights</div>
-        <div class="demand-count">7</div>
-      </div>
-      <div class="demand-item">
-        <div class="demand-text">Outdoor movie or film screening</div>
-        <div class="demand-count">5</div>
-      </div>
-      <div style="margin-top:20px;padding-top:16px;border-top:0.5px solid rgba(255,255,255,0.04)">
-        <div style="font-size:10px;color:var(--taupe);margin-bottom:12px">Resident suggestions awaiting approval</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid rgba(184,151,42,0.15);border-radius:2px;background:rgba(184,151,42,0.03)">
-            <div style="font-size:12px;color:rgba(242,237,227,0.65)">"Rooftop stargazing night"</div>
-            <div style="display:flex;gap:8px">
-              <div style="padding:4px 10px;border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer">Approve</div>
-              <div style="padding:4px 10px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--taupe);cursor:pointer">Pass</div>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid rgba(184,151,42,0.15);border-radius:2px;background:rgba(184,151,42,0.03)">
-            <div style="font-size:12px;color:rgba(242,237,227,0.65)">"Cooking class in kitchen lounge"</div>
-            <div style="display:flex;gap:8px">
-              <div style="padding:4px 10px;border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer">Approve</div>
-              <div style="padding:4px 10px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--taupe);cursor:pointer">Pass</div>
-            </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe id="mgr-pulse-iframe"
+                    src="project/Fifth%20Circle%20Manager.html?embed=1&screen=tab:pulse"
+                    width="390" height="844" scrolling="no" title="Community Pulse"></iframe>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="feature-text">
-    <div class="feature-number">02 / Demand Intelligence</div>
-    <h3 class="feature-headline">Know what your<br>residents want<br><em>before they ask.</em></h3>
-    <p class="feature-copy">Fifth Circle aggregates event interest signals, resident suggestions, and post-event feedback into a demand intelligence view. Managers can see which ideas have the most organic support — and approve suggestions with one click, turning resident energy into programming.</p>
-    <div class="feature-pills">
-      <span class="pill">Aggregated demand signals</span>
-      <span class="pill">Resident suggestions</span>
-      <span class="pill">One-click approval</span>
-      <span class="pill">Post-event feedback loop</span>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="screen-pill active" onclick="switchMgrPulse('tab:pulse',this)">Pulse</button>
+        <button class="screen-pill" onclick="switchMgrPulse('tab:residents',this)">Residents</button>
+        <button class="screen-pill" onclick="switchMgrPulse('tab:reports',this)">Report</button>
+      </div><!-- end dark-pills -->
     </div>
   </div>
 </div>
 
-<!-- Manager Feature: Event Voting -->
-<div class="manager-feature-row anim-fade" style="padding-top:40px">
-  <div class="feature-text">
-    <div class="feature-number">03 / Event Voting</div>
-    <h3 class="feature-headline">Residents vote.<br><em>Managers decide.</em></h3>
-    <p class="feature-copy">When residents propose an event, Fifth Circle collects organic upvotes from the community and surfaces the ranked results. Managers see real demand before committing — then approve, modify, or pass with one click.</p>
+<!-- Manager Feature: Event Voting & Approvals -->
+<div class="manager-feature-row reverse anim-fade">
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe id="mgr-events-iframe"
+                    src="project/Fifth%20Circle%20Manager.html?embed=1&screen=events:approvals"
+                    width="390" height="844" scrolling="no" title="Event Approvals"></iframe>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="screen-pill active" onclick="switchMgrEvents('events:approvals',this)">Approvals</button>
+        <button class="screen-pill" onclick="switchMgrEvents('tab:events',this)">Calendar</button>
+        <button class="screen-pill" onclick="switchMgrEvents('events:requests',this)">Requests</button>
+      </div>
+    </div>
+  </div>
+  <div class="feature-text anim-fade">
+    <div class="feature-number">02 / Event Voting &amp; Approvals</div>
+    <h3 class="feature-headline">Residents propose.<br><em>Managers decide.</em></h3>
+    <p class="feature-copy">When residents suggest a gathering, Fifth Circle collects organic upvotes and surfaces them ranked by demand. Managers review the full proposal — proposed budget, amenity, resident comment — then approve to calendar, request changes, or pass. One tap, end to end.</p>
     <div class="feature-pills">
       <span class="pill">Resident proposals</span>
       <span class="pill">Live vote counts</span>
-      <span class="pill">One-click scheduling</span>
-      <span class="pill">Ranked by demand</span>
-    </div>
-  </div>
-  <div class="manager-mock anim-fade anim-fade-delay-1">
-    <div class="manager-mock-bar">
-      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
-      <div class="mock-url">fifth-circle.io/chorus/voting</div>
-    </div>
-    <div class="manager-mock-body">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div>
-          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Event Proposals</div>
-          <div style="font-family:var(--serif);font-size:18px;color:var(--cream);font-weight:300">Chorus · Community votes</div>
-        </div>
-        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)">3 new this week</div>
-      </div>
-      <div style="display:flex;flex-direction:column">
-        <div style="padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
-            <div>
-              <div style="font-size:13px;color:rgba(242,237,227,0.85);font-weight:400;margin-bottom:3px">Rooftop Stargazing Night</div>
-              <div style="font-size:10px;color:var(--taupe)">Proposed by Maya T. · Jun 20</div>
-            </div>
-            <div style="display:flex;align-items:baseline;gap:5px">
-              <div style="font-family:var(--serif);font-size:24px;color:var(--gold)">22</div>
-              <div style="font-size:9px;letter-spacing:1px;color:var(--taupe);text-transform:uppercase">votes</div>
-            </div>
-          </div>
-          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:10px"><div style="height:100%;width:88%;border-radius:2px;background:linear-gradient(90deg,var(--gold-muted),var(--gold))"></div></div>
-          <div style="display:flex;gap:8px">
-            <div style="padding:5px 14px;background:rgba(107,140,90,0.12);border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);cursor:pointer">Schedule</div>
-            <div style="padding:5px 14px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);cursor:pointer">Pass</div>
-          </div>
-        </div>
-        <div style="padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
-            <div>
-              <div style="font-size:13px;color:rgba(242,237,227,0.85);font-weight:400;margin-bottom:3px">Cooking Class · Kitchen Lounge</div>
-              <div style="font-size:10px;color:var(--taupe)">Proposed by Priya R. · Jun 18</div>
-            </div>
-            <div style="display:flex;align-items:baseline;gap:5px">
-              <div style="font-family:var(--serif);font-size:24px;color:var(--gold)">17</div>
-              <div style="font-size:9px;letter-spacing:1px;color:var(--taupe);text-transform:uppercase">votes</div>
-            </div>
-          </div>
-          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:10px"><div style="height:100%;width:68%;border-radius:2px;background:linear-gradient(90deg,var(--gold-muted),var(--gold))"></div></div>
-          <div style="display:flex;gap:8px">
-            <div style="padding:5px 14px;background:rgba(107,140,90,0.12);border:0.5px solid rgba(107,140,90,0.3);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);cursor:pointer">Schedule</div>
-            <div style="padding:5px 14px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);cursor:pointer">Pass</div>
-          </div>
-        </div>
-        <div style="padding:14px 0">
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
-            <div>
-              <div style="font-size:13px;color:rgba(242,237,227,0.85);font-weight:400;margin-bottom:3px">Vinyl &amp; Jazz Evening</div>
-              <div style="font-size:10px;color:var(--taupe)">Proposed by Alex K. · Jun 22</div>
-            </div>
-            <div style="display:flex;align-items:baseline;gap:5px">
-              <div style="font-family:var(--serif);font-size:24px;color:var(--gold)">11</div>
-              <div style="font-size:9px;letter-spacing:1px;color:var(--taupe);text-transform:uppercase">votes</div>
-            </div>
-          </div>
-          <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:10px"><div style="height:100%;width:44%;border-radius:2px;background:linear-gradient(90deg,var(--gold-muted),var(--gold))"></div></div>
-          <div style="display:flex;gap:8px">
-            <div style="padding:5px 14px;border:0.5px solid rgba(184,151,42,0.2);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);cursor:pointer">Review</div>
-            <div style="padding:5px 14px;border:0.5px solid rgba(255,255,255,0.08);border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);cursor:pointer">Pass</div>
-          </div>
-        </div>
-      </div>
+      <span class="pill">Approve · Change · Hold · Decline</span>
+      <span class="pill">Auto-adds to calendar</span>
     </div>
   </div>
 </div>
 
-<!-- Manager Feature: AI Budgeting -->
-<div class="manager-feature-row reverse anim-fade">
-  <div class="manager-mock anim-fade anim-fade-delay-1">
-    <div class="manager-mock-bar">
-      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
-      <div class="mock-url">fifth-circle.io/chorus/budget</div>
-    </div>
-    <div class="manager-mock-body">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div>
-          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">AI Budget Planner</div>
-          <div style="font-family:var(--serif);font-size:18px;color:var(--cream);font-weight:300">July · Recommended allocation</div>
-        </div>
-        <div style="padding:6px 14px;border:0.5px solid rgba(184,151,42,0.25);border-radius:2px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);cursor:pointer">Approve All</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;margin-bottom:20px">
-        <div style="padding:14px 16px;background:rgba(28,25,21,0.6)">
-          <div style="font-family:var(--serif);font-size:22px;color:var(--cream)">$4,200</div>
-          <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);margin-top:3px">Monthly budget</div>
-        </div>
-        <div style="padding:14px 16px;background:rgba(28,25,21,0.6)">
-          <div style="font-family:var(--serif);font-size:22px;color:var(--gold)">$3,800</div>
-          <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);margin-top:3px">AI recommended</div>
-        </div>
-        <div style="padding:14px 16px;background:rgba(28,25,21,0.6)">
-          <div style="font-family:var(--serif);font-size:22px;color:var(--green)">2.4×</div>
-          <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe);margin-top:3px">Avg. ROI</div>
-        </div>
-      </div>
-      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-bottom:10px">Event breakdown</div>
-      <div style="display:flex;flex-direction:column">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div>
-            <div style="font-size:12px;color:rgba(242,237,227,0.8)">Rooftop Wine Tasting</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:2px">Jun 27 · 18 RSVPs · <span style="color:var(--green)">$61/head</span></div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:13px;color:var(--cream)">$1,100</div>
-            <div style="font-size:9px;color:var(--green)">↑ high ROI</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div>
-            <div style="font-size:12px;color:rgba(242,237,227,0.8)">Morning Yoga · Sky Deck</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:2px">Jul 2 · 9 RSVPs · <span style="color:var(--taupe)">$33/head</span></div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:13px;color:var(--cream)">$300</div>
-            <div style="font-size:9px;color:var(--taupe)">low cost</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div>
-            <div style="font-size:12px;color:rgba(242,237,227,0.8)">Rooftop Stargazing <span style="font-size:9px;color:var(--gold)">(proposed · 22 votes)</span></div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:2px">TBD · est. 20 attendees · <span style="color:var(--gold)">$48/head</span></div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:13px;color:var(--gold)">$960</div>
-            <div style="font-size:9px;color:var(--gold)">AI suggested</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
-          <div>
-            <div style="font-size:12px;color:rgba(242,237,227,0.5)">Contingency reserve</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:2px">AI recommended buffer</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:13px;color:rgba(242,237,227,0.35)">$1,440</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Manager Feature: AI Budget Planning -->
+<div class="manager-feature-row anim-fade">
   <div class="feature-text">
-    <div class="feature-number">04 / AI Budgeting</div>
-    <h3 class="feature-headline">Budget that plans<br><em>itself.</em></h3>
-    <p class="feature-copy">Fifth Circle's AI budget planner analyzes RSVP rates, post-event satisfaction scores, and cost-per-head data to recommend optimal spending for each upcoming event. Managers approve, adjust, or override — the AI just makes it effortless.</p>
+    <div class="feature-number">03 / AI Budget Planning</div>
+    <h3 class="feature-headline">Budget recommendations<br><em>built on real demand.</em></h3>
+    <p class="feature-copy">The Planning tab synthesizes open resident suggestions, interest data, remaining monthly budget, and the approved vendor list into specific event recommendations — with cost estimates, matched vendors, and matched resident interests. Draft it directly from the recommendation.</p>
     <div class="feature-pills">
-      <span class="pill">AI-recommended allocations</span>
-      <span class="pill">Cost per head</span>
-      <span class="pill">ROI by event type</span>
-      <span class="pill">Contingency planning</span>
+      <span class="pill">Demand-weighted recommendations</span>
+      <span class="pill">Cost estimates</span>
+      <span class="pill">Vendor matching</span>
+      <span class="pill">Budget fit indicator</span>
+    </div>
+  </div>
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20Manager.html?embed=1&screen=events:planning"
+                    width="390" height="844" scrolling="no" title="AI Planning"></iframe>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Manager Feature: Vendor Suggestions -->
-<div class="manager-feature-row anim-fade" style="padding-bottom:80px">
-  <div class="feature-text">
-    <div class="feature-number">05 / Vendor Suggestions</div>
-    <h3 class="feature-headline">Resident-vetted<br><em>partners.</em></h3>
-    <p class="feature-copy">Residents nominate vendors they love — caterers, wellness studios, sommeliers, musicians. Fifth Circle collects these nominations, ranks them by resident support, and lets managers build a pre-vetted vendor roster with a single tap.</p>
+<!-- Manager Feature: Vendor Directory -->
+<div class="manager-feature-row reverse anim-fade" style="padding-bottom:80px">
+  <div class="feature-phone anim-fade anim-fade-delay-1">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe src="project/Fifth%20Circle%20Manager.html?embed=1&screen=vendor"
+                    width="390" height="844" scrolling="no" title="Vendor Directory"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="feature-text anim-fade">
+    <div class="feature-number">04 / Vendor Directory</div>
+    <h3 class="feature-headline">A roster built by<br><em>residents.</em></h3>
+    <p class="feature-copy">Residents nominate vendors they trust — sommeliers, wellness studios, private chefs, musicians. Fifth Circle surfaces them in a ranked approval queue. Managers approve with one tap, building a pre-vetted partner directory that feeds directly into the planning recommender.</p>
     <div class="feature-pills">
       <span class="pill">Resident nominations</span>
       <span class="pill">Ranked by support</span>
-      <span class="pill">Category filtering</span>
-      <span class="pill">One-tap roster add</span>
-    </div>
-  </div>
-  <div class="manager-mock anim-fade anim-fade-delay-1">
-    <div class="manager-mock-bar">
-      <div class="mock-dot mock-dot-r"></div><div class="mock-dot mock-dot-y"></div><div class="mock-dot mock-dot-g"></div>
-      <div class="mock-url">fifth-circle.io/chorus/vendors</div>
-    </div>
-    <div class="manager-mock-body">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div>
-          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Vendor Suggestions</div>
-          <div style="font-family:var(--serif);font-size:18px;color:var(--cream);font-weight:300">Resident-nominated partners</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <div style="padding:4px 12px;background:rgba(184,151,42,0.1);border:0.5px solid rgba(184,151,42,0.3);border-radius:20px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)">All</div>
-        <div style="padding:4px 12px;border:0.5px solid rgba(255,255,255,0.08);border-radius:20px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)">Catering</div>
-        <div style="padding:4px 12px;border:0.5px solid rgba(255,255,255,0.08);border-radius:20px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)">Wellness</div>
-        <div style="padding:4px 12px;border:0.5px solid rgba(255,255,255,0.08);border-radius:20px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--taupe)">Entertainment</div>
-      </div>
-      <div style="display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div style="width:36px;height:36px;border-radius:2px;background:rgba(184,151,42,0.08);border:0.5px solid rgba(184,151,42,0.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">🍷</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;color:rgba(242,237,227,0.8);font-weight:400">Terroir Wine Co.</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:1px">Catering · 9 residents</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);line-height:1">9</div>
-            <div style="padding:4px 10px;background:rgba(107,140,90,0.1);border:0.5px solid rgba(107,140,90,0.25);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer;white-space:nowrap">Add to roster</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div style="width:36px;height:36px;border-radius:2px;background:rgba(107,140,90,0.08);border:0.5px solid rgba(107,140,90,0.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">🧘</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;color:rgba(242,237,227,0.8);font-weight:400">Studio Bloom</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:1px">Wellness · 7 residents</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);line-height:1">7</div>
-            <div style="padding:4px 10px;background:rgba(107,140,90,0.1);border:0.5px solid rgba(107,140,90,0.25);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--green);cursor:pointer;white-space:nowrap">Add to roster</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)">
-          <div style="width:36px;height:36px;border-radius:2px;background:rgba(184,151,42,0.06);border:0.5px solid rgba(184,151,42,0.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">🎵</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;color:rgba(242,237,227,0.8);font-weight:400">The Mellow Duo</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:1px">Entertainment · 5 residents</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);line-height:1">5</div>
-            <div style="padding:4px 10px;border:0.5px solid rgba(184,151,42,0.2);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--gold);cursor:pointer">Review</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
-          <div style="width:36px;height:36px;border-radius:2px;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.06);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">🍳</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;color:rgba(242,237,227,0.8);font-weight:400">Chef Marcos</div>
-            <div style="font-size:10px;color:var(--taupe);margin-top:1px">Catering · 4 residents</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);line-height:1">4</div>
-            <div style="padding:4px 10px;border:0.5px solid rgba(184,151,42,0.2);border-radius:2px;font-size:9px;letter-spacing:1.5px;color:var(--gold);cursor:pointer">Review</div>
-          </div>
-        </div>
-      </div>
+      <span class="pill">One-tap approval</span>
+      <span class="pill">Feeds planning recommender</span>
     </div>
   </div>
 </div>
@@ -1436,7 +1032,21 @@ document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
 function switchCircleScreen(screen, btn) {
   const iframe = document.getElementById('circles-iframe');
   iframe.src = 'project/Fifth%20Circle%20App.html?embed=1&screen=' + encodeURIComponent(screen);
-  document.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
+  btn.parentElement.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Manager screen switchers ──
+function switchMgrPulse(screen, btn) {
+  const iframe = document.getElementById('mgr-pulse-iframe');
+  iframe.src = 'project/Fifth%20Circle%20Manager.html?embed=1&screen=' + encodeURIComponent(screen);
+  btn.parentElement.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+function switchMgrEvents(screen, btn) {
+  const iframe = document.getElementById('mgr-events-iframe');
+  iframe.src = 'project/Fifth%20Circle%20Manager.html?embed=1&screen=' + encodeURIComponent(screen);
+  btn.parentElement.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
 }
 
