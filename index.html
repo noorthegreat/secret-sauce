@@ -438,6 +438,50 @@ footer{
   pointer-events:none;
 }
 
+/* ── HOW IT WORKS ── */
+#how{background:var(--charcoal-mid)}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;max-width:1280px;margin:72px auto 0}
+.how-card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.how-card-frame{margin-bottom:28px}
+.how-card-step{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(184,151,42,0.5);margin-bottom:8px}
+.how-card-title{font-family:var(--serif);font-size:21px;font-weight:300;color:var(--cream);margin-bottom:10px;line-height:1.2}
+.how-card-body{font-size:12.5px;line-height:1.75;color:rgba(242,237,227,0.35);max-width:200px}
+/* mini phone: 188px outer, 172px inner, scale 0.4410 */
+.phone-frame.mini{width:188px;border-radius:30px;padding:8px}
+.phone-frame.mini .phone-frame-inner-wrap{width:172px;height:372px;overflow:hidden;border-radius:22px;position:relative}
+.phone-frame.mini .phone-frame-inner{width:390px;height:844px;transform:scale(0.4410);transform-origin:top left}
+
+/* ── PRODUCT TOUR ── */
+#tour{background:var(--charcoal)}
+.tour-layout{display:grid;grid-template-columns:1fr 1fr;gap:120px;align-items:start;max-width:1280px;margin:72px auto 0}
+.tour-sticky{position:sticky;top:80px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.tour-step{padding:64px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);opacity:0.22;transition:opacity .5s,transform .5s;transform:translateX(10px)}
+.tour-step:last-child{border-bottom:none;padding-bottom:120px}
+.tour-step.active{opacity:1;transform:translateX(0)}
+.tour-step-num{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(184,151,42,0.5);margin-bottom:14px}
+.tour-step-title{font-family:var(--serif);font-size:clamp(26px,2.8vw,40px);font-weight:300;color:var(--cream);margin-bottom:14px;line-height:1.12}
+.tour-step-title em{font-style:italic;color:rgba(242,237,227,0.32)}
+.tour-step-body{font-size:14px;line-height:1.8;color:rgba(242,237,227,0.4);max-width:420px}
+.tour-step-detail{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.tour-step-detail-item{font-size:10.5px;letter-spacing:1px;color:rgba(184,151,42,0.55);padding-left:14px;position:relative}
+.tour-step-detail-item::before{content:'';position:absolute;left:0;top:5px;width:5px;height:0.5px;background:var(--gold-muted)}
+
+/* ── BEFORE / AFTER ── */
+.ba-wrap{display:grid;grid-template-columns:1fr 1fr;max-width:1100px;margin:64px auto 0;border-radius:4px;overflow:hidden;border:0.5px solid rgba(28,25,21,0.08)}
+.ba-col{padding:52px 48px}
+.ba-before{background:rgba(28,25,21,0.03);border-right:0.5px solid rgba(28,25,21,0.08)}
+.ba-after{background:rgba(184,151,42,0.05)}
+.ba-head{font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:400;margin-bottom:36px}
+.ba-before .ba-head{color:rgba(28,25,21,0.35)}
+.ba-after .ba-head{color:var(--gold-muted)}
+.ba-item{display:flex;align-items:start;gap:14px;padding:16px 0;border-bottom:0.5px solid rgba(28,25,21,0.06)}
+.ba-item:last-child{border-bottom:none}
+.ba-dot{width:5px;height:5px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.ba-before .ba-dot{background:rgba(28,25,21,0.18)}
+.ba-after .ba-dot{background:var(--gold)}
+.ba-text{font-size:13.5px;line-height:1.65;color:rgba(28,25,21,0.52)}
+.ba-after .ba-text{color:rgba(28,25,21,0.63)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .hero-inner,.feature-row,.manager-feature-row{grid-template-columns:1fr}
@@ -446,6 +490,11 @@ footer{
   .hero-phones{margin-top:60px}
   .manager-screens{grid-template-columns:1fr 1fr}
   .privacy-grid{grid-template-columns:1fr 1fr}
+  .how-grid{grid-template-columns:repeat(2,1fr)}
+  .tour-layout{grid-template-columns:1fr}
+  .tour-sticky{position:relative;top:auto;margin-bottom:48px}
+  .ba-wrap{grid-template-columns:1fr}
+  .ba-before{border-right:none;border-bottom:0.5px solid rgba(28,25,21,0.08)}
 }
 @media(max-width:640px){
   section,.feature-row,#hero{padding:80px 20px}
@@ -453,6 +502,8 @@ footer{
   .manager-screens,.privacy-grid{grid-template-columns:1fr}
   .pilot-cols{grid-template-columns:1fr}
   nav .nav-links{display:none}
+  .how-grid{grid-template-columns:1fr}
+  .ba-col{padding:36px 28px}
 }
 </style>
 </head>
@@ -471,9 +522,9 @@ footer{
       <span class="nav-wordmark">FIFTH CIRCLE</span>
     </a>
     <div class="nav-links">
-      <a href="#resident">Resident Experience</a>
-      <a href="#manager">Manager Experience</a>
-      <a href="#privacy">Privacy &amp; Safety</a>
+      <a href="#how">How It Works</a>
+      <a href="#resident">For Residents</a>
+      <a href="#manager">For Managers</a>
       <a href="#pilot">Pilot Vision</a>
     </div>
     <a href="#cta" class="nav-cta">Request a Pilot</a>
@@ -526,6 +577,150 @@ footer{
           </div>
         </div>
         <div class="phone-label">Concierge</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner anim-fade">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title" style="max-width:680px">From move-in to belonging,<br><em>in four steps.</em></h2>
+    <p class="section-body" style="margin-top:12px">Fifth Circle works quietly in the background — learning what each resident values, then making the right connection at exactly the right moment.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card anim-fade">
+      <div class="how-card-frame">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=onboarding"
+                      width="390" height="844" scrolling="no" title="Onboarding"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-card-step">01 · Discover</div>
+      <div class="how-card-title">Tell us who you are</div>
+      <p class="how-card-body">A five-minute onboarding that maps your goals, interests, and availability. No surveys. No noise.</p>
+    </div>
+    <div class="how-card anim-fade anim-fade-delay-1">
+      <div class="how-card-frame">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=intro:ethan"
+                      width="390" height="844" scrolling="no" title="Introduction"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-card-step">02 · Connect</div>
+      <div class="how-card-title">A curated introduction</div>
+      <p class="how-card-body">The concierge selects a neighbor worth meeting. Both say yes before either learns the other's name.</p>
+    </div>
+    <div class="how-card anim-fade anim-fade-delay-2">
+      <div class="how-card-frame">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:events"
+                      width="390" height="844" scrolling="no" title="Gatherings"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-card-step">03 · Gather</div>
+      <div class="how-card-title">Your building's social calendar</div>
+      <p class="how-card-body">Curated events — tastings, rooftop evenings, shared interests — planned around what residents actually want.</p>
+    </div>
+    <div class="how-card anim-fade anim-fade-delay-3">
+      <div class="how-card-frame">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:home"
+                      width="390" height="844" scrolling="no" title="Home"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-card-step">04 · Belong</div>
+      <div class="how-card-title">A community that knows you</div>
+      <p class="how-card-body">Over time, your home becomes a place full of people you actually know — not just neighbors you pass in the hall.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT TOUR -->
+<section id="tour">
+  <div class="section-inner anim-fade">
+    <div class="section-eyebrow">The Resident Journey</div>
+    <h2 class="section-title" style="max-width:560px">A week in the life<br>of a <em>new resident.</em></h2>
+  </div>
+  <div class="tour-layout">
+    <div class="tour-sticky">
+      <div class="phone-frame large">
+        <div class="phone-frame-inner-wrap">
+          <div class="phone-frame-inner">
+            <iframe id="tour-iframe"
+                    src="project/Fifth%20Circle%20App.html?embed=1&screen=onboarding"
+                    width="390" height="844" scrolling="no" title="Resident Journey"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tour-steps">
+      <div class="tour-step active" data-screen="onboarding">
+        <div class="tour-step-num">Day 1</div>
+        <h3 class="tour-step-title">Move in.<br><em>Join in five minutes.</em></h3>
+        <p class="tour-step-body">A concierge welcome arrives on move-in day. Residents complete a five-step profile — goals, interests, availability — and the system immediately begins building their match profile in the background.</p>
+        <div class="tour-step-detail">
+          <div class="tour-step-detail-item">Profile &amp; verification</div>
+          <div class="tour-step-detail-item">Goal &amp; interest mapping</div>
+          <div class="tour-step-detail-item">Availability windows</div>
+        </div>
+      </div>
+      <div class="tour-step" data-screen="tab:concierge">
+        <div class="tour-step-num">Day 2</div>
+        <h3 class="tour-step-title">Your concierge<br><em>starts working.</em></h3>
+        <p class="tour-step-body">The Concierge tab is where Fifth Circle's intelligence lives. Residents refine what they're looking for — a tennis partner, a professional contact, someone to share a bottle of wine with — and the system calibrates.</p>
+        <div class="tour-step-detail">
+          <div class="tour-step-detail-item">Per-goal preferences</div>
+          <div class="tour-step-detail-item">Continuous learning</div>
+          <div class="tour-step-detail-item">Match signal calibration</div>
+        </div>
+      </div>
+      <div class="tour-step" data-screen="intro:ethan">
+        <div class="tour-step-num">Day 4</div>
+        <h3 class="tour-step-title">An introduction<br><em>arrives.</em></h3>
+        <p class="tour-step-body">A private introduction card appears — detailed enough to spark real curiosity, anonymous enough to feel safe. Both residents decide privately. Only when both say yes does either learn the other's name.</p>
+        <div class="tour-step-detail">
+          <div class="tour-step-detail-item">Concierge match note</div>
+          <div class="tour-step-detail-item">Double opt-in</div>
+          <div class="tour-step-detail-item">Identity revealed only on match</div>
+        </div>
+      </div>
+      <div class="tour-step" data-screen="meetfeedback:james">
+        <div class="tour-step-num">Day 7</div>
+        <h3 class="tour-step-title">You meet.<br><em>It goes well.</em></h3>
+        <p class="tour-step-body">Fifth Circle coordinates availability and suggests a time. After the meetup, both residents leave private feedback — which sharpens the concierge's model and improves every future introduction.</p>
+        <div class="tour-step-detail">
+          <div class="tour-step-detail-item">Coordinated availability</div>
+          <div class="tour-step-detail-item">Post-meetup feedback</div>
+          <div class="tour-step-detail-item">Match signal improvement</div>
+        </div>
+      </div>
+      <div class="tour-step" data-screen="tab:events">
+        <div class="tour-step-num">Day 14</div>
+        <h3 class="tour-step-title">Your calendar<br><em>fills up.</em></h3>
+        <p class="tour-step-body">A rooftop tasting. A reading circle. A morning yoga session. Events appear in the resident calendar — curated around the building's collective interests, not a manager's best guess.</p>
+        <div class="tour-step-detail">
+          <div class="tour-step-detail-item">Curated event calendar</div>
+          <div class="tour-step-detail-item">RSVP &amp; attendance</div>
+          <div class="tour-step-detail-item">Resident-proposed gatherings</div>
+        </div>
       </div>
     </div>
   </div>
@@ -885,8 +1080,74 @@ footer{
   </div>
 </div>
 
-<!-- ════ CREAM BAND: privacy + pilot ════ -->
+<!-- ════ CREAM BAND: before/after + privacy + pilot ════ -->
 <div class="on-cream">
+
+<!-- BEFORE / AFTER -->
+<section id="before-after" style="padding:120px 40px 0">
+  <div class="section-inner anim-fade">
+    <div class="section-eyebrow">The Difference</div>
+    <h2 class="section-title" style="max-width:640px">What changes when a building<br>invests in <em>belonging.</em></h2>
+  </div>
+  <div class="ba-wrap anim-fade">
+    <div class="ba-col ba-before">
+      <div class="ba-head">Without Fifth Circle</div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Residents leave after 12 months having made zero meaningful connections in the building</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Amenities go unused for months — residents don't know what's available or who else is interested</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Events are planned around manager instincts, not resident demand — fill rates are inconsistent</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Turnover climbs because residents feel isolated — not because the building is inadequate</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Vendor relationships are informal, hard to replicate, and never tied to resident preferences</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Managers learn about retention risk at renewal — far too late to act</div>
+      </div>
+    </div>
+    <div class="ba-col ba-after">
+      <div class="ba-head">With Fifth Circle</div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Every resident receives a curated introduction in their first week — 84% acceptance rate</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Events are proposed by residents, voted on by neighbors, and approved by managers in one flow</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">The AI planner recommends events based on actual demand, budget fit, and vetted vendor availability</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Residents who form connections renew at twice the rate of those who don't</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Vendors are nominated by residents, vetted by managers, and fed directly into event planning</div>
+      </div>
+      <div class="ba-item">
+        <div class="ba-dot"></div>
+        <div class="ba-text">Managers see real-time retention signals — connection velocity, engagement trends — weeks before renewal</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-light" style="margin-top:120px"></div>
 
 <!-- PRIVACY & SAFETY -->
 <section id="privacy" style="padding:120px 0">
@@ -1048,6 +1309,25 @@ function switchMgrEvents(screen, btn) {
   iframe.src = 'project/Fifth%20Circle%20Manager.html?embed=1&screen=' + encodeURIComponent(screen);
   btn.parentElement.querySelectorAll('.screen-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
+}
+
+// ── Product tour: scroll-driven phone ──
+const tourIframe = document.getElementById('tour-iframe');
+if (tourIframe) {
+  const tourObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.tour-step').forEach(s => s.classList.remove('active'));
+        e.target.classList.add('active');
+        const screen = e.target.dataset.screen;
+        if (tourIframe.dataset.lastScreen !== screen) {
+          tourIframe.dataset.lastScreen = screen;
+          tourIframe.src = 'project/Fifth%20Circle%20App.html?embed=1&screen=' + encodeURIComponent(screen);
+        }
+      }
+    });
+  }, { threshold: 0.45, rootMargin: '-5% 0px -45% 0px' });
+  document.querySelectorAll('.tour-step').forEach(s => tourObs.observe(s));
 }
 
 // ── Hero phone screens — cycle on click ──
