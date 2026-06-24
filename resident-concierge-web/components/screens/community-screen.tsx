@@ -292,11 +292,8 @@ export function CommunityScreen({
   const [feedbackDrafts, setFeedbackDrafts] = useState<
     Record<string, { rating: number; detail: string }>
   >({})
-  const [localVotes, setLocalVotes] = useState<Record<string, boolean>>({})
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null)
-  const [circleResponses, setCircleResponses] = useState<
-    Record<string, "interested" | "waitlist" | "following">
-  >({})
+  const [circleResponses, setCircleResponses] = useState<Record<string, "interested">>({})
 
   const hasResidentAccess = Boolean(
     isSignedIn &&
@@ -525,6 +522,56 @@ export function CommunityScreen({
       updateSignalState(eventId, { interest: active })
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to update your interest.")
+    } finally {
+      setSubmittingKey(null)
+    }
+  }
+
+  async function toggleVote(eventId: string, active: boolean) {
+    const accessToken = session?.access_token
+
+    if (!accessToken) {
+      onSignIn()
+      return
+    }
+
+    if (accountSnapshot?.needsSurveyCompletion) {
+      onCompleteProfile()
+      return
+    }
+
+    setSubmittingKey(`vote:${eventId}`)
+    setErrorMessage(null)
+
+    try {
+      const response = await fetch("/api/event-engagements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          action: "vote",
+          eventId,
+          active,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update your support signal.")
+      }
+
+      updateSignalState(eventId, { vote: active })
+
+      if (active) {
+        trackProductEvent("resident_gathering_vote")
+      }
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to update your support signal.",
+      )
     } finally {
       setSubmittingKey(null)
     }
@@ -770,8 +817,8 @@ export function CommunityScreen({
           accountSnapshot={accountSnapshot}
           accountLoading={accountLoading}
           onSelectCircle={setSelectedCircleId}
-          onRespondToCircle={(circleId, response) => {
-            setCircleResponses((current) => ({ ...current, [circleId]: response }))
+          onRespondToCircle={(circleId) => {
+            setCircleResponses((current) => ({ ...current, [circleId]: "interested" }))
             trackProductEvent("resident_circle_interest_recorded")
           }}
           onSignIn={onSignIn}
@@ -787,7 +834,7 @@ export function CommunityScreen({
           proposalTitle={proposalTitle}
           proposalDetail={proposalDetail}
           eventPolls={eventPolls}
-          localVotes={localVotes}
+          voteSignals={engagementState.signalsByEventId}
           submittingKey={submittingKey}
           isSignedIn={isSignedIn}
           accountSnapshot={accountSnapshot}
@@ -795,9 +842,7 @@ export function CommunityScreen({
           onProposalTitleChange={setProposalTitle}
           onProposalDetailChange={setProposalDetail}
           onSubmitProposal={submitProposal}
-          onToggleVote={(pollId) =>
-            setLocalVotes((current) => ({ ...current, [pollId]: !current[pollId] }))
-          }
+          onToggleVote={toggleVote}
           onSignIn={onSignIn}
           onCompleteProfile={onCompleteProfile}
         />
@@ -1286,12 +1331,12 @@ function CirclesView({
 }: {
   circles: CirclePreview[]
   selectedCircleId: string | null
-  circleResponses: Record<string, "interested" | "waitlist" | "following">
+  circleResponses: Record<string, "interested">
   isSignedIn: boolean
   accountSnapshot: ResidentAccountSnapshot | null
   accountLoading: boolean
   onSelectCircle: (circleId: string) => void
-  onRespondToCircle: (circleId: string, response: "interested" | "waitlist" | "following") => void
+  onRespondToCircle: (circleId: string) => void
   onSignIn: () => void
   onCompleteProfile: () => void
   onOpenPeople: () => void
@@ -1351,38 +1396,10 @@ function CirclesView({
         <div className="rounded-[1.3rem] border border-gold/35 bg-[#f6ecdf] px-4 py-3 text-sm text-[#6a5847]">
           <div className="inline-flex items-center gap-2 font-medium">
             <Check className="size-4 text-gold" />
-            Marked in this preview
+            Interest noted for this pilot preview
           </div>
           <p className="mt-1 leading-6 text-[#756452]">
-            This helps you keep track of circles that feel promising. It does not create a saved membership yet.
-          </p>
-        </div>
-      )
-    }
-
-    if (response === "waitlist") {
-      return (
-        <div className="rounded-[1.3rem] border border-gold/35 bg-[#f6ecdf] px-4 py-3 text-sm text-[#6a5847]">
-          <div className="inline-flex items-center gap-2 font-medium">
-            <Clock3 className="size-4 text-gold" />
-            Strong future-circle signal
-          </div>
-          <p className="mt-1 leading-6 text-[#756452]">
-            This is still a pilot preview. Fifth Circle has not created a live waitlist or group membership here.
-          </p>
-        </div>
-      )
-    }
-
-    if (response === "following") {
-      return (
-        <div className="rounded-[1.3rem] border border-[#ded1bf] bg-white px-4 py-3 text-sm text-[#7b6b59]">
-          <div className="inline-flex items-center gap-2 font-medium">
-            <Heart className="size-4 text-gold" />
-            Saved as a circle to watch
-          </div>
-          <p className="mt-1 leading-6 text-[#756452]">
-            This is only held inside your current preview session while circles remain an emerging pilot experience.
+            This helps surface the circle as promising during the pilot. It does not create a saved membership or live group roster yet.
           </p>
         </div>
       )
@@ -1392,7 +1409,7 @@ function CirclesView({
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => onRespondToCircle(circle.id, "interested")}
+          onClick={() => onRespondToCircle(circle.id)}
           className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background"
         >
           Mark as a likely fit
@@ -1443,7 +1460,7 @@ function CirclesView({
           The best circles begin with a shared mood, not a crowded group.
         </p>
         <p className="mt-3 text-sm leading-7 text-[#6f604f]">
-          We use these early signals to notice where a few residents may genuinely enjoy the same kind of conversation, timing, or recurring activity. Nothing public happens automatically. The concierge still shapes what becomes real.
+          We use these early signals to notice where a few residents may genuinely enjoy the same kind of conversation, timing, or recurring activity. Nothing public happens automatically, and this screen does not create saved group membership yet. The concierge still shapes what becomes real.
         </p>
       </div>
 
@@ -1602,7 +1619,7 @@ function SuggestionsView({
   proposalTitle,
   proposalDetail,
   eventPolls,
-  localVotes,
+  voteSignals,
   submittingKey,
   isSignedIn,
   accountSnapshot,
@@ -1619,7 +1636,7 @@ function SuggestionsView({
   proposalTitle: string
   proposalDetail: string
   eventPolls: CommunityPoll[]
-  localVotes: Record<string, boolean>
+  voteSignals: Record<string, ResidentEventSignalState>
   submittingKey: string | null
   isSignedIn: boolean
   accountSnapshot: ResidentAccountSnapshot | null
@@ -1627,7 +1644,7 @@ function SuggestionsView({
   onProposalTitleChange: (value: string) => void
   onProposalDetailChange: (value: string) => void
   onSubmitProposal: () => Promise<void>
-  onToggleVote: (pollId: string) => void
+  onToggleVote: (pollId: string, active: boolean) => Promise<void>
   onSignIn: () => void
   onCompleteProfile: () => void
 }) {
@@ -1739,7 +1756,7 @@ function SuggestionsView({
         </p>
         <div className="space-y-3">
           {eventPolls.map((poll) => {
-            const isVoted = localVotes[poll.id]
+            const isVoted = Boolean(voteSignals[poll.id]?.vote)
             const votes = poll.votes + (isVoted ? 1 : 0)
             const percent = Math.min(100, poll.percent + (isVoted ? 2 : 0))
             return (
@@ -1764,15 +1781,20 @@ function SuggestionsView({
                 </div>
                 <button
                   type="button"
-                  onClick={() => onToggleVote(poll.id)}
+                  onClick={() => void onToggleVote(poll.id, !isVoted)}
+                  disabled={!isEligible || submittingKey === `vote:${poll.id}`}
                   className={cn(
-                    "rounded-full border px-3 py-2 text-xs font-medium",
+                    "rounded-full border px-3 py-2 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-70",
                     isVoted
                       ? "border-gold bg-gold text-gold-foreground"
                       : "border-[#e1d5c3] text-foreground",
                   )}
                 >
-                  {isVoted ? "Added" : "Support"}
+                  {submittingKey === `vote:${poll.id}`
+                    ? "Saving..."
+                    : isVoted
+                      ? "Added"
+                      : "Support"}
                 </button>
               </div>
             )

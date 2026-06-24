@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { ArrowRight, CalendarRange, Loader2, Sparkles, Users } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { ArrowRight, CalendarRange, Camera, Loader2, Sparkles, Users } from "lucide-react"
 
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
 import { Chip, SelectCard } from "@/components/select-card"
@@ -24,7 +24,7 @@ import {
 } from "@/lib/concierge-data"
 import { cn } from "@/lib/utils"
 
-type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 type SocialEnergyId = "calm" | "balanced" | "outgoing"
 type PlanningStyleId = "spontaneous" | "planned" | "flexible"
 
@@ -60,6 +60,10 @@ export type OnboardingSubmission = {
   consentState?: {
     communityAgreementAccepted: boolean
   }
+}
+
+export type OnboardingAssets = {
+  profilePhoto: File | null
 }
 
 const socialInterests: InterestId[] = [
@@ -122,7 +126,7 @@ const planningStyleOptions: Array<{
 export function Onboarding({
   onComplete,
 }: {
-  onComplete: (submission: OnboardingSubmission) => Promise<void>
+  onComplete: (submission: OnboardingSubmission, assets: OnboardingAssets) => Promise<void>
 }) {
   const [step, setStep] = useState<Step>(0)
   const [lookingFor, setLookingFor] = useState<MatchingGoalId[]>(["friendships"])
@@ -144,6 +148,8 @@ export function Onboarding({
   const [consentAccepted, setConsentAccepted] = useState(false)
   const [recognitionCue, setRecognitionCue] = useState("")
   const [conciergeNote, setConciergeNote] = useState("")
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -163,23 +169,41 @@ export function Onboarding({
     return parts.filter(Boolean).join(" | ").slice(0, 280)
   }, [cadence, conciergeNote, recognitionCue])
 
+  useEffect(() => {
+    if (!profilePhoto) {
+      setProfilePhotoPreview(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(profilePhoto)
+    setProfilePhotoPreview(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [profilePhoto])
+
   const canAdvance =
-    step === 1
+    step === 0
       ? true
-      : step === 2
-        ? lookingFor.length > 0 && style.length > 0
-        : step === 3
-          ? chosenInterests.length >= 3
-          : step === 4
-            ? availabilitySummary.length > 0
-            : step === 5
-              ? Boolean(cadence && socialEnergy && planningStyle)
-              : step === 6
-                ? consentAccepted && conciergeNote.trim().length >= 12
-                : true
+      : step === 1
+        ? true
+        : step === 2
+          ? true
+          : step === 3
+            ? lookingFor.length > 0 && style.length > 0
+            : step === 4
+              ? chosenInterests.length >= 3
+              : step === 5
+                ? availabilitySummary.length > 0
+                : step === 6
+                  ? Boolean(cadence && socialEnergy && planningStyle)
+                  : step === 7
+                    ? consentAccepted && conciergeNote.trim().length >= 12
+                    : true
 
   function next() {
-    setStep((current) => Math.min(6, (current + 1) as Step))
+    setStep((current) => Math.min(7, (current + 1) as Step))
   }
 
   function previous() {
@@ -195,41 +219,46 @@ export function Onboarding({
     setErrorMessage(null)
 
     try {
-      await onComplete({
-        lookingFor,
-        interests: chosenInterests,
-        connectionStyles: style,
-        availability: availabilitySummary,
-        availabilityGrid,
-        conciergeNote: composedConciergeNote,
-        profileBasics: {
-          recognitionCue: recognitionCue.trim() || undefined,
-          occupation: occupation.trim() || undefined,
-        },
-        compatibilityPrompts: {
-          socialEnergy,
-          planningStyle,
-          favoriteTopics: chosenInterests.filter((interest) => socialInterests.includes(interest)),
-        },
-        activityPreferences: chosenInterests.filter((interest) =>
-          activityInterests.includes(interest),
-        ),
-        networkingPreferences: {
-          openToNetworking: lookingFor.includes("professional_networking"),
-          openToMentoring,
-          lookingForMentorship,
-          occupation: occupation.trim() || undefined,
-        },
-        introPreferences: {
-          cadence,
-          socialEnergy,
-          planningStyle,
+      await onComplete(
+        {
+          lookingFor,
+          interests: chosenInterests,
           connectionStyles: style,
+          availability: availabilitySummary,
+          availabilityGrid,
+          conciergeNote: composedConciergeNote,
+          profileBasics: {
+            recognitionCue: recognitionCue.trim() || undefined,
+            occupation: occupation.trim() || undefined,
+          },
+          compatibilityPrompts: {
+            socialEnergy,
+            planningStyle,
+            favoriteTopics: chosenInterests.filter((interest) => socialInterests.includes(interest)),
+          },
+          activityPreferences: chosenInterests.filter((interest) =>
+            activityInterests.includes(interest),
+          ),
+          networkingPreferences: {
+            openToNetworking: lookingFor.includes("professional_networking"),
+            openToMentoring,
+            lookingForMentorship,
+            occupation: occupation.trim() || undefined,
+          },
+          introPreferences: {
+            cadence,
+            socialEnergy,
+            planningStyle,
+            connectionStyles: style,
+          },
+          consentState: {
+            communityAgreementAccepted: consentAccepted,
+          },
         },
-        consentState: {
-          communityAgreementAccepted: consentAccepted,
+        {
+          profilePhoto,
         },
-      })
+      )
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Unable to save your onboarding right now.",
@@ -247,7 +276,7 @@ export function Onboarding({
       {step > 0 ? (
         <div className="px-7 pt-1">
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5, 6].map((progressStep) => (
+            {[1, 2, 3, 4, 5, 6, 7].map((progressStep) => (
               <span
                 key={progressStep}
                 className={cn(
@@ -280,12 +309,72 @@ export function Onboarding({
         )}
         {step === 2 && (
           <Section
+            eyebrow="Recognition"
+            title="Help your neighbors"
+            accent="recognise you."
+            subtitle="A photo makes introductions feel warmer and more trustworthy. This stays inside your building experience and helps the concierge make more human recommendations."
+          >
+            <div className="rounded-[2rem] border border-[#43392f] bg-[#251f19] p-5">
+              <div className="flex items-center gap-4">
+                <div className="flex size-20 items-center justify-center overflow-hidden rounded-full border border-[#b89655]/45 bg-[#30281f] text-[#d9bf86]">
+                  {profilePhotoPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profilePhotoPreview}
+                      alt="Profile preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Camera className="size-7" strokeWidth={1.5} />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-serif text-2xl text-[#f3ebdc]">A recognizable presence</p>
+                  <p className="mt-2 text-sm leading-7 text-[#a79883]">
+                    Add a clear photo of yourself if you can. It helps residents feel like they are
+                    meeting a real neighbor, not just reading a profile.
+                  </p>
+                </div>
+              </div>
+
+              <label className="mt-5 block">
+                <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
+                  Profile photo
+                </span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => setProfilePhoto(event.target.files?.[0] ?? null)}
+                  className="block w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 py-3 text-sm text-[#d9cfbf] file:mr-4 file:rounded-full file:border-0 file:bg-[#b89655] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[#241d16]"
+                />
+              </label>
+
+              <div className="mt-4 rounded-[1.4rem] border border-[#43392f] bg-[#201b16] px-4 py-4">
+                <p className="text-sm leading-7 text-[#d9cfbf]">
+                  {profilePhoto
+                    ? "Great. We will attach this to your resident profile so introductions and concierge notes feel more grounded."
+                    : "You can continue without a photo, but adding one usually leads to stronger first introductions."}
+                </p>
+              </div>
+            </div>
+          </Section>
+        )}
+        {step === 3 && (
+          <Section
             eyebrow="Introductions"
             title="What kind of"
             accent="connections"
             afterAccent="matter most to you?"
             subtitle="Choose the kinds of resident introductions that would feel genuinely valuable inside your building."
           >
+            <div className="mb-4 rounded-[1.5rem] border border-[#43392f] bg-[#251f19] px-4 py-4">
+              <p className="text-sm leading-7 text-[#d9cfbf]">
+                Think about the introductions you would actually say yes to: a coffee friend, an
+                activity partner, someone to see more of the building with, or an occasional
+                professional connection.
+              </p>
+            </div>
+
             <div className="space-y-3">
               {intents.map((intent) => (
                 <SelectCard
@@ -307,7 +396,7 @@ export function Onboarding({
 
             <div className="mt-8">
               <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#8f7d66]">
-                How you like to meet
+                Best format for a first connection
               </p>
               <div className="mt-3 space-y-3">
                 {connectionStyles.map((option) => (
@@ -328,9 +417,48 @@ export function Onboarding({
                 ))}
               </div>
             </div>
+
+            {lookingFor.includes("professional_networking") ? (
+              <div className="mt-8 rounded-[2rem] border border-[#43392f] bg-[#251f19] p-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#8f7d66]">
+                  Professional context
+                </p>
+                <p className="mt-2 text-sm leading-7 text-[#a79883]">
+                  Keep this light. We only use it to shape stronger optional networking
+                  introductions inside your building community.
+                </p>
+
+                <label className="mt-4 block">
+                  <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
+                    Occupation or professional context
+                  </span>
+                  <input
+                    value={occupation}
+                    onChange={(event) => setOccupation(event.target.value)}
+                    placeholder="Founder, investor, attorney, designer, consultant..."
+                    className="h-12 w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 text-sm text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"
+                  />
+                </label>
+
+                <div className="mt-4 space-y-3">
+                  <ToggleRow
+                    label="Open to mentoring"
+                    note="You would be comfortable sharing guidance or warm professional context."
+                    checked={openToMentoring}
+                    onChange={setOpenToMentoring}
+                  />
+                  <ToggleRow
+                    label="Looking for mentorship"
+                    note="You would value being introduced to a resident with experience you can learn from."
+                    checked={lookingForMentorship}
+                    onChange={setLookingForMentorship}
+                  />
+                </div>
+              </div>
+            ) : null}
           </Section>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <Section
             eyebrow="Shared interests"
             title="What do you"
@@ -352,7 +480,7 @@ export function Onboarding({
             />
           </Section>
         )}
-        {step === 4 && (
+        {step === 5 && (
           <Section
             eyebrow="Availability"
             title="When are you"
@@ -366,7 +494,7 @@ export function Onboarding({
             />
           </Section>
         )}
-        {step === 5 && (
+        {step === 6 && (
           <Section
             eyebrow="Cadence"
             title="How often would you"
@@ -430,7 +558,7 @@ export function Onboarding({
             </div>
           </Section>
         )}
-        {step === 6 && (
+        {step === 7 && (
           <Section
             eyebrow="Recognition"
             title="Help your neighbors"
@@ -464,18 +592,6 @@ export function Onboarding({
 
               <label className="mt-4 block">
                 <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
-                  Occupation or professional context
-                </span>
-                <input
-                  value={occupation}
-                  onChange={(event) => setOccupation(event.target.value)}
-                  placeholder="Optional: architecture, law, investing, design, founder..."
-                  className="h-12 w-full rounded-[1rem] border border-[#42382d] bg-[#2a231c] px-4 text-sm text-[#f3ebdc] outline-none transition-colors placeholder:text-[#7f7262] focus:border-[#b89655]"
-                />
-              </label>
-
-              <label className="mt-4 block">
-                <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-[#8f7d66]">
                   Concierge note
                 </span>
                 <textarea
@@ -500,18 +616,11 @@ export function Onboarding({
                       disabled
                       onChange={() => undefined}
                     />
-                    <ToggleRow
-                      label="Open to mentoring"
-                      note="You would be comfortable sharing guidance or making warm introductions."
-                      checked={openToMentoring}
-                      onChange={setOpenToMentoring}
-                    />
-                    <ToggleRow
-                      label="Looking for mentorship"
-                      note="You would value being introduced to a resident with experience in an area you are growing into."
-                      checked={lookingForMentorship}
-                      onChange={setLookingForMentorship}
-                    />
+                    {occupation.trim() ? (
+                      <div className="rounded-[1.2rem] border border-[#43392f] px-4 py-3 text-sm text-[#d9cfbf]">
+                        Professional context saved: {occupation.trim()}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               ) : null}
@@ -561,7 +670,7 @@ export function Onboarding({
             ) : null}
             <button
               type="button"
-              onClick={step === 6 ? () => void handleComplete() : next}
+              onClick={step === 7 ? () => void handleComplete() : next}
               disabled={!canAdvance || isSubmitting}
               className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[#43392f] bg-[#231d17] px-6 py-4 text-sm font-medium tracking-[0.18em] text-[#f3ebdc] transition-colors hover:border-[#b89655] disabled:opacity-60"
             >
@@ -570,8 +679,8 @@ export function Onboarding({
                   <Loader2 className="size-4 animate-spin" />
                   Saving
                 </>
-              ) : step === 6 ? (
-                "Enter Fifth Circle"
+                ) : step === 7 ? (
+                  "Enter Fifth Circle"
               ) : (
                 <>
                   Continue

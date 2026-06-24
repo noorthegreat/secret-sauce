@@ -63,6 +63,22 @@ export type ManagerResidentItem = {
   summary: string
 }
 
+export type ManagerResidentRequestItem = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber: string | null
+  unitNumber: string | null
+  moveInDate: string | null
+  status: "pending_review" | "approved" | "rejected" | "withdrawn"
+  submittedAt: string
+  wantsFriendships: boolean
+  wantsNetworking: boolean
+  contactViaSms: boolean
+  contactViaEmail: boolean
+}
+
 export type ManagerIntroductionWatchItem = {
   id: string
   residentAFirstName: string
@@ -122,6 +138,7 @@ export type ManagerDashboardSnapshot = {
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
   residentRoster: ManagerResidentItem[]
+  residentRequests: ManagerResidentRequestItem[]
   introductionWatchlist: ManagerIntroductionWatchItem[]
   communicationCues: ManagerCommunicationCue[]
   introductionQueue: ManagerIntroductionQueueItem[]
@@ -152,10 +169,19 @@ type EventRow = {
 type JoinRequestRow = {
   id: string
   first_name: string
+  last_name: string | null
+  email: string | null
   normalized_email: string
+  phone_number: string | null
+  unit_number: string | null
+  move_in_date: string | null
   status: "pending_review" | "approved" | "rejected" | "withdrawn" | string
   interests: string[] | null
   looking_for: string[] | null
+  wants_friendships: boolean | null
+  wants_networking: boolean | null
+  contact_via_sms: boolean | null
+  contact_via_email: boolean | null
   created_at: string
 }
 
@@ -399,7 +425,7 @@ function percentageLabel(numerator: number, denominator: number) {
 function fallbackAmenityUsage(): DashboardListBlock {
   return {
     items: [],
-    emptyMessage: "Coming soon once amenity usage is tracked in dedicated building tables.",
+    emptyMessage: "Pilot preview only. Live amenity demand will appear once dedicated space-usage tracking is added.",
   }
 }
 
@@ -569,6 +595,34 @@ function buildResidentRoster({
     .slice(0, 12)
 }
 
+function buildResidentRequests(requests: JoinRequestRow[]): ManagerResidentRequestItem[] {
+  return requests
+    .filter((request) =>
+      ["pending_review", "approved", "rejected", "withdrawn"].includes(request.status),
+    )
+    .slice(0, 12)
+    .map((request) => ({
+      id: request.id,
+      firstName: request.first_name?.trim() || "Resident",
+      lastName: request.last_name?.trim() || "",
+      email: request.email?.trim() || request.normalized_email?.trim() || "",
+      phoneNumber: request.phone_number?.trim() || null,
+      unitNumber: request.unit_number?.trim() || null,
+      moveInDate: request.move_in_date ?? null,
+      status:
+        request.status === "approved" ||
+        request.status === "rejected" ||
+        request.status === "withdrawn"
+          ? request.status
+          : "pending_review",
+      submittedAt: request.created_at,
+      wantsFriendships: Boolean(request.wants_friendships),
+      wantsNetworking: Boolean(request.wants_networking),
+      contactViaSms: Boolean(request.contact_via_sms),
+      contactViaEmail: Boolean(request.contact_via_email),
+    }))
+}
+
 function getIntroductionNextStep(status: BuildingIntroductionRow["status"]) {
   switch (status) {
     case "requested":
@@ -721,235 +775,6 @@ function buildCommunicationCues({
   return cues.sort((left, right) => priorityRank[left.priority] - priorityRank[right.priority])
 }
 
-export function getMockManagerDashboardSnapshot(): ManagerDashboardSnapshot {
-  return {
-    buildingName: "Chorus Apartments",
-    pulseScore: 72,
-    pulseDelta: 9,
-    isLive: false,
-    roiStats: [
-      { label: "Resident opt-in rate", value: "14%", helper: "Activated residents vs. 250 estimated units." },
-      { label: "Intro request to mutual", value: "57%", helper: "Share of requested introductions that reached mutual interest." },
-      { label: "Mutual to delivered", value: "63%", helper: "Concierge handoffs completed after mutual interest." },
-      { label: "Onboarding completion", value: "67%", helper: "Activated residents who finished the concierge questionnaire." },
-    ],
-    stats: [
-      { label: "Residents invited", value: "Coming soon", helper: "Invitation tracking not wired yet.", isPlaceholder: true },
-      { label: "Residents approved", value: "35" },
-      { label: "Residents activated", value: "18", accent: true },
-      { label: "Active memberships", value: "22" },
-      { label: "Survey completion", value: "67%" },
-      { label: "Event RSVPs", value: "57" },
-      { label: "Event attendance", value: "Coming soon", helper: "Attendance check-ins are not stored yet.", isPlaceholder: true },
-      { label: "Intro requests", value: "14" },
-      { label: "Mutual intros", value: "8", accent: true },
-      { label: "Introductions delivered", value: "5" },
-    ],
-    trend: [
-      { month: "Jan", value: 38 },
-      { month: "Feb", value: 44 },
-      { month: "Mar", value: 51 },
-      { month: "Apr", value: 49 },
-      { month: "May", value: 63 },
-      { month: "Jun", value: 72 },
-    ],
-    topInterests: {
-      items: [
-        { label: "Wellness", value: 84 },
-        { label: "Food", value: 76 },
-        { label: "Travel", value: 61 },
-        { label: "Books", value: 48 },
-        { label: "Running", value: 39 },
-      ],
-    },
-    eventInsights: {
-      items: [
-        { label: "Rooftop Wine Night", value: 42 },
-        { label: "Sunrise Running Club", value: 31 },
-        { label: "Women's Brunch", value: 27 },
-        { label: "Book Club", value: 23 },
-      ],
-    },
-    requestStatus: {
-      items: [
-        { label: "Pending", value: 12 },
-        { label: "Approved", value: 35 },
-        { label: "Rejected", value: 4 },
-        { label: "Withdrawn", value: 2 },
-      ],
-    },
-    introductionFunnel: {
-      items: [
-        { label: "Suggested", value: 18 },
-        { label: "Requested", value: 14 },
-        { label: "Accepted", value: 9 },
-        { label: "Mutual", value: 8 },
-        { label: "Delivered", value: 5 },
-        { label: "Declined", value: 3 },
-        { label: "Paused", value: 2 },
-      ],
-    },
-    mostRequestedEvents: {
-      items: [],
-      emptyMessage: "Coming soon once resident event-request voting is stored in Supabase.",
-    },
-    amenityUsage: fallbackAmenityUsage(),
-    residentRoster: [
-      {
-        id: "resident-pending-1",
-        firstName: "Maya",
-        stage: "pending_review",
-        submittedAt: new Date().toISOString(),
-        joinedAt: null,
-        summary: "Awaiting building-team review before resident access is approved.",
-      },
-      {
-        id: "resident-onboarding-1",
-        firstName: "Ava",
-        stage: "active_needs_onboarding",
-        submittedAt: null,
-        joinedAt: new Date().toISOString(),
-        summary: "Activated, but still missing the onboarding signals needed for strong matching.",
-      },
-      {
-        id: "resident-ready-1",
-        firstName: "Marcus",
-        stage: "active_ready",
-        submittedAt: null,
-        joinedAt: new Date().toISOString(),
-        summary: "Ready for thoughtful introductions, circles, and gathering RSVPs.",
-      },
-    ],
-    introductionWatchlist: [
-      {
-        id: "intro-watch-1",
-        residentAFirstName: "Ava",
-        residentBFirstName: "Marcus",
-        introType: "friendship",
-        status: "mutual",
-        source: "resident_request",
-        compatibilitySummary: "They both enjoy wellness-oriented gatherings and intentional one-on-one conversations.",
-        managerCompatibilitySummary: "Both residents are looking for a calm first introduction and have overlapping evening availability.",
-        meetupRecommendation: {
-          title: "Rooftop coffee",
-          amenityLabel: "Sky Deck",
-          timingLabel: "Wednesday evening",
-          reason: "A short, low-pressure first meetup fits their shared pace and availability.",
-        },
-        nextStep: "Mutual interest confirmed. Concierge can now deliver the introduction.",
-        lastUpdatedAt: new Date().toISOString(),
-      },
-    ],
-    communicationCues: [
-      {
-        id: "cue-review",
-        priority: "now",
-        title: "Review the first resident requests",
-        description: "The fastest way to create early pilot momentum is to move qualified residents into approved status quickly.",
-      },
-      {
-        id: "cue-onboarding",
-        priority: "soon",
-        title: "Encourage onboarding completion",
-        description: "Introductions get meaningfully stronger once active residents finish the concierge questionnaire and share availability.",
-      },
-    ],
-    introductionQueue: [
-      {
-        id: "intro-1",
-        residentAFirstName: "Ava",
-        residentBFirstName: "Marcus",
-        introType: "friendship",
-        status: "mutual",
-        source: "resident_request",
-        suggestedAt: new Date().toISOString(),
-        mutualAt: new Date().toISOString(),
-        deliveredAt: null,
-        compatibilitySummary: "They both share wellness interests and enjoy intentional one-on-one conversations.",
-        managerCompatibilitySummary: "Both residents prefer a calmer first introduction and have overlapping evening availability.",
-        meetupRecommendation: {
-          title: "Rooftop coffee",
-          amenityLabel: "Sky Deck",
-          timingLabel: "Wednesday evening",
-          reason: "A short, low-pressure first meetup fits their shared pace and early friendship intent.",
-        },
-      },
-      {
-        id: "intro-2",
-        residentAFirstName: "Elena",
-        residentBFirstName: "Priya",
-        introType: "friendship",
-        status: "delivered",
-        source: "system",
-        suggestedAt: new Date().toISOString(),
-        mutualAt: new Date().toISOString(),
-        deliveredAt: new Date().toISOString(),
-        compatibilitySummary: "They both value design, food, and community events in the building.",
-        managerCompatibilitySummary: "They share strong curiosity around design-minded gatherings and have already moved through concierge delivery.",
-        meetupRecommendation: {
-          title: "Resident club supper",
-          amenityLabel: "Private Dining Room",
-          timingLabel: "Saturday evening",
-          reason: "A hosted meal gives them an easy first setting after the introduction has been delivered.",
-        },
-      },
-    ],
-    managerEvents: [
-      {
-        id: "event-1",
-        name: "Rooftop Social",
-        description: "A hosted social hour for residents.",
-        venueName: "Sky Deck",
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-        state: "published",
-        active: true,
-        attendeeCount: 18,
-      },
-      {
-        id: "event-2",
-        name: "Wellness Morning",
-        description: "Draft event for the next resident wellness session.",
-        venueName: "Fitness Studio",
-        startDate: null,
-        endDate: null,
-        state: "draft",
-        active: false,
-        attendeeCount: 0,
-      },
-    ],
-    supportCategoryBreakdown: {
-      items: [
-        { label: "support request", value: 3 },
-        { label: "bug", value: 2 },
-        { label: "safety concern", value: 1 },
-      ],
-    },
-    supportQueue: [
-      {
-        id: "support-1",
-        category: "support_request",
-        status: "open",
-        subject: "Need help updating unit details",
-        messagePreview: "Resident asked for help updating their unit details after a recent move within the building.",
-        submittedAt: new Date().toISOString(),
-        residentFirstName: "Ava",
-        reportedResidentFirstName: null,
-      },
-      {
-        id: "support-2",
-        category: "bug",
-        status: "open",
-        subject: "RSVP issue",
-        messagePreview: "Resident could view the event but the RSVP button stayed disabled after sign-in.",
-        submittedAt: new Date().toISOString(),
-        residentFirstName: "Marcus",
-        reportedResidentFirstName: null,
-      },
-    ],
-  }
-}
-
 async function getConfiguredBuilding() {
   const supabase = getSupabaseAdmin()
   const buildingSlug = normalizeBuildingSlug()
@@ -1069,7 +894,9 @@ export async function getManagerDashboardSnapshotForBuilding({
       .returns<ResidentProfileRow[]>(),
     supabase
       .from("resident_join_requests")
-      .select("id, first_name, normalized_email, status, interests, looking_for, created_at")
+      .select(
+        "id, first_name, last_name, email, normalized_email, phone_number, unit_number, move_in_date, status, interests, looking_for, wants_friendships, wants_networking, contact_via_sms, contact_via_email, created_at",
+      )
       .eq("building_id", buildingId)
       .order("created_at", { ascending: false })
       .returns<JoinRequestRow[]>(),
@@ -1243,6 +1070,7 @@ export async function getManagerDashboardSnapshotForBuilding({
     activeProfiles: residentProfiles,
     activeEmails: activeEmailsByUserId,
   })
+  const residentRequests = buildResidentRequests(requests)
   const introductionWatchlist = buildIntroductionWatchlist(introductions, profilesById)
   const communicationCues = buildCommunicationCues({
     residentRoster,
@@ -1289,12 +1117,6 @@ export async function getManagerDashboardSnapshotForBuilding({
         label: "Event RSVPs",
         value: String(eventRsvps),
         helper: "Live building-scoped enrollments across active events.",
-      },
-      {
-        label: "Event attendance",
-        value: "Coming soon",
-        helper: "Attendance check-ins are not stored in the beta schema yet.",
-        isPlaceholder: true,
       },
       {
         label: "Intro requests",
@@ -1347,8 +1169,9 @@ export async function getManagerDashboardSnapshotForBuilding({
           ? undefined
           : "No resident event requests, waitlist signals, or proposal votes have been captured yet.",
     },
-    amenityUsage: fallbackAmenityUsage(),
+    amenityUsage: { items: [] },
     residentRoster,
+    residentRequests,
     introductionWatchlist,
     communicationCues,
     introductionQueue: buildIntroductionQueue(introductions, profilesById),

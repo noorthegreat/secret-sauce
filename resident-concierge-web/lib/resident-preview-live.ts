@@ -18,6 +18,7 @@ import {
   meetsCuratedIntroductionThreshold,
   type MatchInsights,
 } from "@/lib/matching-engine"
+import { getPrivateProfileEmailsByUserIds } from "@/lib/private-profile-fallback"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type ResidentPreviewSnapshot = {
@@ -40,11 +41,6 @@ type ProfileRow = {
   bio: string | null
   photo_url: string | null
   is_paused: boolean | null
-}
-
-type PrivateProfileRow = {
-  user_id: string
-  email: string | null
 }
 
 type JoinRequestRow = {
@@ -271,7 +267,7 @@ export async function getResidentPreviewSnapshot({
   if (residentIds.length > 0 && currentJoinRequestResult.data) {
     const [
       { data: profiles, error: profileError },
-      { data: privateProfiles, error: privateProfileError },
+      emailByUserId,
     ] = await Promise.all([
       supabase
         .from("profiles")
@@ -279,25 +275,14 @@ export async function getResidentPreviewSnapshot({
         .in("id", residentIds)
         .limit(8)
         .returns<ProfileRow[]>(),
-      supabase
-        .from("private_profile_data")
-        .select("user_id, email")
-        .in("user_id", residentIds)
-        .returns<PrivateProfileRow[]>(),
+      getPrivateProfileEmailsByUserIds(supabase, residentIds),
     ])
 
-    if (profileError || privateProfileError) {
+    if (profileError) {
       throw new Error("Unable to load resident preview.")
     }
 
     const visibleProfiles = (profiles ?? []).filter((profile) => !profile.is_paused)
-    const emailByUserId = new Map<string, string>()
-    for (const privateProfile of privateProfiles ?? []) {
-      const normalizedEmail = privateProfile.email?.trim().toLowerCase()
-      if (normalizedEmail) {
-        emailByUserId.set(privateProfile.user_id, normalizedEmail)
-      }
-    }
 
     const residentEmails = Array.from(new Set(emailByUserId.values()))
     const { data: joinRequests, error: joinRequestError } = residentEmails.length

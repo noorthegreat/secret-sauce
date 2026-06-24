@@ -9,6 +9,7 @@ import type {
 } from "@/lib/introduction-types"
 import { notifyIntroductionTransition } from "@/lib/introduction-notifications"
 import { compareResidents } from "@/lib/matching-engine"
+import { getPrivateProfileEmailsByUserIds } from "@/lib/private-profile-fallback"
 import { syncResidentAccountForUser } from "@/lib/resident-account-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import {
@@ -48,11 +49,6 @@ type ProfileRow = {
   bio: string | null
   photo_url: string | null
   is_paused: boolean | null
-}
-
-type PrivateProfileRow = {
-  user_id: string
-  email: string | null
 }
 
 type JoinRequestRow = {
@@ -232,30 +228,18 @@ async function getActiveResidentDirectory(buildingId: string, userIds: string[])
   }
 
   const supabase = getSupabaseAdmin()
-  const [{ data: profiles, error: profileError }, { data: privateProfiles, error: privateError }] =
+  const [{ data: profiles, error: profileError }, emailByUserId] =
     await Promise.all([
       supabase
         .from("profiles")
         .select("id, first_name, bio, photo_url, is_paused")
         .in("id", userIds)
         .returns<ProfileRow[]>(),
-      supabase
-        .from("private_profile_data")
-        .select("user_id, email")
-        .in("user_id", userIds)
-        .returns<PrivateProfileRow[]>(),
+      getPrivateProfileEmailsByUserIds(supabase, userIds),
     ])
 
-  if (profileError || privateError) {
+  if (profileError) {
     throw new Error("Unable to load resident directory.")
-  }
-
-  const emailByUserId = new Map<string, string>()
-  for (const privateProfile of privateProfiles ?? []) {
-    const normalizedEmail = privateProfile.email?.trim().toLowerCase()
-    if (normalizedEmail) {
-      emailByUserId.set(privateProfile.user_id, normalizedEmail)
-    }
   }
 
   const normalizedEmails = Array.from(new Set(emailByUserId.values()))

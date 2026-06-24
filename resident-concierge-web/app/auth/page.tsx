@@ -10,7 +10,7 @@ import { getSupabaseBrowser } from "@/lib/supabase-browser"
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/app/onboarding"
+    return "/app"
   }
 
   return value
@@ -106,7 +106,7 @@ function AuthPageContent() {
     <main className="min-h-screen bg-[#1f1a15] text-[#f3ebdc]">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
         <Link
-          href={isManagerJourney ? "/for-buildings" : "/"}
+          href={isManagerJourney ? "/for-buildings" : "/join-community"}
           className="mb-10 inline-flex w-fit items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[#b8ab97] transition-colors hover:text-[#f3ebdc]"
         >
           <ArrowLeft className="size-4" />
@@ -169,6 +169,39 @@ function AuthPageContent() {
             </button>
           ))}
         </div>
+
+        {!isManagerJourney ? (
+          <p className="mt-5 text-center text-sm leading-7 text-[#a99780]">
+            {mode === "signin" ? (
+              <>
+                Need access first?{" "}
+                <Link
+                  href="/join-community"
+                  className="text-[#f3ebdc] underline decoration-[#8d7043] underline-offset-4"
+                >
+                  Request entry to your building
+                </Link>
+                .
+              </>
+            ) : (
+              <>
+                Already approved?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("signin")
+                    setErrorMessage(null)
+                    setNotice(null)
+                  }}
+                  className="text-[#f3ebdc] underline decoration-[#8d7043] underline-offset-4"
+                >
+                  Sign in instead
+                </button>
+                .
+              </>
+            )}
+          </p>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="mt-7 space-y-4">
           <Field

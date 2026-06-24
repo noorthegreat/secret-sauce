@@ -5,6 +5,7 @@ import {
   normalizeAvailabilityGrid,
   type AvailabilityGrid,
 } from "@/lib/concierge-data"
+import { isMissingPrivateProfileTableError } from "@/lib/private-profile-fallback"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type ResidentAccountStatus =
@@ -134,18 +135,17 @@ async function getConfiguredBuilding() {
   return data
 }
 
-async function getActiveResidentMembership(userId: string) {
+async function getActiveMemberships(userId: string) {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
     .from("building_memberships")
     .select("building_id, role, status")
     .eq("user_id", userId)
-    .eq("role", "resident")
     .eq("status", "active")
     .returns<MembershipRow[]>()
 
   if (error) {
-    throw new Error("Unable to verify resident membership.")
+    throw new Error("Unable to verify building membership.")
   }
 
   return data ?? []
@@ -173,18 +173,36 @@ async function ensureProfileData(user: User, buildingId: string, request: JoinRe
   const supabase = getSupabaseAdmin()
   const nowIso = new Date().toISOString()
 
-  const [{ data: profile }, { data: privateProfile }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, first_name, bio, completed_questionnaire, completed_friendship_questionnaire, is_paused, building_id")
-      .eq("id", user.id)
-      .maybeSingle<ProfileRow>(),
-    supabase
-      .from("private_profile_data")
-      .select("user_id, email, last_name, phone_number")
-      .eq("user_id", user.id)
-      .maybeSingle<PrivateProfileRow>(),
-  ])
+  const { data: profile, error: profileLoadError } = await supabase
+    .from("profiles")
+    .select(
+      "id, first_name, bio, completed_questionnaire, completed_friendship_questionnaire, is_paused, building_id",
+    )
+    .eq("id", user.id)
+    .maybeSingle<ProfileRow>()
+
+  if (profileLoadError) {
+    throw new Error("Unable to load the resident profile.")
+  }
+
+  let privateProfile: PrivateProfileRow | null = null
+  let privateProfileTableAvailable = true
+
+  const { data: privateProfileData, error: privateProfileLoadError } = await supabase
+    .from("private_profile_data")
+    .select("user_id, email, last_name, phone_number")
+    .eq("user_id", user.id)
+    .maybeSingle<PrivateProfileRow>()
+
+  if (privateProfileLoadError) {
+    if (isMissingPrivateProfileTableError(privateProfileLoadError)) {
+      privateProfileTableAvailable = false
+    } else {
+      throw new Error("Unable to load the resident contact profile.")
+    }
+  } else {
+    privateProfile = privateProfileData
+  }
 
   if (profile) {
     const { error } = await supabase
@@ -217,6 +235,10 @@ async function ensureProfileData(user: User, buildingId: string, request: JoinRe
     }
   }
 
+  if (!privateProfileTableAvailable) {
+    return
+  }
+
   if (privateProfile) {
     const { error } = await supabase
       .from("private_profile_data")
@@ -229,6 +251,10 @@ async function ensureProfileData(user: User, buildingId: string, request: JoinRe
       .eq("user_id", user.id)
 
     if (error) {
+      if (isMissingPrivateProfileTableError(error)) {
+        return
+      }
+
       throw new Error("Unable to update the resident contact profile.")
     }
   } else {
@@ -241,6 +267,10 @@ async function ensureProfileData(user: User, buildingId: string, request: JoinRe
     })
 
     if (error) {
+      if (isMissingPrivateProfileTableError(error)) {
+        return
+      }
+
       throw new Error("Unable to create the resident contact profile.")
     }
   }
@@ -421,10 +451,30 @@ export async function syncResidentAccountForUser(user: User): Promise<ResidentAc
     }
   }
 
-  const activeMemberships = await getActiveResidentMembership(user.id)
-  const activeMembership = activeMemberships[0]
+  const activeMemberships = await getActiveMemberships(user.id)
+  const activeResidentMembership = activeMemberships.find((membership) => membership.role === "resident")
+  const activeManagerMembership = activeMemberships.find(
+    (membership) => membership.role === "manager" && membership.building_id === building.id,
+  )
 
-  if (activeMembership && activeMembership.building_id !== building.id) {
+  if (activeManagerMembership) {
+    return {
+      status: "conflict",
+      buildingId: building.id,
+      buildingName: building.name,
+      buildingSlug: building.slug,
+      residentEmail: normalizedEmail,
+      message:
+        "This account is already provisioned as a building manager for this pilot. Please use a separate resident email to test the resident experience.",
+      hasActiveMembership: false,
+      completedQuestionnaire: false,
+      completedFriendshipQuestionnaire: false,
+      needsSurveyCompletion: false,
+      isPaused: false,
+    }
+  }
+
+  if (activeResidentMembership && activeResidentMembership.building_id !== building.id) {
     return {
       status: "conflict",
       buildingId: building.id,

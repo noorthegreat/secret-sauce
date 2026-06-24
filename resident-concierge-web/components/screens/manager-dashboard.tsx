@@ -83,6 +83,22 @@ type ManagerResidentItem = {
   summary: string
 }
 
+type ManagerResidentRequestItem = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber: string | null
+  unitNumber: string | null
+  moveInDate: string | null
+  status: "pending_review" | "approved" | "rejected" | "withdrawn"
+  submittedAt: string
+  wantsFriendships: boolean
+  wantsNetworking: boolean
+  contactViaSms: boolean
+  contactViaEmail: boolean
+}
+
 type ManagerIntroductionWatchItem = {
   id: string
   residentAFirstName: string
@@ -164,6 +180,7 @@ type ManagerDashboardSnapshot = {
   mostRequestedEvents: DashboardListBlock
   amenityUsage: DashboardListBlock
   residentRoster: ManagerResidentItem[]
+  residentRequests: ManagerResidentRequestItem[]
   introductionWatchlist: ManagerIntroductionWatchItem[]
   communicationCues: ManagerCommunicationCue[]
   introductionQueue: ManagerIntroductionQueueItem[]
@@ -187,6 +204,7 @@ const emptySnapshot: ManagerDashboardSnapshot = {
   mostRequestedEvents: { items: [] },
   amenityUsage: { items: [] },
   residentRoster: [],
+  residentRequests: [],
   introductionWatchlist: [],
   communicationCues: [],
   introductionQueue: [],
@@ -210,6 +228,8 @@ export function ManagerDashboard({
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [deliveryActionId, setDeliveryActionId] = useState<string | null>(null)
   const [deliveryError, setDeliveryError] = useState<string | null>(null)
+  const [residentRequestActionId, setResidentRequestActionId] = useState<string | null>(null)
+  const [residentRequestError, setResidentRequestError] = useState<string | null>(null)
   const [eventActionId, setEventActionId] = useState<string | null>(null)
   const [eventError, setEventError] = useState<string | null>(null)
   const [editingEventId, setEditingEventId] = useState<string | null>(null)
@@ -298,6 +318,44 @@ export function ManagerDashboard({
       )
     } finally {
       setDeliveryActionId(null)
+    }
+  }
+
+  async function updateResidentRequestStatus(
+    requestId: string,
+    status: "pending_review" | "approved" | "rejected",
+  ) {
+    setResidentRequestActionId(requestId)
+    setResidentRequestError(null)
+
+    try {
+      const response = await fetch("/api/manager-resident-requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          requestId,
+          status,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update the resident request.")
+      }
+
+      trackProductEvent("manager_resident_request_updated")
+      await loadDashboard()
+    } catch (error) {
+      setResidentRequestError(
+        error instanceof Error ? error.message : "Unable to update the resident request.",
+      )
+    } finally {
+      setResidentRequestActionId(null)
     }
   }
 
@@ -765,6 +823,25 @@ export function ManagerDashboard({
                 </Panel>
               </div>
 
+              <div className="mt-4">
+                <Panel
+                  title="Resident approvals"
+                  caption="Review incoming resident requests and move qualified neighbors into approved access."
+                >
+                  {residentRequestError ? (
+                    <div className="mb-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                      {residentRequestError}
+                    </div>
+                  ) : null}
+                  <ResidentRequestReviewList
+                    items={snapshot.residentRequests}
+                    isLoading={isLoading}
+                    actionId={residentRequestActionId}
+                    onUpdateStatus={(requestId, status) => void updateResidentRequestStatus(requestId, status)}
+                  />
+                </Panel>
+              </div>
+
               <div className="mt-4 grid gap-4 xl:grid-cols-2">
                 <Panel title="Recommended outreach" caption="The clearest manager follow-through moments for the current pilot week">
                   <CommunicationCueList items={snapshot.communicationCues} isLoading={isLoading} />
@@ -845,9 +922,6 @@ export function ManagerDashboard({
                   />
                 </Panel>
 
-                <Panel title="Amenity demand" caption="How shared spaces are showing up in resident demand">
-                  <BarList block={snapshot.amenityUsage} suffix="%" isLoading={isLoading} />
-                </Panel>
               </div>
 
               <Panel title="Gathering operations" caption="Create, edit, publish, and close building gatherings for the pilot">
@@ -1094,6 +1168,11 @@ function Stat({
         accent ? "border-gold/40 bg-gold/10" : "border-border bg-card"
       }`}
     >
+      {isPlaceholder ? (
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-gold">
+          Preview only
+        </p>
+      ) : null}
       <p
         className={`font-serif leading-none ${
           isPlaceholder ? "text-2xl text-muted-foreground" : "text-4xl text-foreground"
@@ -1197,6 +1276,34 @@ function formatResidentStage(stage: ManagerResidentItem["stage"]) {
   }
 }
 
+function formatResidentRequestStatus(status: ManagerResidentRequestItem["status"]) {
+  switch (status) {
+    case "approved":
+      return "Approved"
+    case "rejected":
+      return "Rejected"
+    case "withdrawn":
+      return "Withdrawn"
+    case "pending_review":
+    default:
+      return "Pending review"
+  }
+}
+
+function getResidentRequestIntent(item: ManagerResidentRequestItem) {
+  const labels: string[] = []
+  if (item.wantsFriendships) labels.push("Friendships")
+  if (item.wantsNetworking) labels.push("Networking")
+  return labels.join(" + ") || "Intent not set"
+}
+
+function getResidentRequestContactPrefs(item: ManagerResidentRequestItem) {
+  const labels: string[] = []
+  if (item.contactViaSms) labels.push("SMS")
+  if (item.contactViaEmail) labels.push("Email")
+  return labels.join(" / ") || "No contact preference captured"
+}
+
 function ResidentRoster({
   items,
   isLoading,
@@ -1242,6 +1349,125 @@ function ResidentRoster({
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.summary}</p>
         </div>
       ))}
+    </div>
+  )
+}
+
+function ResidentRequestReviewList({
+  items,
+  isLoading,
+  actionId,
+  onUpdateStatus,
+}: {
+  items: ManagerResidentRequestItem[]
+  isLoading?: boolean
+  actionId: string | null
+  onUpdateStatus: (
+    requestId: string,
+    status: "pending_review" | "approved" | "rejected",
+  ) => void
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3.5">
+        {[...Array.from({ length: 3 })].map((_, index) => (
+          <div key={index} className="h-36 animate-pulse rounded-2xl bg-secondary" />
+        ))}
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <EmptyStateCard
+        title="No resident requests to review"
+        description="As residents request access, their details will appear here so the building team can approve thoughtfully and keep the launch moving."
+        compact
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      {items.map((item) => {
+        const isSaving = actionId === item.id
+        const displayName = [item.firstName, item.lastName].filter(Boolean).join(" ")
+
+        return (
+          <div key={item.id} className="rounded-2xl border border-border bg-background px-4 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-serif text-lg leading-tight text-foreground">
+                  {displayName || item.email}
+                </p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold">
+                  {formatResidentRequestStatus(item.status)}
+                </p>
+              </div>
+              <span className="rounded-full bg-secondary px-3 py-1 text-[11px] font-medium text-foreground">
+                Requested {formatQueueDate(item.submittedAt)}
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3 text-sm text-muted-foreground md:grid-cols-2 xl:grid-cols-4">
+              <p>
+                <span className="font-medium text-foreground">Email:</span> {item.email}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Phone:</span> {item.phoneNumber || "Not provided"}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Unit:</span> {item.unitNumber || "Not provided"}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Move-in:</span> {item.moveInDate || "Not provided"}
+              </p>
+            </div>
+
+            <div className="mt-3 grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
+              <p>
+                <span className="font-medium text-foreground">Looking for:</span> {getResidentRequestIntent(item)}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Contact via:</span> {getResidentRequestContactPrefs(item)}
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {item.status !== "approved" ? (
+                <button
+                  type="button"
+                  onClick={() => onUpdateStatus(item.id, "approved")}
+                  disabled={isSaving}
+                  className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Saving..." : "Approve"}
+                </button>
+              ) : null}
+              {item.status !== "pending_review" ? (
+                <button
+                  type="button"
+                  onClick={() => onUpdateStatus(item.id, "pending_review")}
+                  disabled={isSaving}
+                  className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Saving..." : "Return to pending"}
+                </button>
+              ) : null}
+              {item.status !== "rejected" ? (
+                <button
+                  type="button"
+                  onClick={() => onUpdateStatus(item.id, "rejected")}
+                  disabled={isSaving}
+                  className="rounded-full border border-destructive/25 px-4 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/5 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Saving..." : "Reject"}
+                </button>
+              ) : null}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

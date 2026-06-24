@@ -4,7 +4,14 @@ import { ArrowUpRight, Clock3, FileText, LifeBuoy, ShieldCheck, Sparkles } from 
 
 import type { ResidentAccountSnapshot } from "@/lib/resident-account-server"
 
-type ResidentFacingState = "active" | "pending" | "survey_incomplete" | "missing_membership"
+type ResidentFacingState =
+  | "active"
+  | "pending"
+  | "survey_incomplete"
+  | "missing_membership"
+  | "rejected"
+  | "withdrawn"
+  | "conflict"
 
 export function ResidentAccessCard({
   snapshot,
@@ -125,6 +132,73 @@ export function ResidentAccessCard({
     )
   }
 
+  if (state === "conflict") {
+    return (
+      <CardFrame
+        icon={LifeBuoy}
+        eyebrow={snapshot?.buildingName || "Account conflict"}
+        title="This account is already tied to a different live building."
+        description={
+          snapshot?.message ||
+          "For the pilot, one resident account can only belong to one active building community at a time."
+        }
+        tone="neutral"
+        primaryAction={{
+          label: "Contact building manager/support",
+          href: "mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Account%20Conflict",
+        }}
+        secondaryAction={{
+          label: "Return to join flow",
+          onClick: onReturnToJoin,
+          variant: "secondary",
+        }}
+      />
+    )
+  }
+
+  if (state === "rejected") {
+    return (
+      <CardFrame
+        icon={LifeBuoy}
+        eyebrow={snapshot?.buildingName || "Request not approved"}
+        title="This resident request was not approved."
+        description={
+          snapshot?.message ||
+          "The building team has not approved this resident request yet. Please contact support if you think this is a mistake."
+        }
+        tone="neutral"
+        primaryAction={{
+          label: "Contact building manager/support",
+          href: "mailto:hello@residentconcierge.co?subject=Fifth%20Circle%20Approval%20Help",
+        }}
+        secondaryAction={{
+          label: "Return to join flow",
+          onClick: onReturnToJoin,
+          variant: "secondary",
+        }}
+      />
+    )
+  }
+
+  if (state === "withdrawn") {
+    return (
+      <CardFrame
+        icon={LifeBuoy}
+        eyebrow={snapshot?.buildingName || "Request inactive"}
+        title="This resident request is no longer active."
+        description={
+          snapshot?.message ||
+          "You can submit a new resident request if you still want access to this building community."
+        }
+        tone="neutral"
+        primaryAction={{
+          label: "Return to join flow",
+          onClick: onReturnToJoin,
+        }}
+      />
+    )
+  }
+
   return (
     <CardFrame
       icon={LifeBuoy}
@@ -161,6 +235,18 @@ function getResidentFacingState(snapshot: ResidentAccountSnapshot | null): Resid
     return "pending"
   }
 
+  if (snapshot?.status === "conflict") {
+    return "conflict"
+  }
+
+  if (snapshot?.status === "rejected") {
+    return "rejected"
+  }
+
+  if (snapshot?.status === "withdrawn") {
+    return "withdrawn"
+  }
+
   return "missing_membership"
 }
 
@@ -178,7 +264,9 @@ function CardFrame({
   title: string
   description: string
   tone: "gold" | "success" | "neutral"
-  primaryAction?: { label: string; onClick: () => void; href?: never }
+  primaryAction?:
+    | { label: string; onClick: () => void; href?: never }
+    | { label: string; href: string; onClick?: never }
   secondaryAction?: { label: string; onClick?: () => void; href?: string; variant: "secondary" }
 }) {
   const toneClasses =
@@ -206,14 +294,24 @@ function CardFrame({
       {primaryAction || secondaryAction ? (
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
           {primaryAction ? (
-            <button
-              type="button"
-              onClick={primaryAction.onClick}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-            >
-              {primaryAction.label}
-              <ArrowUpRight className="size-4" />
-            </button>
+            "href" in primaryAction ? (
+              <a
+                href={primaryAction.href}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+              >
+                {primaryAction.label}
+                <ArrowUpRight className="size-4" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={primaryAction.onClick}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+              >
+                {primaryAction.label}
+                <ArrowUpRight className="size-4" />
+              </button>
+            )
           ) : null}
 
           {secondaryAction ? (

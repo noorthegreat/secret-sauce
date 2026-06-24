@@ -5,11 +5,7 @@ import {
   getBearerToken,
 } from "@/lib/resident-account-server"
 import { requireManagerBuilding } from "@/lib/manager-access-server"
-import {
-  getMockManagerDashboardSnapshot,
-  getManagerDashboardSnapshotForBuilding,
-} from "@/lib/manager-dashboard-live"
-import { isPreviewFallbackAllowed } from "@/lib/preview-mode"
+import { getManagerDashboardSnapshotForBuilding } from "@/lib/manager-dashboard-live"
 
 export const dynamic = "force-dynamic"
 
@@ -58,15 +54,6 @@ export async function GET(request: NextRequest) {
       message.includes("pilot request") ||
       message.includes("same work email") ||
       message.includes("subscription")
-
-    if (isPreviewFallbackAllowed() && !isAccessError) {
-      return NextResponse.json(getMockManagerDashboardSnapshot(), {
-        headers: {
-          "Cache-Control": "no-store",
-          "X-Resident-Concierge-Preview": "mock",
-        },
-      })
-    }
 
     return jsonError(
       error instanceof Error ? error.message : "Unable to load manager dashboard.",

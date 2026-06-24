@@ -1089,7 +1089,6 @@ export function ManagerEventPlanningSection({
                 >
                   <option value="manual">Manual</option>
                   <option value="resident_suggestion">Resident suggestion</option>
-                  <option value="ai_draft">AI draft</option>
                 </select>
                 <select
                   value={recommendationForm.status}

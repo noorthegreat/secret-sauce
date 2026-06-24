@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 
 import { FifthCircleBrandMark } from "@/components/fifth-circle-brand-mark"
 import { SelectCard } from "@/components/select-card"
@@ -89,12 +90,19 @@ export default function JoinCommunityPage() {
   return (
     <main className="min-h-screen bg-[#1f1a15] text-[#f3ebdc]">
       <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 pb-12 pt-6">
-        <div className="mb-10 flex justify-center">
+        <div className="mb-8 flex items-start justify-between gap-4">
           <FifthCircleBrandMark
             theme="dark"
             caption="Private building access"
-            className="gap-4"
+            align="left"
+            className="gap-3"
           />
+          <Link
+            href="/auth?next=%2Fapp"
+            className="inline-flex shrink-0 items-center rounded-full border border-[#4a4034] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-[#d5c7b2] transition-colors hover:border-[#b89655] hover:text-[#f3ebdc]"
+          >
+            Sign in
+          </Link>
         </div>
 
         <div className="mb-8 flex items-center justify-center gap-2">
@@ -112,13 +120,42 @@ export default function JoinCommunityPage() {
           {step === 0 ? (
             <section className="space-y-6">
               <HeroBlock
-                eyebrow="Your building community"
+                eyebrow="Private residential community"
                 title="Welcome to"
                 accent="your building."
-                description="A short private request for access. We verify residency first, then invite you into the full onboarding once approved."
+                description="A calm private entry into your building community. We verify residency first, then open the full Fifth Circle experience once you are approved."
               />
 
+              <div className="rounded-[1.8rem] border border-[#3f352c] bg-[#251f19] px-5 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#b89655]">
+                  Already approved?
+                </p>
+                <div className="mt-3 flex items-center justify-between gap-4">
+                  <p className="text-sm leading-7 text-[#b8ab97]">
+                    Sign in with the same email tied to your resident request.
+                  </p>
+                  <Link
+                    href="/auth?next=%2Fapp"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#4a4034] bg-[#1f1a15] px-4 py-2 text-sm text-[#f3ebdc] transition-colors hover:border-[#b89655]"
+                  >
+                    Enter
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </div>
+              </div>
+
+              <JourneyPreview />
+
               <div className="space-y-4 rounded-[2rem] border border-[#3f352c] bg-[#251f19] p-5">
+                <div className="pb-2">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#b89655]">
+                    Confirm your residence
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-[#b8ab97]">
+                    This stays private to your building team and Fifth Circle.
+                  </p>
+                </div>
+
                 <Field label="Invite code">
                   <input
                     value={inviteCode}
@@ -127,6 +164,7 @@ export default function JoinCommunityPage() {
                     required
                   />
                 </Field>
+
                 <Field label="Apartment or unit">
                   <input
                     value={unitNumber}
@@ -135,6 +173,7 @@ export default function JoinCommunityPage() {
                     required
                   />
                 </Field>
+
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="First name">
                     <input
@@ -153,6 +192,7 @@ export default function JoinCommunityPage() {
                     />
                   </Field>
                 </div>
+
                 <Field label="Email">
                   <input
                     type="email"
@@ -162,6 +202,7 @@ export default function JoinCommunityPage() {
                     required
                   />
                 </Field>
+
                 <Field label="Phone">
                   <input
                     type="tel"
@@ -174,22 +215,18 @@ export default function JoinCommunityPage() {
                 </Field>
               </div>
 
-              <PrimaryButton
-                type="button"
-                disabled={!canAdvanceStep0}
-                onClick={() => setStep(1)}
-              >
+              <PrimaryButton type="button" disabled={!canAdvanceStep0} onClick={() => setStep(1)}>
                 Continue
               </PrimaryButton>
             </section>
           ) : (
             <section className="space-y-6">
               <HeroBlock
-                eyebrow="Quiet introductions"
+                eyebrow="Thoughtful introductions"
                 title="What kind of"
                 accent="connections"
                 afterAccent="matter most to you?"
-                description="Choose only what feels genuinely useful. We use this to shape thoughtful introductions after approval, not to create a public profile."
+                description="Choose only what feels genuinely useful. We use this to prepare thoughtful introductions after approval, not to create a public profile."
               />
 
               <div className="space-y-3">
@@ -212,7 +249,8 @@ export default function JoinCommunityPage() {
                   How should we reach you?
                 </p>
                 <p className="mt-2 text-sm leading-7 text-[#b8ab97]">
-                  We’ll only use this to confirm access, share approval updates, and send your next step into onboarding.
+                  We&apos;ll only use this to confirm access, share approval updates, and send your
+                  next step into onboarding.
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -235,10 +273,11 @@ export default function JoinCommunityPage() {
                   <div className="space-y-3">
                     <p>{successMessage}</p>
                     <p className="text-xs leading-6 text-[#d9cfbf]">
-                      Once approved, sign in to complete your private onboarding and unlock introductions, circles, and gatherings.
+                      Once approved, sign in to complete your private onboarding and unlock
+                      introductions, circles, and gatherings.
                     </p>
                     <Link
-                      href="/auth?next=%2Fapp%2Fonboarding"
+                      href="/auth?next=%2Fapp"
                       className="inline-flex rounded-full border border-[#4a4034] bg-[#1f1a15] px-4 py-2 text-sm font-medium text-[#f3ebdc]"
                     >
                       Sign in or create account
@@ -255,6 +294,19 @@ export default function JoinCommunityPage() {
                   {isSubmitting ? "Requesting access..." : "Request access"}
                 </PrimaryButton>
               </div>
+
+              {!successMessage ? (
+                <p className="text-center text-sm leading-7 text-[#a99780]">
+                  Already part of your building community?{" "}
+                  <Link
+                    href="/auth?next=%2Fapp"
+                    className="text-[#f3ebdc] underline decoration-[#8d7043] underline-offset-4"
+                  >
+                    Sign in here
+                  </Link>
+                  .
+                </p>
+              ) : null}
             </section>
           )}
         </form>
@@ -264,6 +316,42 @@ export default function JoinCommunityPage() {
         </p>
       </div>
     </main>
+  )
+}
+
+function JourneyPreview() {
+  return (
+    <div className="rounded-[1.8rem] border border-[#3f352c] bg-[#211b16] px-5 py-5">
+      <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#b89655]">
+        What happens next
+      </p>
+      <div className="mt-4 grid gap-3">
+        {[
+          ["1", "Request access", "We confirm your building and unit details."],
+          ["2", "Receive approval", "Your building team approves private access."],
+          [
+            "3",
+            "Enter Fifth Circle",
+            "Sign in and complete your onboarding to unlock introductions.",
+          ],
+        ].map(([step, title, body]) => (
+          <div
+            key={step}
+            className="rounded-[1.4rem] border border-[#3b3228] bg-[#26201b] px-4 py-4"
+          >
+            <div className="flex items-start gap-4">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#7c6238] text-sm text-[#f0debc]">
+                {step}
+              </span>
+              <div>
+                <p className="font-serif text-xl text-[#f3ebdc]">{title}</p>
+                <p className="mt-1 text-sm leading-7 text-[#a99780]">{body}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -282,7 +370,9 @@ function HeroBlock({
 }) {
   return (
     <div className="text-center">
-      <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[#b89655]">{eyebrow}</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[#b89655]">
+        {eyebrow}
+      </p>
       <h1 className="mt-5 font-serif text-[2.7rem] leading-[0.96] text-[#f3ebdc]">
         {title}
         <span className="block italic text-[#c29a51]">{accent}</span>

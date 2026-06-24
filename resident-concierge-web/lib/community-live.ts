@@ -1,5 +1,4 @@
 import { eventPolls as mockPolls, events as mockEvents } from "@/lib/concierge-data"
-import { isPreviewFallbackAllowed } from "@/lib/preview-mode"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export type CommunityEvent = {
@@ -219,13 +218,9 @@ export async function getCommunityFeed(): Promise<CommunityFeedSnapshot> {
     enrollmentClosesAtIso: event.enrollment_closes_at,
   }))
 
-  if (liveEvents.length === 0 && isPreviewFallbackAllowed()) {
-    return getMockCommunityFeed()
-  }
-
   return {
     buildingName: building.name,
-    isLive: true,
+    isLive: liveEvents.length > 0,
     events: liveEvents,
     polls: buildPolls(liveEvents),
   }
