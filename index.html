@@ -466,6 +466,63 @@ footer{
 .tour-step-detail-item{font-size:10.5px;letter-spacing:1px;color:rgba(184,151,42,0.55);padding-left:14px;position:relative}
 .tour-step-detail-item::before{content:'';position:absolute;left:0;top:5px;width:5px;height:0.5px;background:var(--gold-muted)}
 
+/* ── RESIDENT JOURNEY ── */
+.journey-header{text-align:center;padding-bottom:72px}
+.journey-progress{
+  display:flex;align-items:center;
+  max-width:480px;margin:0 auto 72px;padding:0 40px;
+}
+.journey-dot{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  border:0.5px solid rgba(184,151,42,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:13px;font-weight:300;color:var(--gold-muted);
+}
+.journey-dot-line{flex:1;height:0.5px;background:rgba(184,151,42,0.18)}
+.journey-row{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:16px;
+  max-width:1200px;margin:0 auto;padding:0 40px;
+  overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.journey-row::-webkit-scrollbar{display:none}
+.journey-col{
+  display:flex;flex-direction:column;align-items:center;
+  scroll-snap-align:center;min-width:180px;
+}
+.journey-phone-wrap{pointer-events:none}
+.journey-step-label{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--taupe);margin-top:24px;margin-bottom:10px;
+}
+.journey-step-title{
+  font-family:var(--serif);font-size:18px;font-weight:300;
+  color:var(--charcoal);line-height:1.25;margin-bottom:8px;text-align:center;
+}
+.journey-step-body{
+  font-size:12px;line-height:1.65;color:rgba(28,25,21,0.45);
+  text-align:center;max-width:178px;
+}
+/* Resident demo CTA */
+.resident-demo-cta{
+  text-align:center;padding:100px 40px 120px;
+}
+.resident-demo-cta-title{
+  font-family:var(--serif);font-size:clamp(30px,3vw,48px);
+  font-weight:300;color:var(--charcoal);line-height:1.1;margin-bottom:14px;
+}
+.resident-demo-cta-title em{font-style:italic;color:rgba(28,25,21,0.35)}
+.resident-demo-cta-sub{
+  font-size:15px;color:rgba(28,25,21,0.45);margin-bottom:40px;font-weight:300;
+}
+.btn-charcoal{
+  display:inline-block;padding:15px 40px;
+  background:var(--charcoal);border-radius:2px;
+  font-family:var(--sans);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cream);font-weight:400;cursor:pointer;transition:background .2s;
+}
+.btn-charcoal:hover{background:var(--charcoal-soft)}
+
 /* ── BEFORE / AFTER ── */
 .ba-wrap{display:grid;grid-template-columns:1fr 1fr;max-width:1100px;margin:64px auto 0;border-radius:4px;overflow:hidden;border:0.5px solid rgba(28,25,21,0.08)}
 .ba-col{padding:52px 48px}
@@ -759,194 +816,108 @@ footer{
 
 <div class="divider-light"></div>
 
-<!-- RESIDENT EXPERIENCE -->
-<section id="resident" style="padding:120px 0 0">
-  <div class="resident-header anim-fade">
-    <div>
-      <div class="section-eyebrow">Resident Experience</div>
-      <h2 class="section-title">Everything a resident<br>needs to <em>belong.</em></h2>
+<!-- RESIDENT JOURNEY -->
+<section id="resident" style="padding:100px 0 0">
+  <div class="section-inner journey-header anim-fade">
+    <div class="section-eyebrow">Resident Experience</div>
+    <h2 class="section-title">How Residents Find<br><em>Community</em></h2>
+    <p class="section-body" style="margin:12px auto 0;max-width:480px">From move-in to meaningful connection in just a few steps.</p>
+  </div>
+  <div class="journey-progress anim-fade">
+    <div class="journey-dot">1</div>
+    <div class="journey-dot-line"></div>
+    <div class="journey-dot">2</div>
+    <div class="journey-dot-line"></div>
+    <div class="journey-dot">3</div>
+    <div class="journey-dot-line"></div>
+    <div class="journey-dot">4</div>
+    <div class="journey-dot-line"></div>
+    <div class="journey-dot">5</div>
+  </div>
+  <div class="journey-row">
+    <div class="journey-col anim-fade">
+      <div class="journey-phone-wrap">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=onboarding"
+                      width="390" height="844" scrolling="no" title="Onboarding"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="journey-step-label">Step 1</div>
+      <div class="journey-step-title">Share Your<br>Interests</div>
+      <p class="journey-step-body">Residents select interests, goals, and availability during onboarding.</p>
     </div>
-    <p class="section-body">A curated mobile experience that learns what each resident values — then quietly works to create the right connections, at the right moment, in the right place.</p>
+    <div class="journey-col anim-fade anim-fade-delay-1">
+      <div class="journey-phone-wrap">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=intro:ethan"
+                      width="390" height="844" scrolling="no" title="Introductions"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="journey-step-label">Step 2</div>
+      <div class="journey-step-title">Receive Curated<br>Introductions</div>
+      <p class="journey-step-body">Fifth Circle introduces residents with shared interests and compatible schedules.</p>
+    </div>
+    <div class="journey-col anim-fade anim-fade-delay-2">
+      <div class="journey-phone-wrap">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:events"
+                      width="390" height="844" scrolling="no" title="Experiences"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="journey-step-label">Step 3</div>
+      <div class="journey-step-title">Join<br>Experiences</div>
+      <p class="journey-step-body">Residents discover events tailored to the community's interests.</p>
+    </div>
+    <div class="journey-col anim-fade anim-fade-delay-3">
+      <div class="journey-phone-wrap">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=circle:reading"
+                      width="390" height="844" scrolling="no" title="Circles"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="journey-step-label">Step 4</div>
+      <div class="journey-step-title">Participate<br>in Circles</div>
+      <p class="journey-step-body">Small groups help residents build ongoing relationships around shared interests.</p>
+    </div>
+    <div class="journey-col anim-fade" style="transition-delay:.4s">
+      <div class="journey-phone-wrap">
+        <div class="phone-frame mini">
+          <div class="phone-frame-inner-wrap">
+            <div class="phone-frame-inner">
+              <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:home"
+                      width="390" height="844" scrolling="no" title="Feel at Home"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="journey-step-label">Step 5</div>
+      <div class="journey-step-title">Feel<br>at Home</div>
+      <p class="journey-step-body">The building becomes a genuine community rather than just a place to live.</p>
+    </div>
   </div>
 </section>
 
-<!-- FEATURE 1: Effortless Onboarding -->
-<div class="feature-row">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">01 / Onboarding</div>
-    <h3 class="feature-headline">Five minutes to<br><em>belonging.</em></h3>
-    <p class="feature-copy">Residents join with a streamlined five-step flow: profile → goals → interests → availability → agreement. No lengthy surveys. No redundant questions. Deeper goal-specific preferences are gathered naturally over time, as the concierge gets to know them.</p>
-    <div class="feature-pills">
-      <span class="pill">Profile &amp; verification</span>
-      <span class="pill">Goal selection</span>
-      <span class="pill">Interest mapping</span>
-      <span class="pill">Availability windows</span>
-      <span class="pill">Privacy consent</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=onboarding"
-                    width="390" height="844" scrolling="no" title="Onboarding"></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="divider-light"></div>
-
-<!-- FEATURE 2: Curated Introductions -->
-<div class="feature-row reverse">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">02 / Introductions</div>
-    <h3 class="feature-headline">Curated connections,<br><em>not cold requests.</em></h3>
-    <p class="feature-copy">When the concierge identifies a strong match, both residents receive a private introduction card — detailed enough to spark genuine curiosity, private enough to feel safe. Only with mutual yes does either party learn the other's identity. Availability is shared and the meeting is coordinated.</p>
-    <div class="feature-pills">
-      <span class="pill">Double opt-in</span>
-      <span class="pill">Concierge note</span>
-      <span class="pill">Shared availability</span>
-      <span class="pill">Meetup coordination</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=intro:ethan"
-                    width="390" height="844" scrolling="no" title="Introduction Review"></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="divider-light"></div>
-
-<!-- FEATURE 3: People & Home -->
-<div class="feature-row">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">03 / Community Home</div>
-    <h3 class="feature-headline">A home screen that<br><em>knows you.</em></h3>
-    <p class="feature-copy">The resident home surface surfaces upcoming events, pending introductions, and a goal checklist that guides new residents toward their first connections. Everything is personalized — nothing feels generic. The building comes alive through photography, amenities, and the faces of people worth knowing.</p>
-    <div class="feature-pills">
-      <span class="pill">Pending introductions</span>
-      <span class="pill">Goal checklist</span>
-      <span class="pill">Upcoming events</span>
-      <span class="pill">Building identity</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:people"
-                    width="390" height="844" scrolling="no" title="People"></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="divider-light"></div>
-
-<!-- FEATURE 4: Events -->
-<div class="feature-row reverse">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">04 / Events &amp; Gatherings</div>
-    <h3 class="feature-headline">Your building's<br><em>social calendar.</em></h3>
-    <p class="feature-copy">Curated gatherings — wine tastings, rooftop evenings, game nights — appear in a tasteful calendar view. Residents can RSVP, suggest new events, and leave private feedback. The building becomes a stage for the life residents actually want to live.</p>
-    <div class="feature-pills">
-      <span class="pill">Curated event calendar</span>
-      <span class="pill">RSVP &amp; attendance</span>
-      <span class="pill">Resident suggestions</span>
-      <span class="pill">Post-event feedback</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:events"
-                    width="390" height="844" scrolling="no" title="Events"></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="divider-light"></div>
-
-<!-- FEATURE 5: Concierge -->
-<div class="feature-row">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">05 / The Concierge</div>
-    <h3 class="feature-headline">A matchmaker who<br><em>remembers everything.</em></h3>
-    <p class="feature-copy">The Concierge tab is where Fifth Circle's intelligence lives. Residents sharpen their preferences by goal — activity partners, professional connections, friendships, group hangouts — and the concierge uses this signal to surface progressively better matches over time.</p>
-    <div class="feature-pills">
-      <span class="pill">Per-goal preferences</span>
-      <span class="pill">Match signal</span>
-      <span class="pill">Concierge notes</span>
-      <span class="pill">Continuous learning</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe src="project/Fifth%20Circle%20App.html?embed=1&screen=tab:concierge"
-                    width="390" height="844" scrolling="no" title="Concierge"></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="divider-light"></div>
-
-<!-- FEATURE 6: Circles -->
-<div class="feature-row reverse">
-  <div class="feature-text anim-fade">
-    <div class="feature-number">06 / Circles</div>
-    <h3 class="feature-headline">Small groups,<br><em>well formed.</em></h3>
-    <p class="feature-copy">Circles are hand-formed groups of 3–6 residents, curated by the concierge around shared interests and pace. Each circle has a host — a resident who anchors the rhythm and keeps the energy right. Members give private feedback after each gathering, and the concierge uses it to keep circles healthy over time.</p>
-    <div class="feature-pills">
-      <span class="pill">Curated by the concierge</span>
-      <span class="pill">Host-led gatherings</span>
-      <span class="pill">Post-gathering feedback</span>
-      <span class="pill">Match signal input</span>
-    </div>
-  </div>
-  <div class="feature-phone anim-fade anim-fade-delay-1">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <div class="phone-frame large" id="circles-frame">
-        <div class="phone-frame-inner-wrap">
-          <div class="phone-frame-inner">
-            <iframe id="circles-iframe"
-                    src="project/Fifth%20Circle%20App.html?embed=1&screen=circle:reading"
-                    width="390" height="844" scrolling="no" title="Circles"></iframe>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="screen-pill active" onclick="switchCircleScreen('circle:reading',this)">The Reading Room</button>
-        <button class="screen-pill" onclick="switchCircleScreen('circle:coffee',this)">Coffee Circle</button>
-        <button class="screen-pill" onclick="switchCircleScreen('tab:circles',this)">All circles</button>
-      </div>
-    </div>
-  </div>
+<!-- RESIDENT DEMO CTA -->
+<div class="resident-demo-cta anim-fade">
+  <h2 class="resident-demo-cta-title">Explore the<br><em>Resident Experience</em></h2>
+  <p class="resident-demo-cta-sub">Navigate the full resident prototype.</p>
+  <a href="project/Fifth%20Circle%20App.html" target="_blank" class="btn-charcoal">Open Resident Demo</a>
 </div>
 
 </div><!-- end cream band -->
